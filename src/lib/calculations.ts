@@ -25,6 +25,7 @@ export interface UserInputs {
     crypto: number;
     cash: number;
     property: number;
+    other: number;
   };
   
   traditionalRetirementAccounts: number;
