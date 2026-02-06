@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { FIREResult, ComparisonSummary } from '@/lib/calculations';
 import { countries } from '@/data/countries';
 import { formatCurrency, formatPercent } from '@/lib/formatters';
@@ -33,19 +34,101 @@ export function ResultsPanel({
   userAge = 35,
   inputs
 }: ResultsPanelProps) {
+  const [showAdvanced, setShowAdvanced] = useState(false);
   const country1 = countries[country1Code];
   const country2 = countries[country2Code];
   const isSameCountry = country1Code === country2Code;
 
+  // Determine winner info for Summary
+  const getWinnerInfo = () => {
+    if (isSameCountry) return null;
+    
+    const targetAge = inputs?.targetRetirementAge || 50;
+    const country1HitsTarget = result1.fireAge <= targetAge;
+    const country2HitsTarget = result2.fireAge <= targetAge;
+    const bothMissTarget = !country1HitsTarget && !country2HitsTarget;
+    const yearsBehind1 = result1.fireAge - targetAge;
+    const yearsBehind2 = result2.fireAge - targetAge;
+    
+    if (bothMissTarget) {
+      const bestOption = result1.fireAge <= result2.fireAge ? country1Code : country2Code;
+      const bestYearsBehind = Math.min(yearsBehind1, yearsBehind2);
+      return {
+        type: 'warning' as const,
+        message: `Neither option hits your target age ${targetAge}. ${countries[bestOption]?.name} is closest (${bestYearsBehind} yr${bestYearsBehind > 1 ? 's' : ''} behind)`
+      };
+    }
+    
+    const yearsDiff = Math.abs(result1.yearsUntilFIRE - result2.yearsUntilFIRE);
+    return {
+      type: 'success' as const,
+      winner: countries[comparison.earlierRetirement]?.name,
+      message: result1.yearsUntilFIRE === result2.yearsUntilFIRE 
+        ? 'Same timeline, lower FIRE number'
+        : `FIRE ${yearsDiff} year${yearsDiff === 1 ? '' : 's'} sooner`
+    };
+  };
+
+  const winnerInfo = getWinnerInfo();
+
   return (
     <div className="space-y-4 sm:space-y-6">
+      {/* Header */}
       <div>
         <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">FIRE Comparison</h2>
-        <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">{country1?.flag} {country1?.name} vs {country2?.flag} {country2?.name}</p>
+        <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">
+          <span className="text-blue-600 dark:text-blue-400">{country1?.flag} {country1?.name}</span>
+          {!isSameCountry && (
+            <> vs <span className="text-emerald-600 dark:text-emerald-400">{country2?.flag} {country2?.name}</span></>
+          )}
+        </p>
       </div>
 
-      {/* Country Cards */}
-      <div className="grid grid-cols-2 gap-3 sm:gap-4">
+      {/* 🏆 SUMMARY - Now at the TOP */}
+      {!isSameCountry && winnerInfo && (
+        <div className={`rounded-xl p-4 ${
+          winnerInfo.type === 'success' 
+            ? 'bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 border-2 border-green-400 dark:border-green-500' 
+            : 'bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/30 dark:to-orange-900/30 border-2 border-amber-400 dark:border-amber-500'
+        }`}>
+          <div className="flex items-start gap-3">
+            <span className="text-2xl">{winnerInfo.type === 'success' ? '🏆' : '⚠️'}</span>
+            <div className="flex-1">
+              <h3 className={`font-bold text-base sm:text-lg ${
+                winnerInfo.type === 'success' 
+                  ? 'text-green-700 dark:text-green-300' 
+                  : 'text-amber-700 dark:text-amber-300'
+              }`}>
+                {winnerInfo.type === 'success' ? `${winnerInfo.winner} wins!` : 'Close call'}
+              </h3>
+              <p className={`text-sm mt-0.5 ${
+                winnerInfo.type === 'success' 
+                  ? 'text-green-600 dark:text-green-400' 
+                  : 'text-amber-600 dark:text-amber-400'
+              }`}>
+                {winnerInfo.message}
+              </p>
+              <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0"></span>
+                  <span className="text-gray-600 dark:text-gray-400">
+                    FIRE # {formatCurrency(comparison.fireNumberDifferenceUSD, 'USD')} {comparison.lowerFIRENumber === country1Code ? 'lower in ' + country1?.name : 'lower in ' + country2?.name}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0"></span>
+                  <span className="text-gray-600 dark:text-gray-400">
+                    Tax {formatPercent(comparison.taxRateDifference)} {comparison.lowerEffectiveTaxRate === country1Code ? 'lower in ' + country1?.name : 'lower in ' + country2?.name}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Country Cards - Stack on mobile, side-by-side on tablet+ */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
         <CountryCard 
           result={result1} 
           country={country1} 
@@ -57,6 +140,7 @@ export function ResultsPanel({
           portfolioCurrency={inputs?.portfolioCurrency}
           targetRetirementAge={inputs?.targetRetirementAge}
           currentAge={inputs?.currentAge}
+          colorScheme="blue"
         />
         {!isSameCountry && (
           <CountryCard 
@@ -70,11 +154,12 @@ export function ResultsPanel({
             portfolioCurrency={inputs?.portfolioCurrency}
             targetRetirementAge={inputs?.targetRetirementAge}
             currentAge={inputs?.currentAge}
+            colorScheme="green"
           />
         )}
       </div>
 
-      {/* Reverse Calculator - What Can I Spend? */}
+      {/* If You Retired Today (renamed from "What Can I Spend?") */}
       {inputs && (
         <ReverseCalculator
           portfolioValue={inputs.portfolioValue}
@@ -86,43 +171,7 @@ export function ResultsPanel({
         />
       )}
 
-      {/* Monte Carlo Analysis */}
-      {inputs && (
-        <div className="space-y-3">
-          <MonteCarloCard
-            inputs={inputs}
-            fireResult={result1}
-            countryCode={country1Code}
-          />
-          {!isSameCountry && (
-            <MonteCarloCard
-              inputs={inputs}
-              fireResult={result2}
-              countryCode={country2Code}
-            />
-          )}
-        </div>
-      )}
-
-      {/* Tax Breakdown Details */}
-      {inputs && (
-        <div className="space-y-3">
-          <TaxBreakdownCard
-            grossIncome={result1.annualWithdrawalGross}
-            countryCode={country1Code}
-            incomeType="mixed"
-          />
-          {!isSameCountry && (
-            <TaxBreakdownCard
-              grossIncome={result2.annualWithdrawalGross}
-              countryCode={country2Code}
-              incomeType="mixed"
-            />
-          )}
-        </div>
-      )}
-
-      {/* Cost of Living Comparison */}
+      {/* Cost of Living Comparison - Keep visible */}
       {!isSameCountry && (
         <CostOfLivingCard
           fromCountry={country1Code}
@@ -132,7 +181,7 @@ export function ResultsPanel({
         />
       )}
 
-      {/* Visa Requirements for Target Country */}
+      {/* Visa Requirements - Keep visible */}
       {!isSameCountry && (
         <VisaCard
           countryCode={country2Code}
@@ -140,45 +189,65 @@ export function ResultsPanel({
         />
       )}
 
-      {/* Summary */}
-      {!isSameCountry && (
-        <div className="bg-gray-50 dark:bg-slate-800/50 rounded-xl p-3 sm:p-4">
-          <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-2">Summary</h3>
+      {/* Advanced Details - Collapsed by default */}
+      {inputs && (
+        <div className="border border-gray-200 dark:border-slate-700 rounded-xl overflow-hidden">
+          <button
+            onClick={() => setShowAdvanced(!showAdvanced)}
+            className="w-full p-4 flex items-center justify-between text-left bg-gray-50 dark:bg-slate-800/50 hover:bg-gray-100 dark:hover:bg-slate-700/50 transition-colors"
+          >
+            <div className="flex items-center gap-2">
+              <span className="text-lg">📊</span>
+              <div>
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Advanced Analysis</h3>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Monte Carlo simulations, tax breakdowns, and more</p>
+              </div>
+            </div>
+            <svg 
+              className={`w-5 h-5 text-gray-400 transition-transform ${showAdvanced ? 'rotate-180' : ''}`} 
+              fill="none" 
+              stroke="currentColor" 
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
           
-          {/* Winner explanation - check if either hits target */}
-          {result1.canRetire && result2.canRetire && (() => {
-            const targetAge = inputs?.targetRetirementAge || 50;
-            const country1HitsTarget = result1.fireAge <= targetAge;
-            const country2HitsTarget = result2.fireAge <= targetAge;
-            const bothMissTarget = !country1HitsTarget && !country2HitsTarget;
-            const yearsBehind1 = result1.fireAge - targetAge;
-            const yearsBehind2 = result2.fireAge - targetAge;
-            
-            if (bothMissTarget) {
-              const bestOption = result1.fireAge <= result2.fireAge ? country1Code : country2Code;
-              const bestYearsBehind = Math.min(yearsBehind1, yearsBehind2);
-              return (
-                <p className="text-xs sm:text-sm text-amber-600 dark:text-amber-400 mb-2 font-medium">
-                  ⚠️ Neither option hits your target age {targetAge}. {countries[bestOption]?.name} is closest ({bestYearsBehind} yr{bestYearsBehind > 1 ? 's' : ''} behind)
-                </p>
-              );
-            }
-            
-            return (
-              <p className="text-xs sm:text-sm text-green-600 dark:text-green-400 mb-2 font-medium">
-                🏆 {countries[comparison.earlierRetirement]?.name} wins: {
-                  result1.yearsUntilFIRE === result2.yearsUntilFIRE 
-                    ? 'Same timeline, lower FIRE number'
-                    : `FIRE ${Math.abs(result1.yearsUntilFIRE - result2.yearsUntilFIRE)} year${Math.abs(result1.yearsUntilFIRE - result2.yearsUntilFIRE) === 1 ? '' : 's'} sooner`
-                }
-              </p>
-            );
-          })()}
-          
-          <ul className="space-y-1.5 text-xs sm:text-sm text-gray-600 dark:text-gray-300">
-            <li>• FIRE number is <strong>{formatCurrency(comparison.fireNumberDifferenceUSD, 'USD')}</strong> ({formatPercent(comparison.fireNumberDifferencePercent)}) lower in <strong>{countries[comparison.lowerFIRENumber]?.name}</strong></li>
-            <li>• Effective tax rate is <strong>{formatPercent(comparison.taxRateDifference)}</strong> lower in <strong>{countries[comparison.lowerEffectiveTaxRate]?.name}</strong></li>
-          </ul>
+          {showAdvanced && (
+            <div className="p-4 space-y-4 border-t border-gray-200 dark:border-slate-700">
+              {/* Monte Carlo Analysis */}
+              <div className="space-y-3">
+                <MonteCarloCard
+                  inputs={inputs}
+                  fireResult={result1}
+                  countryCode={country1Code}
+                />
+                {!isSameCountry && (
+                  <MonteCarloCard
+                    inputs={inputs}
+                    fireResult={result2}
+                    countryCode={country2Code}
+                  />
+                )}
+              </div>
+
+              {/* Tax Breakdown Details */}
+              <div className="space-y-3">
+                <TaxBreakdownCard
+                  grossIncome={result1.annualWithdrawalGross}
+                  countryCode={country1Code}
+                  incomeType="mixed"
+                />
+                {!isSameCountry && (
+                  <TaxBreakdownCard
+                    grossIncome={result2.annualWithdrawalGross}
+                    countryCode={country2Code}
+                    incomeType="mixed"
+                  />
+                )}
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -201,7 +270,8 @@ function CountryCard({
   portfolioValue,
   portfolioCurrency,
   targetRetirementAge,
-  currentAge
+  currentAge,
+  colorScheme = 'blue'
 }: { 
   result: FIREResult; 
   country: typeof countries[string];
@@ -213,12 +283,13 @@ function CountryCard({
   portfolioCurrency?: string;
   targetRetirementAge?: number;
   currentAge?: number;
+  colorScheme?: 'blue' | 'green';
 }) {
   const canFIRE = result.canRetire;
   
   // Check if already financially independent (portfolio >= FIRE number)
   const portfolioInFireCurrency = portfolioValue && portfolioCurrency && country?.currency
-    ? (portfolioCurrency === country.currency ? portfolioValue : portfolioValue * 0.85) // Approximate conversion
+    ? (portfolioCurrency === country.currency ? portfolioValue : portfolioValue * 0.85)
     : portfolioValue || 0;
   const alreadyFI = portfolioInFireCurrency >= result.fireNumber;
   
@@ -228,14 +299,15 @@ function CountryCard({
   const hitsTarget = canFIRE && yearsLate === 0;
   const missesTarget = canFIRE && yearsLate > 0;
   
-  // Determine card status based on whether target is achievable
-  // Green = hits target AND is best option
-  // Amber = can FIRE but misses target, OR can hit target but not best option
-  // Red = cannot FIRE at all
+  // Determine card status
   const isWinner = hitsTarget && isSoonerRetirement;
   const isOnTarget = hitsTarget && !isSoonerRetirement;
   const isBehindTarget = missesTarget;
-  const cantFIRE = !canFIRE;
+  
+  // Color bar based on scheme
+  const colorBar = colorScheme === 'blue' 
+    ? 'bg-blue-500' 
+    : 'bg-emerald-500';
   
   // Card styling based on status
   const cardStyles = isWinner
@@ -254,21 +326,26 @@ function CountryCard({
     ? 'bg-amber-500 text-white'
     : 'bg-red-500 text-white';
   
-  const badgeText = isWinner
-    ? '🏆 Best Option'
-    : isOnTarget
+  const badgeText = isWinner 
+    ? '🏆 Best Option' 
+    : isOnTarget 
     ? '✓ On Target'
     : isBehindTarget
     ? `⚠️ ${yearsLate}yr${yearsLate > 1 ? 's' : ''} behind`
     : '✗ Cannot FIRE';
-  
+
   return (
-    <div className={`rounded-xl p-3 sm:p-4 shadow-sm ${cardStyles}`}>
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="font-semibold text-gray-900 dark:text-white text-sm sm:text-base flex items-center gap-1.5">
-          {country?.flag} {country?.name}
-        </h3>
-        <span className={`text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full font-medium ${badgeStyles}`}>
+    <div className={`relative rounded-xl p-3 sm:p-4 ${cardStyles} overflow-hidden`}>
+      {/* Color indicator bar */}
+      <div className={`absolute top-0 left-0 right-0 h-1 ${colorBar}`} />
+      
+      {/* Header with Badge */}
+      <div className="flex items-start justify-between mb-3 pt-1">
+        <div className="flex items-center gap-1.5">
+          <span className="text-base sm:text-lg">{country?.flag}</span>
+          <h3 className="text-xs sm:text-sm font-semibold text-gray-900 dark:text-white truncate">{country?.name}</h3>
+        </div>
+        <span className={`text-[10px] sm:text-xs px-1.5 py-0.5 rounded font-medium whitespace-nowrap ${badgeStyles}`}>
           {badgeText}
         </span>
       </div>
@@ -280,73 +357,56 @@ function CountryCard({
           <p className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white">
             {formatCurrency(result.fireNumber, country?.currency || 'USD')}
           </p>
-          <p className="text-[10px] sm:text-xs text-gray-400 dark:text-gray-500">
-            {formatCurrency(result.fireNumber, country?.currency || 'USD')}
-          </p>
         </div>
 
         {/* Years to FIRE */}
         <div>
           <span className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">Years to FIRE</span>
           <p className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">
-            {canFIRE 
-              ? (result.yearsUntilFIRE === 0 ? '🎉 Now!' : `${result.yearsUntilFIRE} years`)
-              : 'Need more savings'
-            }
+            {alreadyFI ? (
+              <span className="text-green-600 dark:text-green-400">🎉 Already FI!</span>
+            ) : canFIRE ? (
+              <>
+                {result.yearsUntilFIRE} years
+              </>
+            ) : (
+              <span className="text-red-600 dark:text-red-400">Cannot retire</span>
+            )}
           </p>
-          {canFIRE && result.yearsUntilFIRE > 0 && alreadyFI && (
-            <p className="text-[10px] sm:text-xs text-green-600 dark:text-green-400">✓ Already FI! Working by choice</p>
-          )}
-          {canFIRE && result.yearsUntilFIRE > 0 && !alreadyFI && yearsLate > 0 && (
-            <p className="text-[10px] sm:text-xs text-amber-600 dark:text-amber-400">
-              ⚠️ FIRE at age {result.fireAge} ({yearsLate} yr{yearsLate > 1 ? 's' : ''} after target)
+          {canFIRE && !alreadyFI && (
+            <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+              {yearsLate === 0 ? (
+                <span className="text-green-600 dark:text-green-400">✓ Age {result.fireAge} (on target)</span>
+              ) : (
+                <span className="text-amber-600 dark:text-amber-400">Age {result.fireAge} ({yearsLate}yr late)</span>
+              )}
             </p>
-          )}
-          {canFIRE && result.yearsUntilFIRE > 0 && !alreadyFI && yearsLate === 0 && (
-            <p className="text-[10px] sm:text-xs text-green-600 dark:text-green-400">✓ FIRE at age {result.fireAge} (on target!)</p>
-          )}
-          {canFIRE && result.yearsUntilFIRE === 0 && (
-            <p className="text-[10px] sm:text-xs text-green-600 dark:text-green-400">You've reached your FIRE number!</p>
           )}
         </div>
 
-        {/* Effective Tax Rate */}
+        {/* Tax Rate */}
         <div>
           <span className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">Effective Tax Rate</span>
-          <p className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">
+          <p className="text-sm sm:text-base font-medium text-gray-900 dark:text-white">
             {formatPercent(result.effectiveTaxRate)}
           </p>
-        </div>
-
-        {/* Withdrawal Info */}
-        <div className="grid grid-cols-2 gap-2 pt-2 border-t border-gray-200 dark:border-slate-600">
-          <div>
-            <span className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">Gross withdrawal</span>
-            <p className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">
-              {formatCurrency(result.annualWithdrawalGross, country?.currency || 'USD')}
-            </p>
-          </div>
-          <div>
-            <span className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">After tax</span>
-            <p className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">
-              {formatCurrency(result.annualWithdrawalNet, country?.currency || 'USD')}
-            </p>
-          </div>
+          <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5">
+            Gross {formatCurrency(result.annualWithdrawalGross, country?.currency || 'USD')} → Net {formatCurrency(result.annualWithdrawalNet, country?.currency || 'USD')}
+          </p>
         </div>
 
         {/* Healthcare */}
-        <div className="pt-2 border-t border-gray-200 dark:border-slate-600">
+        <div>
           <span className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">Healthcare</span>
-          <p className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">
-            {country?.healthcare.publicAccessForResidents && country?.healthcare.estimatedAnnualCostPreRetirement === 0
-              ? '✓ Free public healthcare'
-              : country?.healthcare.publicAccessForResidents && country?.healthcare.estimatedAnnualCostPreRetirement > 0
-              ? `✓ Public + ~${formatCurrency(country.healthcare.estimatedAnnualCostPreRetirement, country?.currency || 'USD')}/yr`
-              : `~${formatCurrency(country?.healthcare.estimatedAnnualCostPreRetirement || 0, country?.currency || 'USD')}/yr`
-            }
+          <p className="text-xs sm:text-sm text-gray-700 dark:text-gray-300">
+            {country?.healthcare?.estimatedAnnualCostPreRetirement > 5000 ? (
+              <span className="text-amber-600 dark:text-amber-400">~{formatCurrency(country?.healthcare?.estimatedAnnualCostPreRetirement, country?.currency || 'USD')}/yr</span>
+            ) : (
+              <span className="text-green-600 dark:text-green-400">✓ Public + ~{formatCurrency(country?.healthcare?.estimatedAnnualCostPreRetirement || 500, country?.currency || 'USD')}/yr</span>
+            )}
           </p>
-          {country?.healthcare.notes && (
-            <p className="text-[9px] sm:text-[10px] text-gray-400 dark:text-gray-500 mt-0.5">
+          {country?.healthcare?.notes && (
+            <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5 line-clamp-2">
               {country.healthcare.notes}
             </p>
           )}
@@ -356,68 +416,56 @@ function CountryCard({
   );
 }
 
-function TaxNotes({ 
-  result1, 
-  result2, 
-  country1, 
-  country2, 
-  isSameCountry 
-}: { 
-  result1: FIREResult; 
-  result2: FIREResult; 
-  country1: typeof countries[string]; 
+function TaxNotes({ result1, result2, country1, country2, isSameCountry }: {
+  result1: FIREResult;
+  result2: FIREResult;
+  country1: typeof countries[string];
   country2: typeof countries[string];
   isSameCountry: boolean;
 }) {
-  const allNotes = [
-    ...result1.countrySpecificNotes,
-    ...(isSameCountry ? [] : result2.countrySpecificNotes)
-  ];
-
+  const allNotes = [...(result1.countrySpecificNotes || []), ...(!isSameCountry ? (result2.countrySpecificNotes || []) : [])];
+  
   if (allNotes.length === 0) return null;
 
   return (
     <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-3 sm:p-4">
-      <h3 className="text-sm font-semibold text-amber-800 dark:text-amber-300 mb-2 flex items-center gap-2">
+      <h3 className="text-sm font-semibold text-amber-800 dark:text-amber-200 mb-2 flex items-center gap-2">
         ⚠️ Important Tax Considerations
       </h3>
-      <ul className="space-y-1.5 text-xs sm:text-sm text-amber-700 dark:text-amber-400">
+      <ul className="space-y-1.5">
         {allNotes.map((note, i) => (
-          <li key={i}>• {note}</li>
+          <li key={i} className="text-xs text-amber-700 dark:text-amber-300 flex items-start gap-2">
+            <span className="text-amber-500 mt-0.5">•</span>
+            <span>{note}</span>
+          </li>
         ))}
       </ul>
     </div>
   );
 }
 
-function Warnings({ 
-  result1, 
-  result2, 
-  country1, 
-  country2, 
-  isSameCountry 
-}: { 
-  result1: FIREResult; 
-  result2: FIREResult; 
-  country1: typeof countries[string]; 
+function Warnings({ result1, result2, country1, country2, isSameCountry }: {
+  result1: FIREResult;
+  result2: FIREResult;
+  country1: typeof countries[string];
   country2: typeof countries[string];
   isSameCountry: boolean;
 }) {
-  const allWarnings = [
-    ...result1.warnings.map(w => ({ warning: w, country: country1 })),
-    ...(isSameCountry ? [] : result2.warnings.map(w => ({ warning: w, country: country2 })))
-  ];
-
+  const allWarnings = [...(result1.warnings || []), ...(!isSameCountry ? (result2.warnings || []) : [])];
+  
   if (allWarnings.length === 0) return null;
 
   return (
     <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-3 sm:p-4">
-      <h3 className="text-sm font-semibold text-red-800 dark:text-red-300 mb-2 flex items-center gap-2">
+      <h3 className="text-sm font-semibold text-red-800 dark:text-red-200 mb-2 flex items-center gap-2">
         🚨 Warnings
       </h3>
-      <ul className="space-y-1.5 text-xs sm:text-sm text-red-700 dark:text-red-400">
-        {allWarnings.map((w, i) => (
-          <li key={i}>• {w.country?.flag} {w.warning}</li>
+      <ul className="space-y-1.5">
+        {allWarnings.map((warning, i) => (
+          <li key={i} className="text-xs text-red-700 dark:text-red-300 flex items-start gap-2">
+            <span className="text-red-500 mt-0.5">•</span>
+            <span>{warning}</span>
+          </li>
         ))}
       </ul>
     </div>

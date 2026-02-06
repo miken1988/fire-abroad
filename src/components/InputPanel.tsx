@@ -199,7 +199,7 @@ function OtherAssetField({
   const [isEditingValue, setIsEditingValue] = useState(false);
   const [valueDraft, setValueDraft] = useState(String(value));
   
-  const displayLabel = label || 'Other';
+  const displayLabel = label || 'Unallocated';
   const hasUnallocated = unallocated > 0;
   
   // Auto-fill unallocated amount

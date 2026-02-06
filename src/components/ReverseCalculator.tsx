@@ -86,13 +86,13 @@ export function ReverseCalculator({
         className="w-full p-3 sm:p-4 flex items-center justify-between text-left"
       >
         <div className="flex items-center gap-2">
-          <span className="text-lg">🔄</span>
+          <span className="text-lg">💡</span>
           <div>
             <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
-              What Can I Spend?
+              If You Retired Today
             </h3>
             <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">
-              Reverse calculator based on your portfolio
+              With your current {formatCurrency(portfolioValue, portfolioCurrency)} portfolio
             </p>
           </div>
         </div>
