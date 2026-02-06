@@ -44,7 +44,10 @@ export function MonteCarloCard({ inputs, fireResult, countryCode }: MonteCarloCa
               <div className="flex items-center gap-2">
                 <span className="text-lg">🎲</span>
                 <div>
-                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Monte Carlo Analysis</h3>
+                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
+                    Monte Carlo Analysis
+                    <span className="text-gray-500 dark:text-gray-400 font-normal"> • {country?.flag} {country?.name}</span>
+                  </h3>
                   <p className="text-xs text-gray-500 dark:text-gray-400">Running simulations...</p>
                 </div>
               </div>
@@ -84,7 +87,10 @@ export function MonteCarloCard({ inputs, fireResult, countryCode }: MonteCarloCa
             <div className="flex items-center gap-2">
               <span className="text-lg">🎲</span>
               <div>
-                <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Monte Carlo Analysis</h3>
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
+                  Monte Carlo Analysis
+                  <span className="text-gray-500 dark:text-gray-400 font-normal"> • {country?.flag} {country?.name}</span>
+                </h3>
                 <p className="text-xs text-gray-500 dark:text-gray-400">1,000 simulations with market volatility</p>
               </div>
             </div>
