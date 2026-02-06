@@ -13,11 +13,14 @@ export interface MonteCarloResult {
   averageFailureAge: number | null; // Mean age of portfolio depletion in failed sims
 }
 
-// Historical US stock market stats (real returns)
-const STOCK_MEAN_REAL = 0.07;    // ~7% real return
-const STOCK_STDEV = 0.175;       // ~17.5% standard deviation
-const BOND_MEAN_REAL = 0.02;     // ~2% real return  
-const BOND_STDEV = 0.06;         // ~6% standard deviation
+// Asset-specific stats (real returns and volatility)
+const ASSET_STATS = {
+  stocks: { meanReal: 0.07, stdev: 0.175 },    // ~7% real, ~17.5% volatility
+  property: { meanReal: 0.02, stdev: 0.08 },   // ~2% real, ~8% volatility
+  crypto: { meanReal: 0.10, stdev: 0.60 },     // ~10% real, ~60% volatility (very high!)
+  cash: { meanReal: 0.00, stdev: 0.01 },       // ~0% real, minimal volatility
+  bonds: { meanReal: 0.02, stdev: 0.06 },      // ~2% real, ~6% volatility
+};
 
 const NUM_SIMULATIONS = 1000;
 
@@ -32,18 +35,60 @@ function randomNormal(mean: number, stdev: number): number {
 }
 
 /**
- * Generate a random annual return based on portfolio allocation
- * Uses correlated stock/bond returns
+ * Calculate asset weights from inputs
  */
-function randomReturn(stockWeight: number, expectedReturn: number, inflationRate: number): number {
-  const bondWeight = 1 - stockWeight;
+function getAssetWeights(inputs: UserInputs): { stocks: number; property: number; crypto: number; cash: number } {
+  const total = inputs.portfolioValue || 1;
+  const stocksAmount = (inputs.traditionalRetirementAccounts || 0) + 
+                       (inputs.rothAccounts || 0) + 
+                       (inputs.taxableAccounts || 0) +
+                       (inputs.accounts?.other || 0);
+  const cryptoAmount = inputs.accounts?.crypto || 0;
+  const cashAmount = inputs.accounts?.cash || 0;
+  const propertyAmount = inputs.accounts?.property || 0;
   
-  // Generate correlated returns (stocks and bonds have ~0 correlation historically)
-  const stockReturn = randomNormal(STOCK_MEAN_REAL, STOCK_STDEV);
-  const bondReturn = randomNormal(BOND_MEAN_REAL, BOND_STDEV);
+  return {
+    stocks: stocksAmount / total,
+    property: propertyAmount / total,
+    crypto: cryptoAmount / total,
+    cash: cashAmount / total,
+  };
+}
+
+/**
+ * Generate a random annual return based on asset allocation
+ * Each asset class has its own return distribution
+ */
+function randomReturnByAsset(
+  weights: { stocks: number; property: number; crypto: number; cash: number },
+  assetReturns?: UserInputs['assetReturns']
+): number {
+  // Get user-defined mean returns or use defaults
+  const stocksMean = assetReturns?.stocks ?? ASSET_STATS.stocks.meanReal;
+  const propertyMean = assetReturns?.property ?? ASSET_STATS.property.meanReal;
+  const cryptoMean = assetReturns?.crypto ?? ASSET_STATS.crypto.meanReal;
+  const cashMean = assetReturns?.cash ?? ASSET_STATS.cash.meanReal;
   
-  // Weighted portfolio return (already real returns, no need to subtract inflation)
-  return stockWeight * stockReturn + bondWeight * bondReturn;
+  // Generate random returns for each asset class
+  const stocksReturn = randomNormal(stocksMean, ASSET_STATS.stocks.stdev);
+  const propertyReturn = randomNormal(propertyMean, ASSET_STATS.property.stdev);
+  const cryptoReturn = randomNormal(cryptoMean, ASSET_STATS.crypto.stdev);
+  const cashReturn = randomNormal(cashMean, ASSET_STATS.cash.stdev);
+  
+  // Weighted portfolio return
+  const totalWeight = weights.stocks + weights.property + weights.crypto + weights.cash;
+  
+  if (totalWeight === 0) {
+    // Fallback to stocks if no allocation specified
+    return stocksReturn;
+  }
+  
+  return (
+    weights.stocks * stocksReturn +
+    weights.property * propertyReturn +
+    weights.crypto * cryptoReturn +
+    weights.cash * cashReturn
+  );
 }
 
 /**
@@ -59,9 +104,8 @@ function runSingleSimulation(
   hasPension: boolean,
   currentAge: number,
   retirementAge: number,
-  stockWeight: number,
-  expectedReturn: number,
-  inflationRate: number,
+  assetWeights: { stocks: number; property: number; crypto: number; cash: number },
+  assetReturns: UserInputs['assetReturns'],
   years: number
 ): { path: number[]; depletedYear: number | null } {
   const path: number[] = [];
@@ -81,7 +125,7 @@ function runSingleSimulation(
 
     const age = currentAge + year;
     const isRetired = age >= retirementAge;
-    const realReturn = randomReturn(stockWeight, expectedReturn, inflationRate);
+    const realReturn = randomReturnByAsset(assetWeights, assetReturns);
     
     const growth = portfolio * realReturn;
     const savings = isRetired ? 0 : annualSavings;
@@ -114,7 +158,7 @@ export function runMonteCarloSimulation(
   fireResult: FIREResult
 ): MonteCarloResult {
   const years = 50; // Simulate 50 years from current age
-  const stockWeight = (inputs.portfolioAllocation?.stocks || 80) / 100;
+  const assetWeights = getAssetWeights(inputs);
   
   // Collect all simulation paths
   const allPaths: number[][] = [];
@@ -131,9 +175,8 @@ export function runMonteCarloSimulation(
       inputs.expectStatePension,
       inputs.currentAge,
       inputs.targetRetirementAge,
-      stockWeight,
-      inputs.expectedReturn,
-      inputs.inflationRate,
+      assetWeights,
+      inputs.assetReturns,
       years
     );
     

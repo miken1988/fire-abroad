@@ -871,6 +871,187 @@ countryAccountTypes['GR'] = [
 crossBorderTreatment['us_traditional->GR'] = { treatment: 'Taxed as income. Non-Dom: 7% flat on foreign income.', effectiveTaxType: 'income' };
 crossBorderTreatment['us_roth->GR'] = { treatment: 'May be taxed as income. Non-Dom: 7% flat.', warning: 'Greece may not recognize Roth tax-free status.', effectiveTaxType: 'special' };
 
+// JAPAN
+countries['JP'] = {
+  code: 'JP', name: 'Japan', currency: 'JPY', currencySymbol: '¥', flag: '🇯🇵',
+  capitalGains: {
+    shortTerm: [{ min: 0, max: null, rate: 0.2 }],
+    longTerm: [{ min: 0, max: null, rate: 0.2 }],
+    longTermThresholdMonths: 0,
+    annualExemption: 0,
+    hasDeemDisposal: false,
+  },
+  incomeTax: {
+    brackets: [
+      { min: 0, max: 1950000, rate: 0.05 },
+      { min: 1950000, max: 3300000, rate: 0.10 },
+      { min: 3300000, max: 6950000, rate: 0.20 },
+      { min: 6950000, max: 9000000, rate: 0.23 },
+      { min: 9000000, max: 18000000, rate: 0.33 },
+      { min: 18000000, max: 40000000, rate: 0.40 },
+      { min: 40000000, max: null, rate: 0.45 },
+    ],
+    personalAllowance: 480000,
+  },
+  dividendTax: { brackets: [{ min: 0, max: null, rate: 0.2 }], allowance: 0 },
+  retirementAccounts: [
+    { name: 'iDeCo/NISA', taxOnContribution: 'exempt', taxOnGrowth: 'exempt', taxOnWithdrawal: 'income', accessAge: 60, notes: 'Tax-advantaged retirement savings.' },
+  ],
+  healthcare: { system: 'Universal', publicAccessForResidents: true, estimatedAnnualCostPreRetirement: 3000, estimatedAnnualCostPostRetirement: 2000, notes: 'National Health Insurance. Residents pay 30% of costs.' },
+  costOfLiving: { index: 83, monthlyRentCity: 1200, monthlyRentSuburb: 700, notes: 'Tokyo expensive, regional cities more affordable.' },
+  expatRules: { taxationBasis: 'worldwide', citizenshipBasedTaxation: false, hasExitTax: false, taxTreatyNotes: 'Tax treaties with US, UK. Foreign income taxed if remitted to Japan for non-permanent residents.' },
+};
+
+// NEW ZEALAND
+countries['NZ'] = {
+  code: 'NZ', name: 'New Zealand', currency: 'NZD', currencySymbol: 'NZ$', flag: '🇳🇿',
+  capitalGains: {
+    shortTerm: [{ min: 0, max: null, rate: 0 }],
+    longTerm: [{ min: 0, max: null, rate: 0 }],
+    longTermThresholdMonths: 0,
+    annualExemption: 0,
+    hasDeemDisposal: false,
+  },
+  incomeTax: {
+    brackets: [
+      { min: 0, max: 14000, rate: 0.105 },
+      { min: 14000, max: 48000, rate: 0.175 },
+      { min: 48000, max: 70000, rate: 0.30 },
+      { min: 70000, max: 180000, rate: 0.33 },
+      { min: 180000, max: null, rate: 0.39 },
+    ],
+    personalAllowance: 0,
+  },
+  dividendTax: { brackets: [{ min: 0, max: null, rate: 0.33 }], allowance: 0 },
+  retirementAccounts: [
+    { name: 'KiwiSaver', taxOnContribution: 'taxed', taxOnGrowth: 'taxed', taxOnWithdrawal: 'exempt', accessAge: 65, notes: 'Employer contributions. Tax on fund earnings.' },
+  ],
+  healthcare: { system: 'Public', publicAccessForResidents: true, estimatedAnnualCostPreRetirement: 2000, estimatedAnnualCostPostRetirement: 1500, notes: 'Public system with subsidized care. Private insurance common.' },
+  costOfLiving: { index: 78, monthlyRentCity: 1800, monthlyRentSuburb: 1200, notes: 'Auckland expensive. Wellington and regional cities more affordable.' },
+  expatRules: { taxationBasis: 'worldwide', citizenshipBasedTaxation: false, hasExitTax: false, taxTreatyNotes: 'No CGT on most investments. FIF rules apply to foreign shares over NZ$50K.' },
+};
+
+// COLOMBIA
+countries['CO'] = {
+  code: 'CO', name: 'Colombia', currency: 'COP', currencySymbol: 'COP', flag: '🇨🇴',
+  capitalGains: {
+    shortTerm: [{ min: 0, max: null, rate: 0.10 }],
+    longTerm: [{ min: 0, max: null, rate: 0.10 }],
+    longTermThresholdMonths: 24,
+    annualExemption: 0,
+    hasDeemDisposal: false,
+  },
+  incomeTax: {
+    brackets: [
+      { min: 0, max: 46229000, rate: 0 },
+      { min: 46229000, max: 72188000, rate: 0.19 },
+      { min: 72188000, max: 163386000, rate: 0.28 },
+      { min: 163386000, max: 672727000, rate: 0.33 },
+      { min: 672727000, max: null, rate: 0.39 },
+    ],
+    personalAllowance: 46229000,
+  },
+  dividendTax: { brackets: [{ min: 0, max: null, rate: 0.10 }], allowance: 0 },
+  retirementAccounts: [
+    { name: 'AFP Pension', taxOnContribution: 'exempt', taxOnGrowth: 'exempt', taxOnWithdrawal: 'income', accessAge: 62, notes: 'Mandatory pension system.' },
+  ],
+  healthcare: { system: 'Mixed', publicAccessForResidents: true, estimatedAnnualCostPreRetirement: 1500, estimatedAnnualCostPostRetirement: 1200, notes: 'Affordable private healthcare. Many expats use private insurance (~$100-200/mo).' },
+  costOfLiving: { index: 32, monthlyRentCity: 500, monthlyRentSuburb: 300, notes: 'Very affordable. Medellin and Bogota popular with expats.' },
+  expatRules: { taxationBasis: 'territorial', citizenshipBasedTaxation: false, hasExitTax: false, taxTreatyNotes: 'Territorial taxation for first 5 years - foreign income not taxed if not remitted.' },
+};
+
+// PANAMA
+countries['PA'] = {
+  code: 'PA', name: 'Panama', currency: 'USD', currencySymbol: '$', flag: '🇵🇦',
+  capitalGains: {
+    shortTerm: [{ min: 0, max: null, rate: 0.10 }],
+    longTerm: [{ min: 0, max: null, rate: 0.10 }],
+    longTermThresholdMonths: 0,
+    annualExemption: 0,
+    hasDeemDisposal: false,
+  },
+  incomeTax: {
+    brackets: [
+      { min: 0, max: 11000, rate: 0 },
+      { min: 11000, max: 50000, rate: 0.15 },
+      { min: 50000, max: null, rate: 0.25 },
+    ],
+    personalAllowance: 11000,
+  },
+  dividendTax: { brackets: [{ min: 0, max: null, rate: 0.10 }], allowance: 0 },
+  retirementAccounts: [
+    { name: 'CSS Pension', taxOnContribution: 'exempt', taxOnGrowth: 'exempt', taxOnWithdrawal: 'income', accessAge: 62, notes: 'Social security pension.' },
+  ],
+  healthcare: { system: 'Mixed', publicAccessForResidents: true, estimatedAnnualCostPreRetirement: 3000, estimatedAnnualCostPostRetirement: 4000, notes: 'Good private hospitals in Panama City. Insurance ~$150-300/mo.' },
+  costOfLiving: { index: 50, monthlyRentCity: 1200, monthlyRentSuburb: 700, notes: 'Panama City modern but pricier. Interior much cheaper.' },
+  expatRules: { taxationBasis: 'territorial', citizenshipBasedTaxation: false, hasExitTax: false, specialRegimes: [{ name: 'Territorial Taxation', duration: 'Permanent', benefits: 'Foreign income completely tax-free. Only Panama-source income taxed.', eligibility: 'All residents' }], taxTreatyNotes: 'Territorial tax system - foreign-source income NOT taxed. Very favorable for retirees with US investments.' },
+};
+
+// MALAYSIA
+countries['MY'] = {
+  code: 'MY', name: 'Malaysia', currency: 'MYR', currencySymbol: 'RM', flag: '🇲🇾',
+  capitalGains: {
+    shortTerm: [{ min: 0, max: null, rate: 0 }],
+    longTerm: [{ min: 0, max: null, rate: 0 }],
+    longTermThresholdMonths: 0,
+    annualExemption: 0,
+    hasDeemDisposal: false,
+  },
+  incomeTax: {
+    brackets: [
+      { min: 0, max: 5000, rate: 0 },
+      { min: 5000, max: 20000, rate: 0.01 },
+      { min: 20000, max: 35000, rate: 0.03 },
+      { min: 35000, max: 50000, rate: 0.06 },
+      { min: 50000, max: 70000, rate: 0.11 },
+      { min: 70000, max: 100000, rate: 0.19 },
+      { min: 100000, max: 400000, rate: 0.25 },
+      { min: 400000, max: 600000, rate: 0.26 },
+      { min: 600000, max: 2000000, rate: 0.28 },
+      { min: 2000000, max: null, rate: 0.30 },
+    ],
+    personalAllowance: 9000,
+  },
+  dividendTax: { brackets: [{ min: 0, max: null, rate: 0 }], allowance: 0 },
+  retirementAccounts: [
+    { name: 'EPF', taxOnContribution: 'exempt', taxOnGrowth: 'exempt', taxOnWithdrawal: 'exempt', accessAge: 55, notes: 'Employee Provident Fund. Tax-free withdrawals.' },
+  ],
+  healthcare: { system: 'Mixed', publicAccessForResidents: true, estimatedAnnualCostPreRetirement: 2000, estimatedAnnualCostPostRetirement: 3000, notes: 'Excellent private healthcare at low cost. MM2H includes health requirements.' },
+  costOfLiving: { index: 35, monthlyRentCity: 600, monthlyRentSuburb: 350, notes: 'KL affordable by Asian standards. Penang popular with retirees.' },
+  expatRules: { taxationBasis: 'territorial', citizenshipBasedTaxation: false, hasExitTax: false, specialRegimes: [{ name: 'Territorial Taxation', duration: 'Permanent', benefits: 'Foreign-source income tax-free even if remitted (as of 2024).', eligibility: 'All residents' }], taxTreatyNotes: 'Foreign income remitted to Malaysia is tax-free. No CGT on shares.' },
+};
+
+// VIETNAM
+countries['VN'] = {
+  code: 'VN', name: 'Vietnam', currency: 'VND', currencySymbol: '₫', flag: '🇻🇳',
+  capitalGains: {
+    shortTerm: [{ min: 0, max: null, rate: 0.20 }],
+    longTerm: [{ min: 0, max: null, rate: 0.20 }],
+    longTermThresholdMonths: 0,
+    annualExemption: 0,
+    hasDeemDisposal: false,
+  },
+  incomeTax: {
+    brackets: [
+      { min: 0, max: 60000000, rate: 0.05 },
+      { min: 60000000, max: 120000000, rate: 0.10 },
+      { min: 120000000, max: 216000000, rate: 0.15 },
+      { min: 216000000, max: 384000000, rate: 0.20 },
+      { min: 384000000, max: 624000000, rate: 0.25 },
+      { min: 624000000, max: 960000000, rate: 0.30 },
+      { min: 960000000, max: null, rate: 0.35 },
+    ],
+    personalAllowance: 11000000,
+  },
+  dividendTax: { brackets: [{ min: 0, max: null, rate: 0.05 }], allowance: 0 },
+  retirementAccounts: [
+    { name: 'Social Insurance', taxOnContribution: 'exempt', taxOnGrowth: 'exempt', taxOnWithdrawal: 'income', accessAge: 62, notes: 'Mandatory social insurance.' },
+  ],
+  healthcare: { system: 'Mixed', publicAccessForResidents: true, estimatedAnnualCostPreRetirement: 1000, estimatedAnnualCostPostRetirement: 1500, notes: 'Very affordable. International hospitals in major cities. Insurance ~$50-150/mo.' },
+  costOfLiving: { index: 30, monthlyRentCity: 400, monthlyRentSuburb: 200, notes: 'Extremely affordable. Ho Chi Minh City and Hanoi have expat communities.' },
+  expatRules: { taxationBasis: 'worldwide', citizenshipBasedTaxation: false, hasExitTax: false, taxTreatyNotes: 'Tax residency after 183 days. Foreign income taxable for residents.' },
+};
+
 // Add new currency exchange rates
 exchangeRates['USD-CAD'] = 1.36;
 exchangeRates['CAD-USD'] = 0.74;
@@ -897,3 +1078,14 @@ exchangeRates['EUR-THB'] = 38.5;
 exchangeRates['THB-EUR'] = 0.026;
 exchangeRates['EUR-CRC'] = 555;
 exchangeRates['CRC-EUR'] = 0.0018;
+// New country currencies
+exchangeRates['USD-JPY'] = 149.5;
+exchangeRates['JPY-USD'] = 0.0067;
+exchangeRates['USD-NZD'] = 1.62;
+exchangeRates['NZD-USD'] = 0.62;
+exchangeRates['USD-COP'] = 4150;
+exchangeRates['COP-USD'] = 0.00024;
+exchangeRates['USD-MYR'] = 4.47;
+exchangeRates['MYR-USD'] = 0.22;
+exchangeRates['USD-VND'] = 24500;
+exchangeRates['VND-USD'] = 0.000041;

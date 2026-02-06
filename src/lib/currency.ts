@@ -15,6 +15,13 @@ const fallbackRates: Record<string, number> = {
   AED: 3.67,
   SGD: 1.34,
   MXN: 17.15,
+  THB: 35.5,
+  CRC: 510,
+  JPY: 149.5,
+  NZD: 1.62,
+  COP: 4150,
+  MYR: 4.47,
+  VND: 24500,
 };
 
 interface CachedRates {
@@ -55,6 +62,13 @@ export async function fetchLiveRates(): Promise<Record<string, number>> {
       AED: data.rates.AED || fallbackRates.AED,
       SGD: data.rates.SGD || fallbackRates.SGD,
       MXN: data.rates.MXN || fallbackRates.MXN,
+      THB: data.rates.THB || fallbackRates.THB,
+      CRC: data.rates.CRC || fallbackRates.CRC,
+      JPY: data.rates.JPY || fallbackRates.JPY,
+      NZD: data.rates.NZD || fallbackRates.NZD,
+      COP: data.rates.COP || fallbackRates.COP,
+      MYR: data.rates.MYR || fallbackRates.MYR,
+      VND: data.rates.VND || fallbackRates.VND,
     };
 
     // Cache the rates
