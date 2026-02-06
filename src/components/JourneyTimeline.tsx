@@ -56,25 +56,25 @@ export function JourneyTimeline({
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Hover over the chart to explore</p>
         </div>
         
-        <div className="flex items-center gap-4 text-right">
-          <div>
+        <div className="flex items-start gap-4 text-right">
+          <div className="min-h-[52px]">
             <div className="text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-wide">{country1.flag} {country1.name}</div>
             <div className="text-lg font-bold text-blue-600 dark:text-blue-400">
               {formatCompact(displayData.p1?.portfolioEnd || 0, country1.currency)}
             </div>
-            {displayData.p1?.isRetired && (
-              <div className="text-[10px] text-gray-500 dark:text-gray-400">-{formatCompact(displayData.p1.withdrawal, country1.currency)}/yr</div>
-            )}
+            <div className="text-[10px] text-gray-500 dark:text-gray-400 h-4">
+              {displayData.p1?.isRetired ? `-${formatCompact(displayData.p1.withdrawal, country1.currency)}/yr` : ''}
+            </div>
           </div>
           {isComparison && displayData.p2 && (
-            <div>
+            <div className="min-h-[52px]">
               <div className="text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-wide">{country2?.flag} {country2?.name}</div>
               <div className="text-lg font-bold text-emerald-600 dark:text-emerald-400">
                 {formatCompact(displayData.p2?.portfolioEnd || 0, country2?.currency || 'USD')}
               </div>
-              {displayData.p2?.isRetired && (
-                <div className="text-[10px] text-gray-500 dark:text-gray-400">-{formatCompact(displayData.p2.withdrawal, country2?.currency || 'USD')}/yr</div>
-              )}
+              <div className="text-[10px] text-gray-500 dark:text-gray-400 h-4">
+                {displayData.p2?.isRetired ? `-${formatCompact(displayData.p2.withdrawal, country2?.currency || 'USD')}/yr` : ''}
+              </div>
             </div>
           )}
         </div>

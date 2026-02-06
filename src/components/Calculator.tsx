@@ -203,7 +203,7 @@ export function Calculator() {
       <div className="border-t border-gray-200 dark:border-slate-700 mt-8 sm:mt-12">
         <div className="max-w-7xl mx-auto px-3 py-4 sm:px-6 sm:py-6 lg:px-8">
           <p className="text-[10px] sm:text-xs text-gray-400 dark:text-gray-500 text-center">
-            Data last updated: February 2025 • Exchange rates update hourly
+            Data last updated: {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })} • Exchange rates update hourly
           </p>
         </div>
       </div>
