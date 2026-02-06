@@ -92,6 +92,7 @@ function MoneySlider({
   currency,
   tooltip,
   warning,
+  unallocated = 0,
 }: {
   value: number;
   onChange: (val: number) => void;
@@ -101,9 +102,11 @@ function MoneySlider({
   currency: string;
   tooltip?: string;
   warning?: string | null;
+  unallocated?: number;
 }) {
   const [isEditing, setIsEditing] = useState(false);
   const [textValue, setTextValue] = useState(String(value));
+  const [isFocused, setIsFocused] = useState(false);
   const step = getSmartStep(max);
 
   const handleTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -118,6 +121,7 @@ function MoneySlider({
 
   const handleTextBlur = () => {
     setIsEditing(false);
+    setIsFocused(false);
     const parsed = parseFloat(textValue.replace(/,/g, ''));
     if (isNaN(parsed) || textValue === '') {
       onChange(0);
@@ -128,22 +132,43 @@ function MoneySlider({
 
   const handleTextFocus = () => {
     setIsEditing(true);
+    setIsFocused(true);
     setTextValue(String(value));
+  };
+
+  const handleFill = () => {
+    onChange(value + unallocated);
   };
 
   // Display formatted number with commas when not editing
   const displayValue = isEditing ? textValue : formatWithCommas(value);
+  
+  // Show fill button when focused/hovered and there's unallocated funds
+  const showFill = unallocated > 0;
 
   return (
-    <div>
+    <div 
+      className="group"
+      onMouseEnter={() => setIsFocused(true)}
+      onMouseLeave={() => !isEditing && setIsFocused(false)}
+    >
       <div className="flex items-center justify-between mb-1.5">
         <label className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-1">
           {icon && <span>{icon}</span>} {label}
           {tooltip && <Tooltip text={tooltip} />}
           {warning && <span className="text-amber-500">⚠️</span>}
         </label>
-        {/* Editable value display - use text input to allow commas */}
-        <div className="flex items-center">
+        {/* Editable value display with Fill button */}
+        <div className="flex items-center gap-2">
+          {showFill && isFocused && (
+            <button
+              type="button"
+              onClick={handleFill}
+              className="px-2 py-0.5 text-[10px] sm:text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded transition-colors"
+            >
+              +{formatWithCommas(unallocated)}
+            </button>
+          )}
           <input
             type="text"
             inputMode="numeric"
@@ -522,6 +547,7 @@ export function InputPanel({ inputs, onChange }: InputPanelProps) {
                     currency={inputs.portfolioCurrency}
                     tooltip={account.description}
                     warning={warning}
+                    unallocated={unallocated}
                   />
                 );
               })}
@@ -540,6 +566,7 @@ export function InputPanel({ inputs, onChange }: InputPanelProps) {
                 icon="₿"
                 currency={inputs.portfolioCurrency}
                 tooltip="Cryptocurrency holdings (Bitcoin, Ethereum, etc.)"
+                unallocated={unallocated}
               />
               <MoneySlider
                 value={inputs.accounts?.cash || 0}
@@ -549,6 +576,7 @@ export function InputPanel({ inputs, onChange }: InputPanelProps) {
                 icon="💵"
                 currency={inputs.portfolioCurrency}
                 tooltip="Cash and cash equivalents"
+                unallocated={unallocated}
               />
               <MoneySlider
                 value={inputs.accounts?.property || 0}
@@ -558,6 +586,7 @@ export function InputPanel({ inputs, onChange }: InputPanelProps) {
                 icon="🏠"
                 currency={inputs.portfolioCurrency}
                 tooltip="Real estate equity (home value minus mortgage)"
+                unallocated={unallocated}
               />
               
               {/* Auto-calculating Other/Unallocated field */}
