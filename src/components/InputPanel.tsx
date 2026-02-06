@@ -164,9 +164,9 @@ function MoneySlider({
             <button
               type="button"
               onClick={handleFill}
-              className="px-2 py-0.5 text-[10px] sm:text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded transition-colors"
+              className="px-2 py-1 text-[10px] sm:text-xs font-medium text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900/50 hover:bg-blue-200 dark:hover:bg-blue-800/50 rounded-lg transition-colors whitespace-nowrap"
             >
-              +{formatWithCommas(unallocated)}
+              Fill {formatWithCommas(unallocated)}
             </button>
           )}
           <input
@@ -301,7 +301,7 @@ function OtherAssetField({
           {hasUnallocated && value !== unallocated && (
             <button
               onClick={handleAutoFill}
-              className="text-[10px] px-2 py-0.5 bg-blue-500 hover:bg-blue-600 text-white rounded transition-colors"
+              className="px-2 py-1 text-[10px] sm:text-xs font-medium text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900/50 hover:bg-blue-200 dark:hover:bg-blue-800/50 rounded-lg transition-colors whitespace-nowrap"
             >
               Fill {formatCurrency(unallocated, currency)}
             </button>
