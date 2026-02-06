@@ -639,10 +639,7 @@ export function InputPanel({ inputs, onChange }: InputPanelProps) {
 
   return (
     <div className="space-y-6 sm:space-y-8">
-      <div>
-        <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">Your Details</h2>
-        <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">Adjust the inputs below. Results update instantly.</p>
-      </div>
+      <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Adjust the inputs below. Results update instantly.</p>
 
       {/* Age Section */}
       <section>
