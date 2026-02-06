@@ -110,21 +110,34 @@ html.dark input[type="range"]::-moz-range-thumb {
   animation: fade-in 0.2s ease-out;
 }
 
-/* Flame animation for logo */
-@keyframes flame-subtle {
-  0%, 100% { 
-    transform: scale(1);
-    opacity: 0.9;
+/* Stripe-style animated gradient for FIRE text */
+@keyframes fire-gradient-flow {
+  0% {
+    background-position: 0% 50%;
   }
-  50% { 
-    transform: scale(1.1);
-    opacity: 1;
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
   }
 }
 
-.animate-flame-subtle {
-  animation: flame-subtle 2s ease-in-out infinite;
-  display: inline-block;
+.fire-gradient {
+  background: linear-gradient(
+    90deg,
+    #f97316,
+    #ef4444,
+    #f59e0b,
+    #dc2626,
+    #fb923c,
+    #f97316
+  );
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: fire-gradient-flow 3s ease infinite;
 }
 
 /* Dark mode form elements */
