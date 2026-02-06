@@ -302,7 +302,10 @@ export function calculateFIRE(inputs: UserInputs, targetCountryCode: string): FI
   // So no more savings will be added
   const retiringNow = inputs.currentAge >= inputs.targetRetirementAge;
   
-  for (let year = 0; year <= 50; year++) {
+  // Project until age 100
+  const yearsToProject = Math.max(50, 100 - inputs.currentAge);
+  
+  for (let year = 0; year <= yearsToProject; year++) {
     const age = inputs.currentAge + year;
     const portfolioStart = currentLiquid + currentIlliquid;
     const liquidStart = currentLiquid;

@@ -57,15 +57,15 @@ describe('calculateFIRE', () => {
 
     test('insufficient portfolio cannot retire', () => {
       const inputs = createInputs({ 
-        portfolioValue: 50000,  // Very small portfolio
-        annualSpending: 100000, // Very high spending
+        portfolioValue: 10000,   // Very small portfolio
+        annualSpending: 200000,  // Extremely high spending
         targetRetirementAge: 40,
         currentAge: 40,
         annualSavings: 0,
       });
       const result = calculateFIRE(inputs, 'US');
       
-      // With 50K and 100K spending, definitely can't retire
+      // With 10K and 200K spending, definitely can't retire
       expect(result.canRetire).toBe(false);
     });
 
@@ -359,7 +359,7 @@ describe('calculateFIRE', () => {
       expect(year20?.portfolioEnd).toBeLessThan(inputs.portfolioValue);
     });
 
-    test('projections extend to 50 years', () => {
+    test('projections extend to age 100', () => {
       const inputs = createInputs({ 
         currentAge: 40,
         targetRetirementAge: 45,
@@ -368,7 +368,10 @@ describe('calculateFIRE', () => {
       
       const result = calculateFIRE(inputs, 'US');
       
-      expect(result.projections.length).toBeGreaterThanOrEqual(50);
+      // Should project to age 100 (60 years from age 40)
+      expect(result.projections.length).toBeGreaterThanOrEqual(60);
+      const lastProjection = result.projections[result.projections.length - 1];
+      expect(lastProjection.age).toBe(100);
     });
   });
 
