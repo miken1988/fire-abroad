@@ -99,15 +99,8 @@ export function Calculator() {
         <div className="max-w-7xl mx-auto px-3 py-3 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
             <div className="min-w-0 flex-1">
-              <h1 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white truncate flex items-baseline gap-0.5">
-                <span className="font-light">Where</span>
-                <span className="font-light text-gray-500 dark:text-gray-400 mx-0.5">to</span>
-                <span className="font-extrabold bg-gradient-to-r from-orange-500 via-red-500 to-yellow-500 bg-clip-text text-transparent">F</span>
-                <span className="relative font-extrabold bg-gradient-to-r from-orange-500 via-red-500 to-yellow-500 bg-clip-text text-transparent">
-                  I
-                  <span className="absolute -top-1 left-1/2 -translate-x-1/2 text-[10px] sm:text-xs animate-flame">🔥</span>
-                </span>
-                <span className="font-extrabold bg-gradient-to-r from-orange-500 via-red-500 to-yellow-500 bg-clip-text text-transparent">RE</span>
+              <h1 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white truncate">
+                Where to F<span className="relative">ı<span className="absolute -top-1 left-1/2 -translate-x-1/2 text-[10px] sm:text-xs animate-flame">🔥</span></span>RE
               </h1>
               <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 hidden sm:block">Compare early retirement across countries</p>
             </div>
