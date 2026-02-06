@@ -48,9 +48,24 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={`${inter.variable} font-sans antialiased`}>
+      <body className={`${inter.variable} font-sans antialiased min-h-screen flex flex-col`}>
         <ThemeProvider>
-          {children}
+          <main className="flex-1">
+            {children}
+          </main>
+          <footer className="border-t border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900/50 py-6 px-4">
+            <div className="max-w-4xl mx-auto text-center space-y-2">
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                <strong>Disclaimer:</strong> This tool is for educational and informational purposes only. 
+                It does not constitute financial, tax, legal, or immigration advice. Tax laws and visa requirements 
+                change frequently and vary by individual circumstances. Always consult qualified professionals 
+                before making financial or relocation decisions.
+              </p>
+              <p className="text-xs text-gray-400 dark:text-gray-500">
+                © {new Date().getFullYear()} WhereToFIRE.com • Built for the FIRE community
+              </p>
+            </div>
+          </footer>
         </ThemeProvider>
       </body>
     </html>

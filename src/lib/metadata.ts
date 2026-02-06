@@ -2,18 +2,18 @@ import { Metadata } from 'next';
 import { countries } from '@/data/countries';
 
 const siteConfig = {
-  name: 'FIRE Abroad',
+  name: 'WhereToFIRE',
   description: 'Compare early retirement across countries. Calculate your FIRE number, compare taxes, cost of living, and visa requirements for retiring abroad.',
-  url: 'https://fireabroad.com',
+  url: 'https://wheretofire.com',
   ogImage: '/og-image.png',
-  twitter: '@fireabroad',
+  twitter: '@wheretofire',
 };
 
 export const defaultMetadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
   title: {
-    default: 'FIRE Abroad - Compare Early Retirement Across Countries',
-    template: '%s | FIRE Abroad',
+    default: 'WhereToFIRE - Compare Early Retirement Across Countries',
+    template: '%s | WhereToFIRE',
   },
   description: siteConfig.description,
   keywords: [
@@ -33,10 +33,11 @@ export const defaultMetadata: Metadata = {
     'Mexico retirement',
     'retire overseas',
     'geographic arbitrage',
+    'where to retire',
   ],
-  authors: [{ name: 'FIRE Abroad' }],
-  creator: 'FIRE Abroad',
-  publisher: 'FIRE Abroad',
+  authors: [{ name: 'WhereToFIRE' }],
+  creator: 'WhereToFIRE',
+  publisher: 'WhereToFIRE',
   robots: {
     index: true,
     follow: true,
@@ -53,20 +54,20 @@ export const defaultMetadata: Metadata = {
     locale: 'en_US',
     url: siteConfig.url,
     siteName: siteConfig.name,
-    title: 'FIRE Abroad - Compare Early Retirement Across Countries',
+    title: 'WhereToFIRE - Compare Early Retirement Across Countries',
     description: siteConfig.description,
     images: [
       {
         url: siteConfig.ogImage,
         width: 1200,
         height: 630,
-        alt: 'FIRE Abroad - Early Retirement Calculator',
+        alt: 'WhereToFIRE - Early Retirement Calculator',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'FIRE Abroad - Compare Early Retirement Across Countries',
+    title: 'WhereToFIRE - Compare Early Retirement Across Countries',
     description: siteConfig.description,
     images: [siteConfig.ogImage],
     creator: siteConfig.twitter,
@@ -125,7 +126,7 @@ export function generateStructuredData(params?: {
   const baseStructuredData = {
     '@context': 'https://schema.org',
     '@type': 'WebApplication',
-    name: 'FIRE Abroad Calculator',
+    name: 'WhereToFIRE Calculator',
     description: siteConfig.description,
     url: siteConfig.url,
     applicationCategory: 'FinanceApplication',
@@ -141,6 +142,7 @@ export function generateStructuredData(params?: {
       'Cost of living comparison',
       'Visa requirements information',
       'Retirement timeline projection',
+      'Monte Carlo simulation',
       'PDF export',
     ],
   };
@@ -196,7 +198,7 @@ export function generateStructuredData(params?: {
         description: `Compare early retirement options between ${from.name} and ${to.name}. Includes tax comparison, cost of living, and visa requirements.`,
         author: {
           '@type': 'Organization',
-          name: 'FIRE Abroad',
+          name: 'WhereToFIRE',
         },
       },
     ];

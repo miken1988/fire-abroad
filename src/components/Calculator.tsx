@@ -99,7 +99,7 @@ export function Calculator() {
         <div className="max-w-7xl mx-auto px-3 py-3 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
             <div className="min-w-0 flex-1">
-              <h1 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white truncate">🔥 FIRE Abroad</h1>
+              <h1 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white truncate">🔥 WhereToFIRE</h1>
               <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 hidden sm:block">Compare early retirement across countries</p>
             </div>
             <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
@@ -203,7 +203,7 @@ export function Calculator() {
       <footer className="border-t border-gray-200 dark:border-slate-700 mt-8 sm:mt-12">
         <div className="max-w-7xl mx-auto px-3 py-4 sm:px-6 sm:py-6 lg:px-8">
           <p className="text-[10px] sm:text-xs text-gray-400 dark:text-gray-500 text-center">
-            FIRE Abroad is for educational purposes only. Tax laws change frequently. Consult a tax professional.
+            WhereToFIRE is for educational purposes only. Tax laws change frequently. Consult a tax professional.
             <span className="hidden sm:inline"><br />Data last updated: February 2025 • Exchange rates update hourly</span>
           </p>
         </div>
