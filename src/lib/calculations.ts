@@ -66,13 +66,17 @@ export interface UserInputs {
 export interface YearlyProjection {
   year: number;
   age: number;
-  portfolioStart: number;
+  portfolioStart: number;      // Total portfolio (liquid + illiquid)
+  liquidStart: number;         // Liquid assets only (stocks, bonds, cash, crypto)
+  illiquidStart: number;       // Illiquid assets (property)
   growth: number;
   savings: number;
   withdrawal: number;
   pensionIncome: number;
   taxPaid: number;
-  portfolioEnd: number;
+  portfolioEnd: number;        // Total portfolio end
+  liquidEnd: number;           // Liquid assets end
+  illiquidEnd: number;         // Illiquid end
   isRetired: boolean;
   hasPension: boolean;
 }
@@ -89,6 +93,8 @@ export interface FIREResult {
   projections: YearlyProjection[];
   warnings: string[];
   countrySpecificNotes: string[];
+  liquidPortfolioValue: number;    // For display
+  illiquidPortfolioValue: number;  // For display
   pensionInfo?: {
     startAge: number;
     annualAmount: number;
@@ -229,7 +235,19 @@ export function calculateFIRE(inputs: UserInputs, targetCountryCode: string): FI
   const fireNumberUSD = convertCurrency(fireNumber, country.currency, 'USD');
   
   const projections: YearlyProjection[] = [];
-  let currentPortfolio = portfolioInLocalCurrency;
+  
+  // Separate liquid vs illiquid assets
+  // Liquid: stocks, bonds, cash, crypto, retirement accounts
+  // Illiquid: property (can't withdraw from it annually)
+  const propertyAmount = inputs.accounts?.property || 0;
+  const liquidPortfolioUSD = inputs.portfolioValue - propertyAmount;
+  const illiquidPortfolioUSD = propertyAmount;
+  
+  // Convert to local currency
+  let currentLiquid = convertCurrency(liquidPortfolioUSD, inputs.portfolioCurrency, country.currency);
+  let currentIlliquid = convertCurrency(illiquidPortfolioUSD, inputs.portfolioCurrency, country.currency);
+  let currentPortfolio = currentLiquid + currentIlliquid;
+  
   let hasRetired = false;
   let fireAge = 0;
   let yearsUntilFIRE = -1;
@@ -249,34 +267,36 @@ export function calculateFIRE(inputs: UserInputs, targetCountryCode: string): FI
     cash: inputs.assetReturns?.cash ?? defaultCashReturn,
   };
   
-  // Calculate asset allocation percentages from accounts
-  const totalPortfolio = inputs.portfolioValue || 1;
+  // Calculate asset allocation percentages from accounts (LIQUID ONLY for return calc)
+  const liquidTotal = liquidPortfolioUSD || 1;
   const stocksAmount = (inputs.traditionalRetirementAccounts || 0) + 
                        (inputs.rothAccounts || 0) + 
                        (inputs.taxableAccounts || 0);
   const cryptoAmount = inputs.accounts?.crypto || 0;
   const cashAmount = inputs.accounts?.cash || 0;
-  const propertyAmount = inputs.accounts?.property || 0;
   const otherAmount = inputs.accounts?.other || 0; // Treat as stocks
   
-  const stocksWeight = (stocksAmount + otherAmount) / totalPortfolio;
-  const cryptoWeight = cryptoAmount / totalPortfolio;
-  const cashWeight = cashAmount / totalPortfolio;
-  const propertyWeight = propertyAmount / totalPortfolio;
+  // Weights for liquid portfolio return calculation
+  const stocksWeight = (stocksAmount + otherAmount) / liquidTotal;
+  const cryptoWeight = cryptoAmount / liquidTotal;
+  const cashWeight = cashAmount / liquidTotal;
   
-  // Weighted average nominal return
-  const weightedNominalReturn = 
-    stocksWeight * assetReturns.stocks +
-    cryptoWeight * assetReturns.crypto +
-    cashWeight * assetReturns.cash +
-    propertyWeight * assetReturns.property;
-  
-  // Fall back to user's expected return if no allocation specified
-  const nominalReturn = (stocksWeight + cryptoWeight + cashWeight + propertyWeight) > 0 
-    ? weightedNominalReturn 
+  // Weighted average nominal return for LIQUID assets
+  const liquidNominalReturn = (stocksWeight + cryptoWeight + cashWeight) > 0 
+    ? (stocksWeight * assetReturns.stocks +
+       cryptoWeight * assetReturns.crypto +
+       cashWeight * assetReturns.cash) / (stocksWeight + cryptoWeight + cashWeight)
     : inputs.expectedReturn;
   
+  // Property grows separately
+  const propertyNominalReturn = assetReturns.property;
+  
   const inflationRate = inputs.inflationRate;
+  
+  // For backwards compatibility, also track combined nominal return
+  const nominalReturn = liquidPortfolioUSD > 0 
+    ? (liquidNominalReturn * liquidPortfolioUSD + propertyNominalReturn * illiquidPortfolioUSD) / inputs.portfolioValue
+    : inputs.expectedReturn;
   
   // If user sets current age >= target retirement age, they're saying "I want to retire now"
   // So no more savings will be added
@@ -284,9 +304,12 @@ export function calculateFIRE(inputs: UserInputs, targetCountryCode: string): FI
   
   for (let year = 0; year <= 50; year++) {
     const age = inputs.currentAge + year;
-    const portfolioStart = currentPortfolio;
+    const portfolioStart = currentLiquid + currentIlliquid;
+    const liquidStart = currentLiquid;
+    const illiquidStart = currentIlliquid;
     
-    const isRetired = hasRetired || (age >= inputs.targetRetirementAge && currentPortfolio >= fireNumber);
+    // Can only retire if LIQUID assets support it (can't withdraw from property)
+    const isRetired = hasRetired || (age >= inputs.targetRetirementAge && currentLiquid >= fireNumber * 0.8); // Allow some flexibility
     
     if (isRetired && !hasRetired) {
       hasRetired = true;
@@ -295,8 +318,12 @@ export function calculateFIRE(inputs: UserInputs, targetCountryCode: string): FI
       yearsSinceRetirement = 0;
     }
     
-    const growth = portfolioStart * nominalReturn;
-    // No savings if retired OR if user indicated they want to retire now
+    // Growth calculated separately for liquid and illiquid
+    const liquidGrowth = currentLiquid * liquidNominalReturn;
+    const illiquidGrowth = currentIlliquid * propertyNominalReturn;
+    const growth = liquidGrowth + illiquidGrowth;
+    
+    // Savings go to liquid assets (not property)
     const savingsThisYear = (isRetired || retiringNow) ? 0 : annualSavingsLocal;
     
     // Origin pension (from leaving country) kicks in at its age
@@ -329,25 +356,36 @@ export function calculateFIRE(inputs: UserInputs, targetCountryCode: string): FI
       yearsSinceRetirement++;
     }
     
-    const portfolioEnd = Math.max(0, portfolioStart + growth + savingsThisYear - withdrawal);
+    // Withdrawals come from LIQUID assets only
+    const liquidEnd = Math.max(0, currentLiquid + liquidGrowth + savingsThisYear - withdrawal);
+    // Property just grows, no withdrawals
+    const illiquidEnd = currentIlliquid + illiquidGrowth;
+    const portfolioEnd = liquidEnd + illiquidEnd;
     
     projections.push({
       year,
       age,
       portfolioStart,
+      liquidStart,
+      illiquidStart,
       growth,
       savings: savingsThisYear,
       withdrawal,
       pensionIncome,
       taxPaid,
       portfolioEnd,
+      liquidEnd,
+      illiquidEnd,
       isRetired,
       hasPension: !!(hasOriginPension || hasDestinationPension)
     });
     
+    currentLiquid = liquidEnd;
+    currentIlliquid = illiquidEnd;
     currentPortfolio = portfolioEnd;
     
-    if (portfolioEnd <= 0 && isRetired) {
+    // Only break if LIQUID assets are depleted (property still exists but can't help)
+    if (liquidEnd <= 0 && isRetired) {
       break;
     }
   }
@@ -369,9 +407,16 @@ export function calculateFIRE(inputs: UserInputs, targetCountryCode: string): FI
   const effectiveTaxRate = estimateEffectiveTaxRate(grossWithdrawalNeeded, country, usState);
   
   const warnings: string[] = [];
-  const depletionYear = projections.find(p => p.portfolioEnd <= 0 && p.isRetired);
-  if (depletionYear) {
-    warnings.push(`Portfolio depleted at age ${depletionYear.age}`);
+  
+  // Check for LIQUID asset depletion (not total portfolio)
+  const liquidDepletionYear = projections.find(p => p.liquidEnd <= 0 && p.isRetired);
+  if (liquidDepletionYear) {
+    const hasProperty = illiquidPortfolioUSD > 0;
+    if (hasProperty) {
+      warnings.push(`Liquid assets depleted at age ${liquidDepletionYear.age}. Property equity (€${Math.round(liquidDepletionYear.illiquidEnd).toLocaleString()}) remains but isn't withdrawable.`);
+    } else {
+      warnings.push(`Portfolio depleted at age ${liquidDepletionYear.age}`);
+    }
   }
   
   const countrySpecificNotes = getCountrySpecificNotes(targetCountryCode, inputs);
@@ -383,6 +428,10 @@ export function calculateFIRE(inputs: UserInputs, targetCountryCode: string): FI
       warnings.push(`${pension.name} may not be payable while living in ${country.name}. Verify eligibility.`);
     }
   }
+  
+  // Convert liquid/illiquid to local currency for display
+  const liquidPortfolioLocal = convertCurrency(liquidPortfolioUSD, inputs.portfolioCurrency, country.currency);
+  const illiquidPortfolioLocal = convertCurrency(illiquidPortfolioUSD, inputs.portfolioCurrency, country.currency);
   
   return {
     fireNumber,
@@ -396,6 +445,8 @@ export function calculateFIRE(inputs: UserInputs, targetCountryCode: string): FI
     projections,
     warnings,
     countrySpecificNotes,
+    liquidPortfolioValue: liquidPortfolioLocal,
+    illiquidPortfolioValue: illiquidPortfolioLocal,
     pensionInfo: inputs.expectStatePension ? {
       startAge: pensionStartAge,
       annualAmount: pensionAmountLocal,

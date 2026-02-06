@@ -36,11 +36,11 @@ export function JourneyTimeline({
   const minAge = projections1[0]?.age || 35;
   const maxAge = projections1[projections1.length - 1]?.age || 90;
 
-  // Find key milestones
+  // Find key milestones - use liquidEnd for depletion (property is illiquid)
   const peak1Age = projections1.reduce((max, p) => p.portfolioEnd > max.portfolioEnd ? p : max, projections1[0])?.age;
-  const depleted1 = projections1.find(p => p.portfolioEnd <= 0);
+  const depleted1 = projections1.find(p => p.liquidEnd <= 0);
   const peak2Age = projections2?.reduce((max, p) => p.portfolioEnd > max.portfolioEnd ? p : max, projections2[0])?.age;
-  const depleted2 = projections2?.find(p => p.portfolioEnd <= 0);
+  const depleted2 = projections2?.find(p => p.liquidEnd <= 0);
 
   const getDataAtAge = (age: number) => {
     const p1 = projections1.find(p => p.age === age);
@@ -272,7 +272,7 @@ function MilestoneCards({ projections1, projections2, country1, country2, retire
   ].filter((age, i, arr) => age && arr.indexOf(age) === i && age <= 90);
 
   const peak = projections.reduce((max, p) => p.portfolioEnd > max.portfolioEnd ? p : max, projections[0]);
-  const depleted = projections.find(p => p.portfolioEnd <= 0);
+  const depleted = projections.find(p => p.liquidEnd <= 0);
 
   return (
     <div className="space-y-3">
@@ -309,7 +309,8 @@ function MilestoneCards({ projections1, projections2, country1, country2, retire
           const isPeak = proj.age === peak.age;
           const isDepleted = depleted && proj.age >= depleted.age;
           const isRetirementStart = proj.age === retirementAge;
-          const isLow = proj.portfolioEnd < peak.portfolioEnd * 0.25 && proj.portfolioEnd > 0;
+          const isLow = proj.liquidEnd < peak.portfolioEnd * 0.25 && proj.liquidEnd > 0;
+          const hasProperty = proj.illiquidEnd > 0;
 
           let bgColor = 'bg-white dark:bg-slate-800';
           let borderColor = 'border-gray-200 dark:border-slate-700';
@@ -343,8 +344,8 @@ function MilestoneCards({ projections1, projections2, country1, country2, retire
                     <div className="text-xs text-gray-500 dark:text-gray-400">
                       {isRetirementStart && 'Retirement begins'}
                       {isPeak && !isRetirementStart && 'Portfolio peak'}
-                      {isDepleted && 'Portfolio depleted'}
-                      {isLow && !isDepleted && 'Low balance'}
+                      {isDepleted && (hasProperty ? 'Liquid assets depleted' : 'Portfolio depleted')}
+                      {isLow && !isDepleted && 'Low liquid balance'}
                       {!isRetirementStart && !isPeak && !isDepleted && !isLow && (proj.isRetired ? 'Retired' : 'Working')}
                     </div>
                   </div>
@@ -353,6 +354,11 @@ function MilestoneCards({ projections1, projections2, country1, country2, retire
                   <div className={`font-semibold ${isDepleted ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-white'}`}>
                     {formatCompact(Math.max(0, proj.portfolioEnd), country.currency)}
                   </div>
+                  {hasProperty && (
+                    <div className="text-[10px] text-gray-400 dark:text-gray-500">
+                      {formatCompact(proj.liquidEnd, country.currency)} liquid • {formatCompact(proj.illiquidEnd, country.currency)} property
+                    </div>
+                  )}
                   {proj.isRetired && proj.withdrawal > 0 && !isDepleted && (
                     <div className="text-xs text-gray-500 dark:text-gray-400">
                       -{formatCompact(proj.withdrawal, country.currency)}/yr
