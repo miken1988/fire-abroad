@@ -110,6 +110,31 @@ html.dark input[type="range"]::-moz-range-thumb {
   animation: fade-in 0.2s ease-out;
 }
 
+/* Flame animation for logo */
+@keyframes flame {
+  0%, 100% { 
+    transform: translateX(-50%) scale(1) rotate(-3deg);
+    filter: brightness(1);
+  }
+  25% { 
+    transform: translateX(-50%) scale(1.1) rotate(2deg);
+    filter: brightness(1.1);
+  }
+  50% { 
+    transform: translateX(-50%) scale(0.95) rotate(-2deg);
+    filter: brightness(1.2);
+  }
+  75% { 
+    transform: translateX(-50%) scale(1.05) rotate(3deg);
+    filter: brightness(1.05);
+  }
+}
+
+.animate-flame {
+  animation: flame 1.5s ease-in-out infinite;
+  display: inline-block;
+}
+
 /* Dark mode form elements */
 html.dark select,
 html.dark input[type="text"],
