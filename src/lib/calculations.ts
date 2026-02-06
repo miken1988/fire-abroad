@@ -26,6 +26,7 @@ export interface UserInputs {
     cash: number;
     property: number;
     other: number;
+    otherLabel: string;
   };
   
   traditionalRetirementAccounts: number;

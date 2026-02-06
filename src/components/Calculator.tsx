@@ -19,7 +19,7 @@ const defaultInputs: UserInputs = {
   portfolioValue: 250000,
   portfolioCurrency: 'USD',
   portfolioAllocation: { stocks: 80, bonds: 15, cash: 5, crypto: 0, property: 0 },
-  accounts: { taxDeferred: 100000, taxFree: 50000, taxable: 80000, crypto: 20000, cash: 0, property: 0, other: 0 },
+  accounts: { taxDeferred: 100000, taxFree: 50000, taxable: 80000, crypto: 20000, cash: 0, property: 0, other: 0, otherLabel: '' },
   traditionalRetirementAccounts: 100000,
   rothAccounts: 50000,
   taxableAccounts: 80000,
