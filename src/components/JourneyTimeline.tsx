@@ -50,6 +50,10 @@ export function JourneyTimeline({
 
   const displayAge = hoveredAge || minAge;
   const displayData = getDataAtAge(displayAge);
+  
+  // Check if there's any illiquid (property) assets
+  const hasIlliquid1 = (displayData.p1?.illiquidEnd || 0) > 0;
+  const hasIlliquid2 = (displayData.p2?.illiquidEnd || 0) > 0;
 
   return (
     <div className="space-y-4">
@@ -66,9 +70,24 @@ export function JourneyTimeline({
             <div className="text-lg font-bold text-blue-600 dark:text-blue-400">
               {formatCompact(displayData.p1?.portfolioEnd || 0, country1.currency)}
             </div>
-            <div className="text-[10px] text-gray-500 dark:text-gray-400 h-4">
-              {displayData.p1?.isRetired ? `-${formatCompact(displayData.p1.withdrawal, country1.currency)}/yr` : ''}
-            </div>
+            {hasIlliquid1 ? (
+              <div className="text-[10px] text-gray-500 dark:text-gray-400">
+                <span className="text-green-600 dark:text-green-400">{formatCompact(displayData.p1?.liquidEnd || 0, country1.currency)}</span>
+                <span className="text-gray-400 dark:text-gray-500"> liquid</span>
+                <span className="mx-1">•</span>
+                <span className="text-amber-600 dark:text-amber-400">{formatCompact(displayData.p1?.illiquidEnd || 0, country1.currency)}</span>
+                <span className="text-gray-400 dark:text-gray-500"> property</span>
+              </div>
+            ) : (
+              <div className="text-[10px] text-gray-500 dark:text-gray-400 h-4">
+                {displayData.p1?.isRetired ? `-${formatCompact(displayData.p1.withdrawal, country1.currency)}/yr` : ''}
+              </div>
+            )}
+            {hasIlliquid1 && displayData.p1?.isRetired && (
+              <div className="text-[10px] text-gray-500 dark:text-gray-400">
+                -{formatCompact(displayData.p1.withdrawal, country1.currency)}/yr withdrawal
+              </div>
+            )}
           </div>
           {isComparison && displayData.p2 && (
             <div className="min-h-[52px]">
@@ -76,9 +95,24 @@ export function JourneyTimeline({
               <div className="text-lg font-bold text-emerald-600 dark:text-emerald-400">
                 {formatCompact(displayData.p2?.portfolioEnd || 0, country2?.currency || 'USD')}
               </div>
-              <div className="text-[10px] text-gray-500 dark:text-gray-400 h-4">
-                {displayData.p2?.isRetired ? `-${formatCompact(displayData.p2.withdrawal, country2?.currency || 'USD')}/yr` : ''}
-              </div>
+              {hasIlliquid2 ? (
+                <div className="text-[10px] text-gray-500 dark:text-gray-400">
+                  <span className="text-green-600 dark:text-green-400">{formatCompact(displayData.p2?.liquidEnd || 0, country2?.currency || 'USD')}</span>
+                  <span className="text-gray-400 dark:text-gray-500"> liquid</span>
+                  <span className="mx-1">•</span>
+                  <span className="text-amber-600 dark:text-amber-400">{formatCompact(displayData.p2?.illiquidEnd || 0, country2?.currency || 'USD')}</span>
+                  <span className="text-gray-400 dark:text-gray-500"> property</span>
+                </div>
+              ) : (
+                <div className="text-[10px] text-gray-500 dark:text-gray-400 h-4">
+                  {displayData.p2?.isRetired ? `-${formatCompact(displayData.p2.withdrawal, country2?.currency || 'USD')}/yr` : ''}
+                </div>
+              )}
+              {hasIlliquid2 && displayData.p2?.isRetired && (
+                <div className="text-[10px] text-gray-500 dark:text-gray-400">
+                  -{formatCompact(displayData.p2.withdrawal, country2?.currency || 'USD')}/yr withdrawal
+                </div>
+              )}
             </div>
           )}
         </div>
