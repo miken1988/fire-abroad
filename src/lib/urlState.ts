@@ -7,6 +7,7 @@ export function encodeStateToURL(inputs: UserInputs): string {
   params.set('ret', inputs.targetRetirementAge.toString());
   params.set('from', inputs.currentCountry);
   params.set('to', inputs.targetCountry);
+  if (inputs.usState) params.set('state', inputs.usState);
   params.set('pv', inputs.portfolioValue.toString());
   params.set('pc', inputs.portfolioCurrency);
   params.set('spend', inputs.annualSpending.toString());
@@ -42,6 +43,7 @@ export function decodeStateFromURL(params: URLSearchParams, defaults: UserInputs
   if (params.get('ret')) inputs.targetRetirementAge = parseInt(params.get('ret')!);
   if (params.get('from')) inputs.currentCountry = params.get('from')!;
   if (params.get('to')) inputs.targetCountry = params.get('to')!;
+  if (params.get('state')) inputs.usState = params.get('state')!;
   if (params.get('pv')) inputs.portfolioValue = parseFloat(params.get('pv')!);
   if (params.get('pc')) {
     inputs.portfolioCurrency = params.get('pc')!;
