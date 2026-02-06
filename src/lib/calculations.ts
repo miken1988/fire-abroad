@@ -48,10 +48,15 @@ export interface UserInputs {
   
   annualSavings: number;
   
-  // State pension inputs
+  // Origin country pension (from current/leaving country - e.g., US Social Security)
   expectStatePension: boolean;
   statePensionAmount: number;  // Annual amount in current country currency
   statePensionAge: number;     // Age when pension starts
+  
+  // Destination country pension (from retirement country - e.g., Irish State Pension)
+  expectDestinationPension?: boolean;
+  destinationPensionAmount?: number;  // Annual amount in target country currency
+  destinationPensionAge?: number;     // Age when pension starts
   
   expectedReturn: number;
   inflationRate: number;
@@ -189,16 +194,28 @@ export function calculateFIRE(inputs: UserInputs, targetCountryCode: string): FI
     country.currency
   );
   
-  // Convert pension to local currency if applicable
-  const pensionAmountLocal = inputs.expectStatePension 
+  // Convert origin pension (from current/leaving country) to local currency
+  const originPensionAmountLocal = inputs.expectStatePension 
     ? convertCurrency(
         inputs.statePensionAmount || 0,
-        inputs.portfolioCurrency,
+        countries[inputs.currentCountry]?.currency || inputs.portfolioCurrency,
         country.currency
       )
     : 0;
+  const originPensionStartAge = inputs.statePensionAge || 67;
   
-  const pensionStartAge = inputs.statePensionAge || 67;
+  // Destination pension (from retirement country) - already in target currency
+  const destinationPensionAmountLocal = inputs.expectDestinationPension
+    ? (inputs.destinationPensionAmount || 0)
+    : 0;
+  const destinationPensionStartAge = inputs.destinationPensionAge || 66;
+  
+  // Combined pension info for display (we'll track both separately in projections)
+  const pensionStartAge = Math.min(
+    inputs.expectStatePension ? originPensionStartAge : 999,
+    inputs.expectDestinationPension ? destinationPensionStartAge : 999
+  );
+  const pensionAmountLocal = originPensionAmountLocal + destinationPensionAmountLocal;
   
   // Pass US state for state tax calculation if applicable
   const usState = targetCountryCode === 'US' ? inputs.usState : undefined;
@@ -282,12 +299,22 @@ export function calculateFIRE(inputs: UserInputs, targetCountryCode: string): FI
     // No savings if retired OR if user indicated they want to retire now
     const savingsThisYear = (isRetired || retiringNow) ? 0 : annualSavingsLocal;
     
-    // Pension income kicks in at pension age (also inflates over time)
-    const hasPension = inputs.expectStatePension && age >= pensionStartAge;
-    const yearsSincePension = hasPension ? age - pensionStartAge : 0;
-    const pensionIncome = hasPension 
-      ? pensionAmountLocal * Math.pow(1 + inflationRate, yearsSincePension) 
+    // Origin pension (from leaving country) kicks in at its age
+    const hasOriginPension = inputs.expectStatePension && age >= originPensionStartAge;
+    const yearsSinceOriginPension = hasOriginPension ? age - originPensionStartAge : 0;
+    const originPensionIncome = hasOriginPension 
+      ? originPensionAmountLocal * Math.pow(1 + inflationRate, yearsSinceOriginPension) 
       : 0;
+    
+    // Destination pension (from retirement country) kicks in at its age
+    const hasDestinationPension = inputs.expectDestinationPension && age >= destinationPensionStartAge;
+    const yearsSinceDestPension = hasDestinationPension ? age - destinationPensionStartAge : 0;
+    const destinationPensionIncome = hasDestinationPension
+      ? destinationPensionAmountLocal * Math.pow(1 + inflationRate, yearsSinceDestPension)
+      : 0;
+    
+    // Total pension income
+    const pensionIncome = originPensionIncome + destinationPensionIncome;
     
     let withdrawal = 0;
     let taxPaid = 0;
@@ -315,7 +342,7 @@ export function calculateFIRE(inputs: UserInputs, targetCountryCode: string): FI
       taxPaid,
       portfolioEnd,
       isRetired,
-      hasPension
+      hasPension: !!(hasOriginPension || hasDestinationPension)
     });
     
     currentPortfolio = portfolioEnd;

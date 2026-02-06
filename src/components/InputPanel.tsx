@@ -520,6 +520,7 @@ export function InputPanel({ inputs, onChange }: InputPanelProps) {
   const targetCountry = countries[inputs.targetCountry];
   const isSameCountry = inputs.currentCountry === inputs.targetCountry;
   const statePension = getStatePension(inputs.currentCountry);
+  const destinationPension = getStatePension(inputs.targetCountry);
 
   const handleChange = (field: keyof UserInputs, value: any) => {
     const newInputs = { ...inputs, [field]: value };
@@ -533,6 +534,15 @@ export function InputPanel({ inputs, onChange }: InputPanelProps) {
       if (newPension) {
         newInputs.statePensionAge = newPension.eligibilityAge;
         newInputs.statePensionAmount = newPension.averageAnnualBenefit;
+      }
+    }
+    
+    // Update destination pension defaults when target country changes
+    if (field === 'targetCountry') {
+      const newDestPension = getStatePension(value);
+      if (newDestPension) {
+        newInputs.destinationPensionAge = newDestPension.eligibilityAge;
+        newInputs.destinationPensionAmount = newDestPension.averageAnnualBenefit;
       }
     }
     
@@ -592,6 +602,8 @@ export function InputPanel({ inputs, onChange }: InputPanelProps) {
   const annualSavingsInput = useNumericInput(inputs.annualSavings, (v) => handleChange('annualSavings', v), { fallback: 0 });
   const pensionAgeInput = useNumericInput(inputs.statePensionAge || (statePension?.eligibilityAge ?? 67), (v) => handleChange('statePensionAge', v), { fallback: 67, integer: true });
   const pensionAmountInput = useNumericInput(inputs.statePensionAmount || (statePension?.averageAnnualBenefit ?? 0), (v) => handleChange('statePensionAmount', v), { fallback: 0 });
+  const destPensionAgeInput = useNumericInput(inputs.destinationPensionAge || (destinationPension?.eligibilityAge ?? 66), (v) => handleChange('destinationPensionAge', v), { fallback: 66, integer: true });
+  const destPensionAmountInput = useNumericInput(inputs.destinationPensionAmount || (destinationPension?.averageAnnualBenefit ?? 0), (v) => handleChange('destinationPensionAmount', v), { fallback: 0 });
 
   const getAccountValue = (accountId: string): number => {
     if (accountId.includes('pension') || accountId.includes('traditional') || accountId.includes('401k') || accountId.includes('ira') || accountId.includes('rrsp') || accountId.includes('super') || accountId.includes('per') || accountId.includes('pillar') || accountId.includes('cpf') || accountId.includes('afore')) {
@@ -892,14 +904,17 @@ export function InputPanel({ inputs, onChange }: InputPanelProps) {
         </div>
       </section>
 
-      {/* State Pension Section */}
+      {/* Government Pensions Section */}
       <section>
-        <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">State Pension</h3>
+        <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">Government Pensions</h3>
+        
+        {/* Origin Country Pension (from leaving country) */}
         {statePension ? (
-          <div className="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-3 sm:p-4">
-            <div className="flex items-center justify-between mb-3">
+          <div className="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-3 sm:p-4 mb-3">
+            <div className="flex items-center justify-between mb-2">
               <label className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
                 🏛️ {statePension.name}
+                <span className="text-[10px] text-gray-500 dark:text-gray-400">({currentCountry?.name})</span>
                 <Tooltip text={statePension.notes} />
               </label>
               <label className="relative inline-flex items-center cursor-pointer">
@@ -965,13 +980,98 @@ export function InputPanel({ inputs, onChange }: InputPanelProps) {
             )}
           </div>
         ) : (
+          <div className="bg-gray-50 dark:bg-slate-800/50 rounded-lg p-3 sm:p-4 mb-3">
+            <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400">
+              <span className="text-lg">🏛️</span>
+              <div>
+                <p className="text-xs sm:text-sm font-medium">No pension data for {currentCountry?.name}</p>
+                <p className="text-[10px] sm:text-xs text-gray-400 dark:text-gray-500">
+                  Data may not be available or country may not have a public pension system.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+        
+        {/* Destination Country Pension (only show if different from origin) */}
+        {!isSameCountry && destinationPension && (
+          <div className="bg-green-50 dark:bg-green-900/30 rounded-lg p-3 sm:p-4">
+            <div className="flex items-center justify-between mb-2">
+              <label className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                🏛️ {destinationPension.name}
+                <span className="text-[10px] text-gray-500 dark:text-gray-400">({targetCountry?.name})</span>
+                <Tooltip text={`${destinationPension.notes} You may be eligible if you're a citizen or have worked/contributed in ${targetCountry?.name}.`} />
+              </label>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={inputs.expectDestinationPension || false}
+                  onChange={(e) => handleChange('expectDestinationPension', e.target.checked)}
+                  className="sr-only peer"
+                />
+                <div className="w-9 h-5 bg-gray-300 dark:bg-slate-600 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-green-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-green-600"></div>
+              </label>
+            </div>
+            
+            {inputs.expectDestinationPension && (
+              <div className="space-y-3 mt-3 pt-3 border-t border-green-100 dark:border-green-800">
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">Start Age</label>
+                    <input
+                      type="number"
+                      value={destPensionAgeInput.value}
+                      onChange={destPensionAgeInput.onChange}
+                      onFocus={destPensionAgeInput.onFocus}
+                      onBlur={destPensionAgeInput.onBlur}
+                      className="w-full px-2 py-1.5 text-sm border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-white dark:bg-slate-800 text-gray-900 dark:text-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">Annual Amount</label>
+                    <div className="flex">
+                      <span className="inline-flex items-center px-2 text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-slate-700 border border-r-0 border-gray-300 dark:border-slate-600 rounded-l-lg">
+                        {targetCountry?.currencySymbol}
+                      </span>
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        value={destPensionAmountInput.value}
+                        onChange={destPensionAmountInput.onChange}
+                        onFocus={destPensionAmountInput.onFocus}
+                        onBlur={destPensionAmountInput.onBlur}
+                        className="flex-1 min-w-0 px-2 py-1.5 text-sm border border-gray-300 dark:border-slate-600 rounded-r-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-white dark:bg-slate-800 text-gray-900 dark:text-white"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <p className="text-[10px] text-green-600 dark:text-green-400">
+                  💡 Average: {formatCurrency(destinationPension.averageAnnualBenefit, destinationPension.currency)}/yr • 
+                  Max: {formatCurrency(destinationPension.maxAnnualBenefit, destinationPension.currency)}/yr • 
+                  Eligible at {destinationPension.eligibilityAge}
+                </p>
+                <p className="text-[10px] text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/30 p-2 rounded">
+                  ⚠️ Eligibility depends on citizenship, residency, or contribution history. Verify with official sources.
+                </p>
+              </div>
+            )}
+            
+            {!inputs.expectDestinationPension && (
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                If you're a {targetCountry?.name} citizen or have contribution history, you may be eligible for {formatCurrency(destinationPension.averageAnnualBenefit, destinationPension.currency)}/yr at age {destinationPension.eligibilityAge}
+              </p>
+            )}
+          </div>
+        )}
+        
+        {!isSameCountry && !destinationPension && (
           <div className="bg-gray-50 dark:bg-slate-800/50 rounded-lg p-3 sm:p-4">
             <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400">
               <span className="text-lg">🏛️</span>
               <div>
-                <p className="text-xs sm:text-sm font-medium">No state pension data available</p>
+                <p className="text-xs sm:text-sm font-medium">No pension data for {targetCountry?.name}</p>
                 <p className="text-[10px] sm:text-xs text-gray-400 dark:text-gray-500">
-                  {currentCountry?.name} may not have a public pension system, or data is not yet available.
+                  Data may not be available or country may not have a public pension system.
                 </p>
               </div>
             </div>
