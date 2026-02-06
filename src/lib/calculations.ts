@@ -167,11 +167,21 @@ export function calculateFIRE(inputs: UserInputs, targetCountryCode: string): FI
     country.currency
   );
   
-  const annualSpendingLocal = convertCurrency(
+  // Get cost of living adjustment
+  // If moving from US ($120K) to Mexico (COL 42%), you only need ~$50K for same lifestyle
+  const currentCountry = countries[inputs.currentCountry];
+  const currentCOL = currentCountry?.costOfLiving?.index || 100;
+  const targetCOL = country.costOfLiving?.index || 100;
+  const colAdjustment = targetCOL / currentCOL;
+  
+  // Convert spending to target currency AND adjust for cost of living
+  const annualSpendingConverted = convertCurrency(
     inputs.annualSpending,
     inputs.spendingCurrency,
     country.currency
   );
+  // Apply COL adjustment - if target is cheaper, you need less money
+  const annualSpendingLocal = annualSpendingConverted * colAdjustment;
   
   const annualSavingsLocal = convertCurrency(
     inputs.annualSavings || 0,
