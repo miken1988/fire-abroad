@@ -168,6 +168,7 @@ export function ResultsPanel({
           country2Code={country2Code}
           currentSpending={inputs.annualSpending}
           safeWithdrawalRate={inputs.safeWithdrawalRate}
+          usState={inputs.usState}
         />
       )}
 

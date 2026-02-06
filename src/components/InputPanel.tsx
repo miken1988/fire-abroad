@@ -3,8 +3,9 @@
 import { UserInputs } from '@/lib/calculations';
 import { countries, countryAccountTypes, crossBorderTreatment } from '@/data/countries';
 import { getStatePension } from '@/data/statePensions';
+import { usStates, USState } from '@/data/usStateTaxes';
 import { formatCurrency } from '@/lib/formatters';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 
 /**
  * Format number with commas (e.g., 5000000 -> "5,000,000")
@@ -330,6 +331,131 @@ function OtherAssetField({
   );
 }
 
+/**
+ * US State Selector with autocomplete
+ */
+function USStateSelector({ value, onChange }: { value: string; onChange: (state: string) => void }) {
+  const [query, setQuery] = useState('');
+  const [isOpen, setIsOpen] = useState(false);
+  const [filteredStates, setFilteredStates] = useState<USState[]>([]);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  
+  const selectedState = usStates.find(s => s.code === value);
+  
+  useEffect(() => {
+    if (query.length > 0) {
+      const q = query.toLowerCase();
+      const filtered = usStates.filter(s => 
+        s.name.toLowerCase().includes(q) || 
+        s.code.toLowerCase().includes(q)
+      ).slice(0, 8);
+      setFilteredStates(filtered);
+      setIsOpen(filtered.length > 0);
+    } else {
+      setFilteredStates([]);
+      setIsOpen(false);
+    }
+  }, [query]);
+  
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node) &&
+          inputRef.current && !inputRef.current.contains(e.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+  
+  const handleSelect = (state: USState) => {
+    onChange(state.code);
+    setQuery('');
+    setIsOpen(false);
+  };
+  
+  const handleClear = () => {
+    onChange('');
+    setQuery('');
+  };
+  
+  const formatTaxRate = (rate: number) => {
+    if (rate === 0) return 'No tax';
+    return `${(rate * 100).toFixed(1)}%`;
+  };
+
+  return (
+    <div className="relative">
+      <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+        🇺🇸 US State (for state taxes)
+      </label>
+      
+      {selectedState ? (
+        <div className="flex items-center justify-between p-2 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg">
+          <div>
+            <span className="font-medium text-sm text-gray-900 dark:text-white">{selectedState.name}</span>
+            <span className="text-xs text-gray-500 dark:text-gray-400 ml-2">
+              {selectedState.hasNoIncomeTax ? (
+                <span className="text-green-600 dark:text-green-400">✓ No state income tax</span>
+              ) : (
+                <span>Top rate: {formatTaxRate(selectedState.incomeTaxRate)}</span>
+              )}
+            </span>
+          </div>
+          <button
+            onClick={handleClear}
+            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-sm"
+          >
+            ✕
+          </button>
+        </div>
+      ) : (
+        <div className="relative">
+          <input
+            ref={inputRef}
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onFocus={() => query.length > 0 && setIsOpen(true)}
+            placeholder="Type state name (e.g., California, TX)"
+            className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-800 text-gray-900 dark:text-white"
+          />
+          
+          {isOpen && (
+            <div 
+              ref={dropdownRef}
+              className="absolute z-50 w-full mt-1 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg shadow-lg max-h-60 overflow-y-auto"
+            >
+              {filteredStates.map(state => (
+                <button
+                  key={state.code}
+                  onClick={() => handleSelect(state)}
+                  className="w-full px-3 py-2 text-left hover:bg-gray-100 dark:hover:bg-slate-700 flex items-center justify-between"
+                >
+                  <span className="text-sm text-gray-900 dark:text-white">
+                    {state.name} <span className="text-gray-400">({state.code})</span>
+                  </span>
+                  <span className={`text-xs ${state.hasNoIncomeTax ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'}`}>
+                    {state.hasNoIncomeTax ? '✓ No tax' : formatTaxRate(state.incomeTaxRate)}
+                  </span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+      
+      {!selectedState && (
+        <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-1">
+          State taxes vary from 0% (FL, TX, WA) to 13.3% (CA)
+        </p>
+      )}
+    </div>
+  );
+}
+
 interface InputPanelProps {
   inputs: UserInputs;
   onChange: (inputs: UserInputs) => void;
@@ -494,6 +620,16 @@ export function InputPanel({ inputs, onChange }: InputPanelProps) {
             </select>
           </div>
         </div>
+        
+        {/* US State Selector - only show when US is selected */}
+        {(inputs.currentCountry === 'US' || inputs.targetCountry === 'US') && (
+          <div className="mt-3">
+            <USStateSelector 
+              value={inputs.usState || ''} 
+              onChange={(state) => handleChange('usState', state)}
+            />
+          </div>
+        )}
       </section>
 
       {/* Portfolio Section */}

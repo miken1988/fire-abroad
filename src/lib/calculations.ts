@@ -7,6 +7,7 @@ export interface UserInputs {
   targetRetirementAge: number;
   currentCountry: string;
   targetCountry: string;
+  usState?: string; // US state code for state tax calculations
   
   portfolioValue: number;
   portfolioCurrency: string;
@@ -181,7 +182,9 @@ export function calculateFIRE(inputs: UserInputs, targetCountryCode: string): FI
   
   const pensionStartAge = inputs.statePensionAge || 67;
   
-  const grossWithdrawalNeeded = annualSpendingLocal / (1 - estimateEffectiveTaxRate(annualSpendingLocal, country));
+  // Pass US state for state tax calculation if applicable
+  const usState = targetCountryCode === 'US' ? inputs.usState : undefined;
+  const grossWithdrawalNeeded = annualSpendingLocal / (1 - estimateEffectiveTaxRate(annualSpendingLocal, country, usState));
   
   // FIRE number is reduced by the present value of expected pension
   // For simplicity, we'll calculate FIRE number without pension, 
@@ -280,7 +283,7 @@ export function calculateFIRE(inputs: UserInputs, targetCountryCode: string): FI
     }
   }
   
-  const effectiveTaxRate = estimateEffectiveTaxRate(grossWithdrawalNeeded, country);
+  const effectiveTaxRate = estimateEffectiveTaxRate(grossWithdrawalNeeded, country, usState);
   
   const warnings: string[] = [];
   const depletionYear = projections.find(p => p.portfolioEnd <= 0 && p.isRetired);
@@ -318,9 +321,28 @@ export function calculateFIRE(inputs: UserInputs, targetCountryCode: string): FI
   };
 }
 
-function estimateEffectiveTaxRate(income: number, country: typeof countries[string]): number {
+function estimateEffectiveTaxRate(income: number, country: typeof countries[string], usStateCode?: string): number {
   if (income <= 0) return 0;
-  const tax = calculateTax(income, country.incomeTax.brackets, country);
+  let tax = calculateTax(income, country.incomeTax.brackets, country);
+  
+  // Add US state tax if applicable
+  if (country.code === 'US' && usStateCode) {
+    // Dynamic import would be better but for simplicity, we'll use a lookup
+    const stateTaxRates: Record<string, number> = {
+      'AL': 0.05, 'AK': 0, 'AZ': 0.025, 'AR': 0.047, 'CA': 0.133, 'CO': 0.044,
+      'CT': 0.0699, 'DE': 0.066, 'FL': 0, 'GA': 0.0549, 'HI': 0.11, 'ID': 0.058,
+      'IL': 0.0495, 'IN': 0.0315, 'IA': 0.057, 'KS': 0.057, 'KY': 0.04, 'LA': 0.0425,
+      'ME': 0.0715, 'MD': 0.0575, 'MA': 0.09, 'MI': 0.0425, 'MN': 0.0985, 'MS': 0.05,
+      'MO': 0.048, 'MT': 0.059, 'NE': 0.0584, 'NV': 0, 'NH': 0.03, 'NJ': 0.1075,
+      'NM': 0.059, 'NY': 0.109, 'NC': 0.0475, 'ND': 0.029, 'OH': 0.0399, 'OK': 0.0475,
+      'OR': 0.099, 'PA': 0.0307, 'RI': 0.0599, 'SC': 0.064, 'SD': 0, 'TN': 0,
+      'TX': 0, 'UT': 0.0465, 'VT': 0.0875, 'VA': 0.0575, 'WA': 0, 'WV': 0.055,
+      'WI': 0.0765, 'WY': 0, 'DC': 0.105
+    };
+    const stateRate = stateTaxRates[usStateCode] || 0;
+    tax += income * stateRate;
+  }
+  
   return tax / income;
 }
 
@@ -370,7 +392,8 @@ export function calculateSustainableSpending(
   portfolioCurrency: string,
   targetCountryCode: string,
   safeWithdrawalRate: number = 0.04,
-  currentSpending?: number
+  currentSpending?: number,
+  usState?: string
 ): ReverseCalculationResult {
   const country = countries[targetCountryCode];
   if (!country) {
@@ -383,8 +406,9 @@ export function calculateSustainableSpending(
   // Calculate gross withdrawal using SWR
   const sustainableSpendingGross = portfolioLocal * safeWithdrawalRate;
   
-  // Estimate tax
-  const effectiveTaxRate = estimateEffectiveTaxRate(sustainableSpendingGross, country);
+  // Estimate tax (include state tax for US)
+  const stateCode = targetCountryCode === 'US' ? usState : undefined;
+  const effectiveTaxRate = estimateEffectiveTaxRate(sustainableSpendingGross, country, stateCode);
   const sustainableSpendingNet = sustainableSpendingGross * (1 - effectiveTaxRate);
   
   // Monthly net

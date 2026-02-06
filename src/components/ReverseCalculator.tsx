@@ -12,6 +12,7 @@ interface ReverseCalculatorProps {
   country2Code: string;
   currentSpending?: number;
   safeWithdrawalRate: number;
+  usState?: string;
 }
 
 export function ReverseCalculator({
@@ -20,7 +21,8 @@ export function ReverseCalculator({
   country1Code,
   country2Code,
   currentSpending,
-  safeWithdrawalRate
+  safeWithdrawalRate,
+  usState
 }: ReverseCalculatorProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   
@@ -35,12 +37,13 @@ export function ReverseCalculator({
         portfolioCurrency,
         country1Code,
         safeWithdrawalRate,
-        currentSpending
+        currentSpending,
+        country1Code === 'US' ? usState : undefined
       );
     } catch {
       return null;
     }
-  }, [portfolioValue, portfolioCurrency, country1Code, safeWithdrawalRate, currentSpending]);
+  }, [portfolioValue, portfolioCurrency, country1Code, safeWithdrawalRate, currentSpending, usState]);
   
   const result2 = useMemo(() => {
     if (isSameCountry) return null;
@@ -50,12 +53,13 @@ export function ReverseCalculator({
         portfolioCurrency,
         country2Code,
         safeWithdrawalRate,
-        currentSpending
+        currentSpending,
+        country2Code === 'US' ? usState : undefined
       );
     } catch {
       return null;
     }
-  }, [portfolioValue, portfolioCurrency, country2Code, safeWithdrawalRate, currentSpending, isSameCountry]);
+  }, [portfolioValue, portfolioCurrency, country2Code, safeWithdrawalRate, currentSpending, isSameCountry, usState]);
 
   const getLuxuryEmoji = (level: string) => {
     switch (level) {
