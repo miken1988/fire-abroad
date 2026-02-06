@@ -81,7 +81,7 @@ export interface Country {
   currency: string;
   currencySymbol: string;
   flag: string;
-  capitalGains: { shortTerm: TaxBracket[]; longTerm: TaxBracket[]; longTermThresholdMonths: number; annualExemption: number; hasDeemDisposal: boolean; additionalTaxes?: { name: string; rate: number; threshold: number; description: string }[] };
+  capitalGains: { shortTerm: TaxBracket[]; longTerm: TaxBracket[]; longTermThresholdMonths: number; annualExemption: number; hasDeemDisposal: boolean; deemDisposalYears?: number; deemDisposalRate?: number; additionalTaxes?: { name: string; rate: number; threshold: number; description: string }[] };
   incomeTax: { brackets: TaxBracket[]; personalAllowance: number; personalAllowancePhaseout?: { startIncome: number; reductionRate: number } };
   dividendTax?: { brackets: TaxBracket[]; allowance: number };
   socialTaxes?: { name: string; employeeRate: number; selfEmployedRate: number; threshold: number; cap?: number; appliesToInvestmentIncome: boolean; appliesToPensions: boolean };

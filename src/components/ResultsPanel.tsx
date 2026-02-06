@@ -278,7 +278,7 @@ function CountryCard({
         <div>
           <span className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">FIRE Number</span>
           <p className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white">
-            {formatCurrency(result.fireNumber, country?.currency || 'USD', true)}
+            {formatCurrency(result.fireNumber, country?.currency || 'USD')}
           </p>
           <p className="text-[10px] sm:text-xs text-gray-400 dark:text-gray-500">
             {formatCurrency(result.fireNumber, country?.currency || 'USD')}

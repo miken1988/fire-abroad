@@ -334,7 +334,7 @@ export function InputPanel({ inputs, onChange }: InputPanelProps) {
     onChange(newInputs);
   };
 
-  const handleAccountChange = (accountKey: string, value: number) => {
+  const handleAccountChange = (accountKey: string, value: number | string) => {
     onChange({
       ...inputs,
       accounts: { ...inputs.accounts, [accountKey]: value },

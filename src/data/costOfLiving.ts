@@ -250,16 +250,28 @@ export function getCostOfLivingComparison(
   cheaper: boolean;
   fromIndex: number;
   toIndex: number;
+  overall: number;
+  housing: number;
+  groceries: number;
+  restaurants: number;
+  transportation: number;
+  healthcare: number;
 } {
-  const fromCOL = costOfLiving[fromCountry]?.index || 100;
-  const toCOL = costOfLiving[toCountry]?.index || 100;
+  const fromCOL = costOfLiving[fromCountry] || { index: 100, rent: 100, groceries: 100, restaurants: 100, transportation: 100, healthcare: 100 };
+  const toCOL = costOfLiving[toCountry] || { index: 100, rent: 100, groceries: 100, restaurants: 100, transportation: 100, healthcare: 100 };
   
-  const percentageDiff = ((toCOL - fromCOL) / fromCOL) * 100;
+  const percentageDiff = ((toCOL.index - fromCOL.index) / fromCOL.index) * 100;
   
   return {
     percentageDiff,
-    cheaper: toCOL < fromCOL,
-    fromIndex: fromCOL,
-    toIndex: toCOL,
+    cheaper: toCOL.index < fromCOL.index,
+    fromIndex: fromCOL.index,
+    toIndex: toCOL.index,
+    overall: toCOL.index / fromCOL.index,
+    housing: toCOL.rent / fromCOL.rent,
+    groceries: toCOL.groceries / fromCOL.groceries,
+    restaurants: toCOL.restaurants / fromCOL.restaurants,
+    transportation: toCOL.transportation / fromCOL.transportation,
+    healthcare: toCOL.healthcare / fromCOL.healthcare,
   };
 }

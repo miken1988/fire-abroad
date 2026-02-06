@@ -120,29 +120,21 @@ function getCountrySpecificNotes(countryCode: string, inputs: UserInputs): strin
   
   if (!country) return notes;
   
-  if (country.capitalGains.crypto !== undefined && inputs.accounts?.crypto > 0) {
-    if (country.capitalGains.crypto === 0) {
-      notes.push(`${country.name} has NO capital gains tax on crypto!`);
-    } else {
-      const rate = country.capitalGains.crypto * 100;
-      notes.push(`Crypto is subject to ${rate}% capital gains tax in ${country.name}.`);
-    }
+  // Check if country has favorable capital gains treatment
+  if (country.capitalGains.longTerm.length > 0 && country.capitalGains.longTerm[0].rate === 0) {
+    notes.push(`${country.name} has 0% capital gains tax on the first bracket!`);
   }
   
-  if (country.capitalGains.longTerm === 0) {
-    notes.push(`${country.name} has NO capital gains tax on private investments!`);
-  }
-  
-  if (country.specialRegimes && country.specialRegimes.length > 0) {
-    country.specialRegimes.forEach(regime => {
-      notes.push(`${regime.name}: ${regime.description}`);
+  // Check for special expat regimes
+  if (country.expatRules?.specialRegimes && country.expatRules.specialRegimes.length > 0) {
+    country.expatRules.specialRegimes.forEach((regime: { name: string; benefits: string }) => {
+      notes.push(`${regime.name}: ${regime.benefits}`);
     });
   }
   
-  if (country.taxTreaties) {
-    if (inputs.currentCountry === 'US' && country.taxTreaties.us) {
-      notes.push(`US-${country.name} tax treaty may reduce withholding on dividends/interest.`);
-    }
+  // Check for tax treaty notes
+  if (country.expatRules?.taxTreatyNotes) {
+    notes.push(country.expatRules.taxTreatyNotes);
   }
   
   return notes;
