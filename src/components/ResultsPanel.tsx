@@ -316,14 +316,14 @@ function CountryCard({
     ? 'bg-blue-500' 
     : 'bg-emerald-500';
   
-  // Card styling based on status - white bg in light mode, subtle tint in dark
+  // Card styling based on status - clean card with left accent border
   const cardStyles = isWinner
-    ? 'bg-white dark:bg-green-900/20 border-2 border-green-400 dark:border-green-500'
+    ? 'bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 border-l-4 border-l-green-500'
     : isOnTarget
-    ? 'bg-white dark:bg-green-900/20 border-2 border-green-400 dark:border-green-500'
+    ? 'bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 border-l-4 border-l-green-500'
     : isBehindTarget
-    ? 'bg-white dark:bg-amber-900/20 border-2 border-amber-400 dark:border-amber-500'
-    : 'bg-white dark:bg-red-900/20 border-2 border-red-400 dark:border-red-500';
+    ? 'bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 border-l-4 border-l-amber-500'
+    : 'bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 border-l-4 border-l-red-500';
   
   const badgeStyles = isWinner
     ? 'bg-green-500 text-white'
@@ -344,12 +344,9 @@ function CountryCard({
     : '✗ Cannot FIRE';
 
   return (
-    <div className={`relative rounded-xl p-3 sm:p-4 ${cardStyles} overflow-hidden`}>
-      {/* Color indicator bar */}
-      <div className={`absolute top-0 left-0 right-0 h-1 ${colorBar}`} />
-      
+    <div className={`relative rounded-xl p-3 sm:p-4 ${cardStyles}`}>
       {/* Header with Badge */}
-      <div className="flex items-start justify-between mb-3 pt-1">
+      <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-1.5">
           <span className="text-base sm:text-lg">{country?.flag}</span>
           <h3 className="text-xs sm:text-sm font-semibold text-gray-900 dark:text-white truncate">{country?.name}</h3>
