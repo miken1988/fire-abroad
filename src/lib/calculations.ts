@@ -125,16 +125,22 @@ function getCountrySpecificNotes(countryCode: string, inputs: UserInputs): strin
     notes.push(`${country.name} has 0% capital gains tax on the first bracket!`);
   }
   
-  // Check for special expat regimes
-  if (country.expatRules?.specialRegimes && country.expatRules.specialRegimes.length > 0) {
+  // Check for special expat regimes (only for target country, not current)
+  if (countryCode === inputs.targetCountry && country.expatRules?.specialRegimes && country.expatRules.specialRegimes.length > 0) {
     country.expatRules.specialRegimes.forEach((regime: { name: string; benefits: string }) => {
       notes.push(`${regime.name}: ${regime.benefits}`);
     });
   }
   
-  // Check for tax treaty notes
-  if (country.expatRules?.taxTreatyNotes) {
-    notes.push(country.expatRules.taxTreatyNotes);
+  // Check for tax treaty notes - only show if relevant to the country pair
+  if (countryCode === inputs.targetCountry && country.expatRules?.taxTreatyNotes) {
+    const treatyNotes = country.expatRules.taxTreatyNotes;
+    // Only show treaty notes if they mention the current country
+    const currentCountryName = countries[inputs.currentCountry]?.name || '';
+    if (treatyNotes.toLowerCase().includes(inputs.currentCountry.toLowerCase()) || 
+        treatyNotes.toLowerCase().includes(currentCountryName.toLowerCase())) {
+      notes.push(treatyNotes);
+    }
   }
   
   return notes;
