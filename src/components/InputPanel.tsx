@@ -94,6 +94,9 @@ function MoneySlider({
   tooltip,
   warning,
   unallocated = 0,
+  returnRate,
+  onReturnRateChange,
+  defaultReturnRate,
 }: {
   value: number;
   onChange: (val: number) => void;
@@ -104,10 +107,14 @@ function MoneySlider({
   tooltip?: string;
   warning?: string | null;
   unallocated?: number;
+  returnRate?: number;
+  onReturnRateChange?: (rate: number) => void;
+  defaultReturnRate?: number;
 }) {
   const [isEditing, setIsEditing] = useState(false);
   const [textValue, setTextValue] = useState(String(value));
   const [isFocused, setIsFocused] = useState(false);
+  const [showReturnSlider, setShowReturnSlider] = useState(false);
   const step = getSmartStep(max);
 
   const handleTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -190,6 +197,53 @@ function MoneySlider({
         onChange={(e) => onChange(parseFloat(e.target.value))}
         className="w-full h-2 bg-gray-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600"
       />
+      
+      {/* Return rate slider - only show if value > 0 and handler provided */}
+      {value > 0 && onReturnRateChange && (
+        <div className="mt-2">
+          {!showReturnSlider ? (
+            <button
+              type="button"
+              onClick={() => setShowReturnSlider(true)}
+              className="text-[10px] text-blue-600 dark:text-blue-400 hover:underline"
+            >
+              ⚙️ Adjust expected return ({((returnRate ?? defaultReturnRate ?? 0.07) * 100).toFixed(0)}%)
+            </button>
+          ) : (
+            <div className="bg-gray-50 dark:bg-slate-800/50 rounded p-2">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-[10px] text-gray-500 dark:text-gray-400">Expected Return</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-medium text-gray-700 dark:text-gray-300">
+                    {((returnRate ?? defaultReturnRate ?? 0.07) * 100).toFixed(0)}%
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setShowReturnSlider(false)}
+                    className="text-gray-400 hover:text-gray-600 text-[10px]"
+                  >
+                    ✕
+                  </button>
+                </div>
+              </div>
+              <input
+                type="range"
+                min="-0.05"
+                max="0.20"
+                step="0.01"
+                value={returnRate ?? defaultReturnRate ?? 0.07}
+                onChange={(e) => onReturnRateChange(parseFloat(e.target.value))}
+                className="w-full h-1.5 bg-gray-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600"
+              />
+              <div className="flex justify-between text-[9px] text-gray-400 mt-0.5">
+                <span>-5%</span>
+                <span>20%</span>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+      
       {warning && (
         <p className="text-[10px] sm:text-xs text-amber-600 dark:text-amber-400 mt-1 bg-amber-50 dark:bg-amber-900/30 p-1.5 sm:p-2 rounded">
           ⚠️ {warning}
@@ -501,6 +555,28 @@ export function InputPanel({ inputs, onChange }: InputPanelProps) {
     });
   };
 
+  const handleAssetReturnChange = (assetType: 'stocks' | 'property' | 'crypto' | 'cash', rate: number) => {
+    onChange({
+      ...inputs,
+      assetReturns: { 
+        ...inputs.assetReturns,
+        stocks: inputs.assetReturns?.stocks ?? inputs.expectedReturn,
+        property: inputs.assetReturns?.property ?? (inputs.inflationRate + 0.02),
+        crypto: inputs.assetReturns?.crypto ?? (inputs.expectedReturn + 0.03),
+        cash: inputs.assetReturns?.cash ?? (inputs.inflationRate * 0.5),
+        [assetType]: rate 
+      },
+    });
+  };
+
+  // Default asset returns (for display)
+  const defaultReturns = {
+    stocks: inputs.expectedReturn,
+    property: inputs.inflationRate + 0.02,
+    crypto: inputs.expectedReturn + 0.03,
+    cash: inputs.inflationRate * 0.5,
+  };
+
   const countryOptions = Object.values(countries).map(c => ({
     value: c.code,
     label: `${c.flag} ${c.name}`,
@@ -684,6 +760,9 @@ export function InputPanel({ inputs, onChange }: InputPanelProps) {
                     tooltip={account.description}
                     warning={warning}
                     unallocated={unallocated}
+                    returnRate={inputs.assetReturns?.stocks}
+                    defaultReturnRate={defaultReturns.stocks}
+                    onReturnRateChange={(r) => handleAssetReturnChange('stocks', r)}
                   />
                 );
               })}
@@ -703,6 +782,9 @@ export function InputPanel({ inputs, onChange }: InputPanelProps) {
                 currency={inputs.portfolioCurrency}
                 tooltip="Cryptocurrency holdings (Bitcoin, Ethereum, etc.)"
                 unallocated={unallocated}
+                returnRate={inputs.assetReturns?.crypto}
+                defaultReturnRate={defaultReturns.crypto}
+                onReturnRateChange={(r) => handleAssetReturnChange('crypto', r)}
               />
               <MoneySlider
                 value={inputs.accounts?.cash || 0}
@@ -713,6 +795,9 @@ export function InputPanel({ inputs, onChange }: InputPanelProps) {
                 currency={inputs.portfolioCurrency}
                 tooltip="Cash and cash equivalents"
                 unallocated={unallocated}
+                returnRate={inputs.assetReturns?.cash}
+                defaultReturnRate={defaultReturns.cash}
+                onReturnRateChange={(r) => handleAssetReturnChange('cash', r)}
               />
               <MoneySlider
                 value={inputs.accounts?.property || 0}
@@ -723,6 +808,9 @@ export function InputPanel({ inputs, onChange }: InputPanelProps) {
                 currency={inputs.portfolioCurrency}
                 tooltip="Real estate equity (home value minus mortgage)"
                 unallocated={unallocated}
+                returnRate={inputs.assetReturns?.property}
+                defaultReturnRate={defaultReturns.property}
+                onReturnRateChange={(r) => handleAssetReturnChange('property', r)}
               />
               
               {/* Auto-calculating Other/Unallocated field */}
@@ -746,8 +834,8 @@ export function InputPanel({ inputs, onChange }: InputPanelProps) {
         <div className="space-y-4">
           <div>
             <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Annual Spending in Retirement
-              <Tooltip text="How much you plan to spend per year in retirement" />
+              Annual Spending (after tax)
+              <Tooltip text="Your target NET spending in retirement. We'll calculate the gross withdrawal needed to cover taxes." />
             </label>
             <div className="flex">
               <span className="inline-flex items-center px-2 sm:px-3 text-xs sm:text-sm text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-slate-700 border border-r-0 border-gray-300 dark:border-slate-600 rounded-l-lg">
@@ -763,6 +851,9 @@ export function InputPanel({ inputs, onChange }: InputPanelProps) {
                 className="flex-1 min-w-0 px-3 py-2 text-sm sm:text-base border border-gray-300 dark:border-slate-600 rounded-r-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-800 text-gray-900 dark:text-white"
               />
             </div>
+            <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-1">
+              💡 This is what you'll actually spend. Gross withdrawal will be higher to cover taxes.
+            </p>
           </div>
           <div>
             <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">

@@ -30,12 +30,20 @@ export interface UserInputs {
     otherLabel: string;
   };
   
+  // Asset-specific expected returns (nominal, before inflation)
+  assetReturns?: {
+    stocks: number;    // Default: expectedReturn (e.g., 0.07)
+    property: number;  // Default: inflation + 0.02
+    crypto: number;    // Default: expectedReturn + 0.03
+    cash: number;      // Default: inflation * 0.5
+  };
+  
   traditionalRetirementAccounts: number;
   rothAccounts: number;
   taxableAccounts: number;
   propertyEquity: number;
   
-  annualSpending: number;
+  annualSpending: number;  // NET spending (after taxes)
   spendingCurrency: string;
   
   annualSavings: number;
@@ -200,14 +208,18 @@ export function calculateFIRE(inputs: UserInputs, targetCountryCode: string): FI
   let yearsUntilFIRE = -1;
   let yearsSinceRetirement = 0;
   
-  // Asset-specific nominal returns (these are typical long-term averages)
-  // User's expectedReturn applies to stocks/equity portion
+  // Asset-specific nominal returns
+  // Use user-defined values if provided, otherwise use defaults
+  const defaultStocksReturn = inputs.expectedReturn;
+  const defaultPropertyReturn = inputs.inflationRate + 0.02;
+  const defaultCryptoReturn = inputs.expectedReturn + 0.03;
+  const defaultCashReturn = inputs.inflationRate * 0.5;
+  
   const assetReturns = {
-    stocks: inputs.expectedReturn,           // User-defined (default 7%)
-    property: inputs.inflationRate + 0.02,   // ~inflation + 2% real
-    crypto: inputs.expectedReturn + 0.03,    // Higher risk/return than stocks
-    cash: inputs.inflationRate * 0.5,        // Barely keeps up with inflation
-    bonds: inputs.inflationRate + 0.01,      // ~inflation + 1% real
+    stocks: inputs.assetReturns?.stocks ?? defaultStocksReturn,
+    property: inputs.assetReturns?.property ?? defaultPropertyReturn,
+    crypto: inputs.assetReturns?.crypto ?? defaultCryptoReturn,
+    cash: inputs.assetReturns?.cash ?? defaultCashReturn,
   };
   
   // Calculate asset allocation percentages from accounts
