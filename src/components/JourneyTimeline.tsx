@@ -11,6 +11,8 @@ interface JourneyTimelineProps {
   country1Code: string;
   country2Code?: string;
   retirementAge: number;
+  expectedReturn?: number;
+  inflationRate?: number;
 }
 
 export function JourneyTimeline({ 
@@ -18,7 +20,9 @@ export function JourneyTimeline({
   projections2, 
   country1Code, 
   country2Code,
-  retirementAge 
+  retirementAge,
+  expectedReturn = 0.07,
+  inflationRate = 0.03
 }: JourneyTimelineProps) {
   const [hoveredAge, setHoveredAge] = useState<number | null>(null);
   
@@ -232,7 +236,7 @@ export function JourneyTimeline({
 
       {/* Projection Note */}
       <p className="text-[10px] text-gray-400 dark:text-gray-500 text-center mt-2">
-        💡 Projection assumes {((projections1[0] as any)?.growth / (projections1[0]?.portfolioStart || 1) * 100).toFixed(0) || 7}% nominal return with inflation-adjusted withdrawals. 
+        💡 Projection assumes {((expectedReturn - inflationRate) * 100).toFixed(0)}% real return ({(expectedReturn * 100).toFixed(0)}% growth − {(inflationRate * 100).toFixed(0)}% inflation). 
         Actual results will vary with market conditions.
       </p>
     </div>

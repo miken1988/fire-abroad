@@ -181,6 +181,8 @@ export function Calculator() {
                 country1Code={inputs.currentCountry}
                 country2Code={!isSameCountry ? inputs.targetCountry : undefined}
                 retirementAge={inputs.targetRetirementAge}
+                expectedReturn={inputs.expectedReturn}
+                inflationRate={inputs.inflationRate}
               />
             </div>
           )}
@@ -195,6 +197,8 @@ export function Calculator() {
               country1Code={inputs.currentCountry}
               country2Code={!isSameCountry ? inputs.targetCountry : undefined}
               retirementAge={inputs.targetRetirementAge}
+              expectedReturn={inputs.expectedReturn}
+              inflationRate={inputs.inflationRate}
             />
           </div>
         )}
