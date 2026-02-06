@@ -316,14 +316,14 @@ function CountryCard({
     ? 'bg-blue-500' 
     : 'bg-emerald-500';
   
-  // Card styling based on status
+  // Card styling based on status - white bg in light mode, subtle tint in dark
   const cardStyles = isWinner
-    ? 'bg-green-50 dark:bg-green-900/20 border-2 border-green-400 dark:border-green-500'
+    ? 'bg-white dark:bg-green-900/20 border-2 border-green-400 dark:border-green-500'
     : isOnTarget
-    ? 'bg-green-50 dark:bg-green-900/20 border-2 border-green-400 dark:border-green-500'
+    ? 'bg-white dark:bg-green-900/20 border-2 border-green-400 dark:border-green-500'
     : isBehindTarget
-    ? 'bg-amber-50 dark:bg-amber-900/20 border-2 border-amber-400 dark:border-amber-500'
-    : 'bg-red-50 dark:bg-red-900/20 border-2 border-red-400 dark:border-red-500';
+    ? 'bg-white dark:bg-amber-900/20 border-2 border-amber-400 dark:border-amber-500'
+    : 'bg-white dark:bg-red-900/20 border-2 border-red-400 dark:border-red-500';
   
   const badgeStyles = isWinner
     ? 'bg-green-500 text-white'
