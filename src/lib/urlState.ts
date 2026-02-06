@@ -14,13 +14,22 @@ export function encodeStateToURL(inputs: UserInputs): string {
   params.set('roth', inputs.rothAccounts.toString());
   params.set('tax', inputs.taxableAccounts.toString());
   params.set('crypto', (inputs.accounts?.crypto || 0).toString());
+  params.set('cash', (inputs.accounts?.cash || 0).toString());
+  params.set('prop', (inputs.accounts?.property || 0).toString());
   if (inputs.annualSavings) params.set('save', inputs.annualSavings.toString());
   
-  // State pension params
+  // Origin country pension params
   if (inputs.expectStatePension) {
     params.set('pension', '1');
     params.set('pensionAmt', inputs.statePensionAmount.toString());
     params.set('pensionAge', inputs.statePensionAge.toString());
+  }
+  
+  // Destination country pension params
+  if (inputs.expectDestinationPension) {
+    params.set('destPension', '1');
+    params.set('destPensionAmt', (inputs.destinationPensionAmount || 0).toString());
+    params.set('destPensionAge', (inputs.destinationPensionAge || 66).toString());
   }
   
   return params.toString();
@@ -42,16 +51,30 @@ export function decodeStateFromURL(params: URLSearchParams, defaults: UserInputs
   if (params.get('trad')) inputs.traditionalRetirementAccounts = parseFloat(params.get('trad')!);
   if (params.get('roth')) inputs.rothAccounts = parseFloat(params.get('roth')!);
   if (params.get('tax')) inputs.taxableAccounts = parseFloat(params.get('tax')!);
-  if (params.get('crypto')) {
-    inputs.accounts = { ...inputs.accounts, crypto: parseFloat(params.get('crypto')!) };
+  
+  // Accounts (crypto, cash, property)
+  if (params.get('crypto') || params.get('cash') || params.get('prop')) {
+    inputs.accounts = { 
+      ...inputs.accounts, 
+      crypto: parseFloat(params.get('crypto') || '0'),
+      cash: parseFloat(params.get('cash') || '0'),
+      property: parseFloat(params.get('prop') || '0'),
+    };
   }
   if (params.get('save')) inputs.annualSavings = parseFloat(params.get('save')!);
   
-  // State pension params
+  // Origin country pension params
   if (params.get('pension') === '1') {
     inputs.expectStatePension = true;
     if (params.get('pensionAmt')) inputs.statePensionAmount = parseFloat(params.get('pensionAmt')!);
     if (params.get('pensionAge')) inputs.statePensionAge = parseInt(params.get('pensionAge')!);
+  }
+  
+  // Destination country pension params
+  if (params.get('destPension') === '1') {
+    inputs.expectDestinationPension = true;
+    if (params.get('destPensionAmt')) inputs.destinationPensionAmount = parseFloat(params.get('destPensionAmt')!);
+    if (params.get('destPensionAge')) inputs.destinationPensionAge = parseInt(params.get('destPensionAge')!);
   }
   
   return inputs;

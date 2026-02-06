@@ -294,11 +294,10 @@ function CountryCard({
 }) {
   const canFIRE = result.canRetire;
   
-  // Check if already financially independent (portfolio >= FIRE number)
-  const portfolioInFireCurrency = portfolioValue && portfolioCurrency && country?.currency
-    ? (portfolioCurrency === country.currency ? portfolioValue : portfolioValue * 0.85)
-    : portfolioValue || 0;
-  const alreadyFI = portfolioInFireCurrency >= result.fireNumber;
+  // Check if already financially independent using LIQUID assets only
+  // (Property is illiquid - can't withdraw from it annually)
+  const liquidInFireCurrency = result.liquidPortfolioValue || 0;
+  const alreadyFI = liquidInFireCurrency >= result.fireNumber;
   
   // Check if FIRE age is later than target
   const targetAge = targetRetirementAge || 50;
@@ -306,10 +305,11 @@ function CountryCard({
   const hitsTarget = canFIRE && yearsLate === 0;
   const missesTarget = canFIRE && yearsLate > 0;
   
-  // Determine card status
-  const isWinner = hitsTarget && isSoonerRetirement;
-  const isOnTarget = hitsTarget && !isSoonerRetirement;
-  const isBehindTarget = missesTarget;
+  // Determine card status - alreadyFI means hitsTarget
+  const effectivelyOnTarget = hitsTarget || alreadyFI;
+  const isWinner = effectivelyOnTarget && isSoonerRetirement;
+  const isOnTarget = effectivelyOnTarget && !isSoonerRetirement;
+  const isBehindTarget = missesTarget && !alreadyFI;
   
   // Color bar based on scheme
   const colorBar = colorScheme === 'blue' 
@@ -333,7 +333,9 @@ function CountryCard({
     ? 'bg-amber-500 text-white'
     : 'bg-red-500 text-white';
   
-  const badgeText = isWinner 
+  const badgeText = alreadyFI
+    ? '🎉 Already FI'
+    : isWinner 
     ? '🏆 Best Option' 
     : isOnTarget 
     ? '✓ On Target'
@@ -366,12 +368,36 @@ function CountryCard({
           </p>
         </div>
 
+        {/* Portfolio Breakdown - show if there's illiquid (property) */}
+        {result.illiquidPortfolioValue > 0 && (
+          <div className="bg-white/50 dark:bg-slate-800/50 rounded-lg p-2 -mx-1">
+            <span className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">Your Portfolio</span>
+            <div className="flex items-center justify-between mt-1">
+              <div>
+                <p className="text-xs sm:text-sm font-semibold text-gray-900 dark:text-white">
+                  {formatCurrency(result.liquidPortfolioValue, country?.currency || 'USD')}
+                </p>
+                <p className="text-[10px] text-gray-500 dark:text-gray-400">Liquid (withdrawable)</p>
+              </div>
+              <div className="text-right">
+                <p className="text-xs sm:text-sm font-semibold text-gray-600 dark:text-gray-400">
+                  {formatCurrency(result.illiquidPortfolioValue, country?.currency || 'USD')}
+                </p>
+                <p className="text-[10px] text-gray-500 dark:text-gray-400">Property (illiquid)</p>
+              </div>
+            </div>
+            <p className="text-[10px] text-amber-600 dark:text-amber-400 mt-1">
+              ⚠️ Withdrawals only come from liquid assets
+            </p>
+          </div>
+        )}
+
         {/* Years to FIRE */}
         <div>
           <span className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">Years to FIRE</span>
           <p className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">
             {alreadyFI ? (
-              <span className="text-green-600 dark:text-green-400">🎉 Already FI!</span>
+              <span className="text-green-600 dark:text-green-400">0 years</span>
             ) : canFIRE ? (
               <>
                 {result.yearsUntilFIRE} years
@@ -380,7 +406,11 @@ function CountryCard({
               <span className="text-red-600 dark:text-red-400">Cannot retire</span>
             )}
           </p>
-          {canFIRE && !alreadyFI && (
+          {alreadyFI ? (
+            <p className="text-[10px] sm:text-xs text-green-600 dark:text-green-400 mt-0.5">
+              ✓ Liquid assets exceed FIRE number - ready now!
+            </p>
+          ) : canFIRE && (
             <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 mt-0.5">
               {yearsLate === 0 ? (
                 <span className="text-green-600 dark:text-green-400">✓ Age {result.fireAge} (on target)</span>
