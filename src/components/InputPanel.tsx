@@ -331,6 +331,15 @@ export function InputPanel({ inputs, onChange }: InputPanelProps) {
       }
     }
     
+    // Auto-zero savings when "retiring now" (current age >= target age)
+    if (field === 'currentAge' || field === 'targetRetirementAge') {
+      const currentAge = field === 'currentAge' ? value : inputs.currentAge;
+      const targetAge = field === 'targetRetirementAge' ? value : inputs.targetRetirementAge;
+      if (currentAge >= targetAge) {
+        newInputs.annualSavings = 0;
+      }
+    }
+    
     onChange(newInputs);
   };
 
@@ -595,24 +604,34 @@ export function InputPanel({ inputs, onChange }: InputPanelProps) {
               Annual Savings (while working)
               <Tooltip text="How much you save and invest each year before retirement" />
             </label>
-            <div className="flex">
-              <span className="inline-flex items-center px-2 sm:px-3 text-xs sm:text-sm text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-slate-700 border border-r-0 border-gray-300 dark:border-slate-600 rounded-l-lg">
-                {currentCountry?.currencySymbol}
-              </span>
-              <input
-                type="text"
-                inputMode="numeric"
-                value={annualSavingsInput.value}
-                onChange={annualSavingsInput.onChange}
-                onFocus={annualSavingsInput.onFocus}
-                onBlur={annualSavingsInput.onBlur}
-                className="flex-1 min-w-0 px-3 py-2 text-sm sm:text-base border border-gray-300 dark:border-slate-600 rounded-r-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-800 text-gray-900 dark:text-white"
-                placeholder="0"
-              />
-            </div>
-            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-              Leave at 0 to see if you can retire today
-            </p>
+            {inputs.currentAge >= inputs.targetRetirementAge ? (
+              <div className="bg-gray-100 dark:bg-slate-700 rounded-lg p-3 text-center">
+                <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+                  💡 Set to $0 — you're retiring now!
+                </p>
+              </div>
+            ) : (
+              <>
+                <div className="flex">
+                  <span className="inline-flex items-center px-2 sm:px-3 text-xs sm:text-sm text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-slate-700 border border-r-0 border-gray-300 dark:border-slate-600 rounded-l-lg">
+                    {currentCountry?.currencySymbol}
+                  </span>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    value={annualSavingsInput.value}
+                    onChange={annualSavingsInput.onChange}
+                    onFocus={annualSavingsInput.onFocus}
+                    onBlur={annualSavingsInput.onBlur}
+                    className="flex-1 min-w-0 px-3 py-2 text-sm sm:text-base border border-gray-300 dark:border-slate-600 rounded-r-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-800 text-gray-900 dark:text-white"
+                    placeholder="0"
+                  />
+                </div>
+                <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                  Set target age = current age to check if you can retire today
+                </p>
+              </>
+            )}
           </div>
         </div>
       </section>

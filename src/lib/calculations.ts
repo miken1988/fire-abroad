@@ -202,6 +202,10 @@ export function calculateFIRE(inputs: UserInputs, targetCountryCode: string): FI
   const nominalReturn = inputs.expectedReturn;
   const inflationRate = inputs.inflationRate;
   
+  // If user sets current age >= target retirement age, they're saying "I want to retire now"
+  // So no more savings will be added
+  const retiringNow = inputs.currentAge >= inputs.targetRetirementAge;
+  
   for (let year = 0; year <= 50; year++) {
     const age = inputs.currentAge + year;
     const portfolioStart = currentPortfolio;
@@ -216,7 +220,8 @@ export function calculateFIRE(inputs: UserInputs, targetCountryCode: string): FI
     }
     
     const growth = portfolioStart * nominalReturn;
-    const savingsThisYear = isRetired ? 0 : annualSavingsLocal;
+    // No savings if retired OR if user indicated they want to retire now
+    const savingsThisYear = (isRetired || retiringNow) ? 0 : annualSavingsLocal;
     
     // Pension income kicks in at pension age (also inflates over time)
     const hasPension = inputs.expectStatePension && age >= pensionStartAge;
