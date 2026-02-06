@@ -200,9 +200,43 @@ export function calculateFIRE(inputs: UserInputs, targetCountryCode: string): FI
   let yearsUntilFIRE = -1;
   let yearsSinceRetirement = 0;
   
-  // Use nominal return for growth, and inflate withdrawals each year
-  // This gives a more realistic picture of portfolio trajectory
-  const nominalReturn = inputs.expectedReturn;
+  // Asset-specific nominal returns (these are typical long-term averages)
+  // User's expectedReturn applies to stocks/equity portion
+  const assetReturns = {
+    stocks: inputs.expectedReturn,           // User-defined (default 7%)
+    property: inputs.inflationRate + 0.02,   // ~inflation + 2% real
+    crypto: inputs.expectedReturn + 0.03,    // Higher risk/return than stocks
+    cash: inputs.inflationRate * 0.5,        // Barely keeps up with inflation
+    bonds: inputs.inflationRate + 0.01,      // ~inflation + 1% real
+  };
+  
+  // Calculate asset allocation percentages from accounts
+  const totalPortfolio = inputs.portfolioValue || 1;
+  const stocksAmount = (inputs.traditionalRetirementAccounts || 0) + 
+                       (inputs.rothAccounts || 0) + 
+                       (inputs.taxableAccounts || 0);
+  const cryptoAmount = inputs.accounts?.crypto || 0;
+  const cashAmount = inputs.accounts?.cash || 0;
+  const propertyAmount = inputs.accounts?.property || 0;
+  const otherAmount = inputs.accounts?.other || 0; // Treat as stocks
+  
+  const stocksWeight = (stocksAmount + otherAmount) / totalPortfolio;
+  const cryptoWeight = cryptoAmount / totalPortfolio;
+  const cashWeight = cashAmount / totalPortfolio;
+  const propertyWeight = propertyAmount / totalPortfolio;
+  
+  // Weighted average nominal return
+  const weightedNominalReturn = 
+    stocksWeight * assetReturns.stocks +
+    cryptoWeight * assetReturns.crypto +
+    cashWeight * assetReturns.cash +
+    propertyWeight * assetReturns.property;
+  
+  // Fall back to user's expected return if no allocation specified
+  const nominalReturn = (stocksWeight + cryptoWeight + cashWeight + propertyWeight) > 0 
+    ? weightedNominalReturn 
+    : inputs.expectedReturn;
+  
   const inflationRate = inputs.inflationRate;
   
   // If user sets current age >= target retirement age, they're saying "I want to retire now"

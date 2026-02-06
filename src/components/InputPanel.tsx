@@ -919,8 +919,8 @@ function AdvancedSettings({ inputs, onChange }: { inputs: UserInputs; onChange: 
           <div>
             <div className="flex items-center justify-between mb-1">
               <label className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-1">
-                Expected Return
-                <Tooltip text="Expected annual investment return before inflation" />
+                Expected Return (Stocks)
+                <Tooltip text="Expected annual return for stocks/equities. Property grows at ~inflation+2%, crypto at this rate+3%, cash at ~0% real." />
               </label>
               <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">{(inputs.expectedReturn * 100).toFixed(1)}%</span>
             </div>
@@ -933,6 +933,9 @@ function AdvancedSettings({ inputs, onChange }: { inputs: UserInputs; onChange: 
               onChange={(e) => onChange('expectedReturn', parseFloat(e.target.value))}
               className="w-full h-2 bg-gray-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600"
             />
+            <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-1">
+              Blended return calculated from your asset mix (stocks, property, crypto, cash)
+            </p>
           </div>
           <div>
             <div className="flex items-center justify-between mb-1">

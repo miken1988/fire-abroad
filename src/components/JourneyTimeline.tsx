@@ -236,7 +236,15 @@ export function JourneyTimeline({
 
       {/* Projection Note */}
       <p className="text-[10px] text-gray-400 dark:text-gray-500 text-center mt-2">
-        💡 Projection assumes {((expectedReturn - inflationRate) * 100).toFixed(0)}% real return ({(expectedReturn * 100).toFixed(0)}% growth − {(inflationRate * 100).toFixed(0)}% inflation). 
+        💡 Projection assumes {(() => {
+          // Calculate actual blended return from projections
+          const firstProj = projections1[0];
+          const actualReturn = firstProj && firstProj.portfolioStart > 0 
+            ? firstProj.growth / firstProj.portfolioStart 
+            : expectedReturn;
+          const realReturn = actualReturn - inflationRate;
+          return `${(realReturn * 100).toFixed(0)}% real return (${(actualReturn * 100).toFixed(0)}% blended growth − ${(inflationRate * 100).toFixed(0)}% inflation)`;
+        })()}. 
         Actual results will vary with market conditions.
       </p>
     </div>
