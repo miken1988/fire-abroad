@@ -51,9 +51,19 @@ export function JourneyTimeline({
   const displayAge = hoveredAge || minAge;
   const displayData = getDataAtAge(displayAge);
   
+  // Calculate years from now for inflation adjustment
+  const yearsFromNow = displayAge - minAge;
+  const inflationFactor = Math.pow(1 + inflationRate, yearsFromNow);
+  
+  // Convert nominal to real (today's purchasing power)
+  const toRealValue = (nominal: number) => nominal / inflationFactor;
+  
   // Check if there's any illiquid (property) assets
   const hasIlliquid1 = (displayData.p1?.illiquidEnd || 0) > 0;
   const hasIlliquid2 = (displayData.p2?.illiquidEnd || 0) > 0;
+  
+  // Show real values when hovering on future years
+  const showRealValue = yearsFromNow > 0;
 
   return (
     <div className="space-y-4">
@@ -70,6 +80,11 @@ export function JourneyTimeline({
             <div className="text-lg font-bold text-blue-600 dark:text-blue-400">
               {formatCompact(displayData.p1?.portfolioEnd || 0, country1.currency)}
             </div>
+            {showRealValue && (
+              <div className="text-[10px] text-gray-500 dark:text-gray-400">
+                ≈ {formatCompact(toRealValue(displayData.p1?.portfolioEnd || 0), country1.currency)} today
+              </div>
+            )}
             {hasIlliquid1 ? (
               <div className="text-[10px] text-gray-500 dark:text-gray-400">
                 <span className="text-green-600 dark:text-green-400">{formatCompact(displayData.p1?.liquidEnd || 0, country1.currency)}</span>
@@ -95,6 +110,11 @@ export function JourneyTimeline({
               <div className="text-lg font-bold text-emerald-600 dark:text-emerald-400">
                 {formatCompact(displayData.p2?.portfolioEnd || 0, country2?.currency || 'USD')}
               </div>
+              {showRealValue && (
+                <div className="text-[10px] text-gray-500 dark:text-gray-400">
+                  ≈ {formatCompact(toRealValue(displayData.p2?.portfolioEnd || 0), country2?.currency || 'USD')} today
+                </div>
+              )}
               {hasIlliquid2 ? (
                 <div className="text-[10px] text-gray-500 dark:text-gray-400">
                   <span className="text-green-600 dark:text-green-400">{formatCompact(displayData.p2?.liquidEnd || 0, country2?.currency || 'USD')}</span>
