@@ -213,3 +213,24 @@ html.dark input:focus-visible,
 html.dark select:focus-visible {
   @apply ring-offset-slate-900;
 }
+
+/* Toast fade in animation */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -10px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out;
+}
+
+/* Safe area for mobile bottom bar */
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
