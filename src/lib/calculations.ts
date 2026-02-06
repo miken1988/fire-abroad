@@ -416,9 +416,9 @@ export function calculateFIRE(inputs: UserInputs, targetCountryCode: string): FI
   if (liquidDepletionYear) {
     const hasProperty = illiquidPortfolioUSD > 0;
     if (hasProperty) {
-      warnings.push(`Liquid assets depleted at age ${liquidDepletionYear.age}. Property equity (€${Math.round(liquidDepletionYear.illiquidEnd).toLocaleString()}) remains but isn't withdrawable.`);
+      warnings.push(`${country.flag} ${country.name}: Liquid assets depleted at age ${liquidDepletionYear.age}. Property equity (${country.currencySymbol}${Math.round(liquidDepletionYear.illiquidEnd).toLocaleString()}) remains but isn't withdrawable.`);
     } else {
-      warnings.push(`Portfolio depleted at age ${liquidDepletionYear.age}`);
+      warnings.push(`${country.flag} ${country.name}: Portfolio depleted at age ${liquidDepletionYear.age}`);
     }
   }
   
@@ -428,7 +428,7 @@ export function calculateFIRE(inputs: UserInputs, targetCountryCode: string): FI
   if (inputs.expectStatePension && pensionAmountLocal > 0) {
     const pension = getStatePension(inputs.currentCountry);
     if (pension && !pension.canClaimAbroad && inputs.currentCountry !== targetCountryCode) {
-      warnings.push(`${pension.name} may not be payable while living in ${country.name}. Verify eligibility.`);
+      warnings.push(`${country.flag} ${country.name}: ${pension.name} may not be payable while living abroad. Verify eligibility.`);
     }
   }
   
