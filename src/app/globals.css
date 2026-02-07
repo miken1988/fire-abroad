@@ -172,6 +172,12 @@ html.dark ::-webkit-scrollbar-thumb:hover {
   background: #64748b;
 }
 
+/* Firefox scrollbar */
+html.dark {
+  scrollbar-width: thin;
+  scrollbar-color: #475569 #1e293b;
+}
+
 /* Mobile-specific improvements */
 @media (max-width: 639px) {
   /* Larger tap targets for buttons */

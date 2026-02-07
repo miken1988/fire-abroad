@@ -330,6 +330,11 @@ function MilestoneCards({ projections1, projections2, country1, country2, retire
     80,
   ].filter((age, i, arr) => age && arr.indexOf(age) === i && age <= 90);
 
+  // Safety check
+  if (projections.length === 0) {
+    return <div className="text-gray-500">Loading...</div>;
+  }
+
   const peak = projections.reduce((max, p) => p.portfolioEnd > max.portfolioEnd ? p : max, projections[0]);
   const depleted = projections.find(p => p.liquidEnd <= 0);
 

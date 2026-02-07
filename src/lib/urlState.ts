@@ -1,4 +1,30 @@
 import { UserInputs } from './calculations';
+import { countries } from '@/data/countries';
+
+// Safe parsing helpers
+function safeParseInt(value: string | null, fallback: number, min?: number, max?: number): number {
+  if (!value) return fallback;
+  const parsed = parseInt(value);
+  if (isNaN(parsed)) return fallback;
+  if (min !== undefined && parsed < min) return fallback;
+  if (max !== undefined && parsed > max) return fallback;
+  return parsed;
+}
+
+function safeParseFloat(value: string | null, fallback: number, min?: number): number {
+  if (!value) return fallback;
+  const parsed = parseFloat(value);
+  if (isNaN(parsed)) return fallback;
+  if (min !== undefined && parsed < min) return fallback;
+  return parsed;
+}
+
+function safeParseCountry(value: string | null, fallback: string): string {
+  if (!value) return fallback;
+  // Validate country exists
+  if (countries[value]) return value;
+  return fallback;
+}
 
 export function encodeStateToURL(inputs: UserInputs): string {
   const params = new URLSearchParams();
@@ -39,44 +65,46 @@ export function encodeStateToURL(inputs: UserInputs): string {
 export function decodeStateFromURL(params: URLSearchParams, defaults: UserInputs): UserInputs {
   const inputs = { ...defaults };
   
-  if (params.get('age')) inputs.currentAge = parseInt(params.get('age')!);
-  if (params.get('ret')) inputs.targetRetirementAge = parseInt(params.get('ret')!);
-  if (params.get('from')) inputs.currentCountry = params.get('from')!;
-  if (params.get('to')) inputs.targetCountry = params.get('to')!;
+  // Parse with validation - invalid values fall back to defaults
+  inputs.currentAge = safeParseInt(params.get('age'), defaults.currentAge, 1, 120);
+  inputs.targetRetirementAge = safeParseInt(params.get('ret'), defaults.targetRetirementAge, 1, 120);
+  inputs.currentCountry = safeParseCountry(params.get('from'), defaults.currentCountry);
+  inputs.targetCountry = safeParseCountry(params.get('to'), defaults.targetCountry);
   if (params.get('state')) inputs.usState = params.get('state')!;
-  if (params.get('pv')) inputs.portfolioValue = parseFloat(params.get('pv')!);
+  
+  inputs.portfolioValue = safeParseFloat(params.get('pv'), defaults.portfolioValue, 0);
   if (params.get('pc')) {
     inputs.portfolioCurrency = params.get('pc')!;
     inputs.spendingCurrency = params.get('pc')!;
   }
-  if (params.get('spend')) inputs.annualSpending = parseFloat(params.get('spend')!);
-  if (params.get('trad')) inputs.traditionalRetirementAccounts = parseFloat(params.get('trad')!);
-  if (params.get('roth')) inputs.rothAccounts = parseFloat(params.get('roth')!);
-  if (params.get('tax')) inputs.taxableAccounts = parseFloat(params.get('tax')!);
+  inputs.annualSpending = safeParseFloat(params.get('spend'), defaults.annualSpending, 0);
+  inputs.traditionalRetirementAccounts = safeParseFloat(params.get('trad'), defaults.traditionalRetirementAccounts, 0);
+  inputs.rothAccounts = safeParseFloat(params.get('roth'), defaults.rothAccounts, 0);
+  inputs.taxableAccounts = safeParseFloat(params.get('tax'), defaults.taxableAccounts, 0);
   
   // Accounts (crypto, cash, property)
   if (params.get('crypto') || params.get('cash') || params.get('prop')) {
     inputs.accounts = { 
       ...inputs.accounts, 
-      crypto: parseFloat(params.get('crypto') || '0'),
-      cash: parseFloat(params.get('cash') || '0'),
-      property: parseFloat(params.get('prop') || '0'),
+      crypto: safeParseFloat(params.get('crypto'), 0, 0),
+      cash: safeParseFloat(params.get('cash'), 0, 0),
+      property: safeParseFloat(params.get('prop'), 0, 0),
     };
   }
-  if (params.get('save')) inputs.annualSavings = parseFloat(params.get('save')!);
+  inputs.annualSavings = safeParseFloat(params.get('save'), defaults.annualSavings, 0);
   
   // Origin country pension params
   if (params.get('pension') === '1') {
     inputs.expectStatePension = true;
-    if (params.get('pensionAmt')) inputs.statePensionAmount = parseFloat(params.get('pensionAmt')!);
-    if (params.get('pensionAge')) inputs.statePensionAge = parseInt(params.get('pensionAge')!);
+    inputs.statePensionAmount = safeParseFloat(params.get('pensionAmt'), defaults.statePensionAmount, 0);
+    inputs.statePensionAge = safeParseInt(params.get('pensionAge'), defaults.statePensionAge, 50, 100);
   }
   
   // Destination country pension params
   if (params.get('destPension') === '1') {
     inputs.expectDestinationPension = true;
-    if (params.get('destPensionAmt')) inputs.destinationPensionAmount = parseFloat(params.get('destPensionAmt')!);
-    if (params.get('destPensionAge')) inputs.destinationPensionAge = parseInt(params.get('destPensionAge')!);
+    inputs.destinationPensionAmount = safeParseFloat(params.get('destPensionAmt'), 0, 0);
+    inputs.destinationPensionAge = safeParseInt(params.get('destPensionAge'), 66, 50, 100);
   }
   
   return inputs;

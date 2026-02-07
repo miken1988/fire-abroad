@@ -58,7 +58,7 @@ export async function fetchLiveRates(): Promise<Record<string, number>> {
     try {
       const { rates, timestamp }: CachedRates = JSON.parse(cached);
       if (Date.now() - timestamp < CACHE_DURATION) {
-        console.log('Using cached FX rates');
+        
         return rates;
       }
     } catch (e) {
@@ -97,7 +97,7 @@ export async function fetchLiveRates(): Promise<Record<string, number>> {
       timestamp: Date.now(),
     }));
 
-    console.log('Fetched live FX rates:', rates);
+    
     return rates;
   } catch (error) {
     console.warn('Failed to fetch live rates, using fallback:', error);
