@@ -188,17 +188,39 @@ html.dark {
   /* Prevent text size adjustment */
   html {
     -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
   }
   
-  /* Better select styling */
-  select {
-    font-size: 16px; /* Prevents iOS zoom on focus */
-  }
-  
-  /* Better input styling */
+  /* Prevent iOS zoom on input focus */
+  select,
   input[type="text"],
-  input[type="number"] {
-    font-size: 16px; /* Prevents iOS zoom on focus */
+  input[type="number"],
+  input[type="email"],
+  input[type="tel"],
+  textarea {
+    font-size: 16px !important;
+  }
+  
+  /* Prevent pull-to-refresh when scrolling up in app */
+  body {
+    overscroll-behavior-y: contain;
+  }
+  
+  /* Better touch scrolling */
+  .overflow-y-auto,
+  .overflow-auto {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* iOS safe area support */
+@supports (padding: max(0px)) {
+  .safe-area-bottom {
+    padding-bottom: max(12px, env(safe-area-inset-bottom));
+  }
+  
+  .safe-area-top {
+    padding-top: max(12px, env(safe-area-inset-top));
   }
 }
 
