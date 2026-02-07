@@ -225,12 +225,16 @@ export function calculateFIRE(inputs: UserInputs, targetCountryCode: string): FI
   
   // Pass US state for state tax calculation if applicable
   const usState = targetCountryCode === 'US' ? inputs.usState : undefined;
-  const grossWithdrawalNeeded = annualSpendingLocal / (1 - estimateEffectiveTaxRate(annualSpendingLocal, country, usState));
+  const effectiveTaxForGross = estimateEffectiveTaxRate(annualSpendingLocal, country, usState);
+  // Safeguard against 100% tax rate (would cause division by zero)
+  const taxMultiplier = Math.max(0.01, 1 - effectiveTaxForGross);
+  const grossWithdrawalNeeded = annualSpendingLocal / taxMultiplier;
   
   // FIRE number is reduced by the present value of expected pension
   // For simplicity, we'll calculate FIRE number without pension, 
   // but show how pension reduces withdrawal needs later
-  const fireNumber = grossWithdrawalNeeded / inputs.safeWithdrawalRate;
+  const swr = inputs.safeWithdrawalRate || 0.04; // Default to 4% if somehow 0
+  const fireNumber = swr > 0 ? grossWithdrawalNeeded / swr : 0;
   
   const fireNumberUSD = convertCurrency(fireNumber, country.currency, 'USD');
   

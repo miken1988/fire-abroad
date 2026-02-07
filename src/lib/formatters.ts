@@ -6,6 +6,11 @@ export function formatCurrency(
   currency: string = 'USD',
   options?: Intl.NumberFormatOptions
 ): string {
+  // Handle edge cases
+  if (amount === undefined || amount === null || isNaN(amount)) {
+    amount = 0;
+  }
+  
   const formatter = new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency,
@@ -23,6 +28,11 @@ export function formatNumber(
   amount: number,
   decimals: number = 0
 ): string {
+  // Handle edge cases
+  if (amount === undefined || amount === null || isNaN(amount)) {
+    amount = 0;
+  }
+  
   return new Intl.NumberFormat('en-US', {
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals,
@@ -36,6 +46,11 @@ export function formatPercent(
   rate: number,
   decimals: number = 1
 ): string {
+  // Handle edge cases
+  if (rate === undefined || rate === null || isNaN(rate)) {
+    rate = 0;
+  }
+  
   return `${(rate * 100).toFixed(decimals)}%`;
 }
 
@@ -43,6 +58,9 @@ export function formatPercent(
  * Format years
  */
 export function formatYears(years: number): string {
+  if (years === undefined || years === null || isNaN(years)) {
+    return '0 years';
+  }
   if (years === 1) return '1 year';
   if (years === 0) return 'Now';
   if (years < 0) return 'Already FIRE';
@@ -56,17 +74,35 @@ export function formatCompact(
   amount: number,
   currency: string = 'USD'
 ): string {
+  // Handle edge cases
+  if (amount === undefined || amount === null || isNaN(amount)) {
+    amount = 0;
+  }
+  
   const symbols: Record<string, string> = {
     USD: '$',
     GBP: '£',
     EUR: '€',
+    CHF: 'CHF ',
+    AUD: 'A$',
+    CAD: 'C$',
+    MXN: 'MX$',
+    THB: '฿',
+    JPY: '¥',
+    SGD: 'S$',
+    AED: 'AED ',
+    NZD: 'NZ$',
+    COP: 'COL$',
+    MYR: 'RM',
+    VND: '₫',
+    CRC: '₡',
   };
-  const symbol = symbols[currency] || '$';
+  const symbol = symbols[currency] || currency + ' ';
   
-  if (amount >= 1000000) {
+  if (Math.abs(amount) >= 1000000) {
     return `${symbol}${(amount / 1000000).toFixed(1)}M`;
   }
-  if (amount >= 1000) {
+  if (Math.abs(amount) >= 1000) {
     return `${symbol}${(amount / 1000).toFixed(0)}K`;
   }
   return `${symbol}${amount.toFixed(0)}`;
