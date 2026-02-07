@@ -373,29 +373,44 @@ function MilestoneCards({ projections1, projections2, country1, country2, retire
           const isPeak = proj.age === peak.age;
           const isDepleted = depleted && proj.age >= depleted.age;
           const isRetirementStart = proj.age === retirementAge;
-          const isLow = proj.liquidEnd < peak.portfolioEnd * 0.25 && proj.liquidEnd > 0;
           const hasProperty = proj.illiquidEnd > 0;
+          
+          // Only show "low liquid" warning if:
+          // 1. Liquid is below 25% of peak AND
+          // 2. We're in retirement (drawing down) AND
+          // 3. Not already depleted AND
+          // 4. Liquid balance is actually concerning (< 2 years of spending)
+          const isLowLiquid = proj.isRetired && 
+            !isDepleted && 
+            proj.liquidEnd > 0 && 
+            proj.liquidEnd < proj.withdrawal * 2;
 
           let bgColor = 'bg-white dark:bg-slate-800';
           let borderColor = 'border-gray-200 dark:border-slate-700';
           let icon = '📅';
+          let status = proj.isRetired ? 'Retired' : 'Working';
 
+          // Priority order for status (only one shows)
           if (isDepleted) {
             bgColor = 'bg-red-50 dark:bg-red-900/20';
             borderColor = 'border-red-200 dark:border-red-800';
             icon = '🚨';
-          } else if (isLow) {
-            bgColor = 'bg-amber-50 dark:bg-amber-900/20';
-            borderColor = 'border-amber-200 dark:border-amber-800';
-            icon = '⚠️';
+            status = hasProperty ? 'Liquid assets depleted' : 'Portfolio depleted';
           } else if (isRetirementStart) {
             bgColor = 'bg-green-50 dark:bg-green-900/20';
             borderColor = 'border-green-200 dark:border-green-800';
             icon = '🎉';
+            status = 'Retirement begins';
+          } else if (isLowLiquid) {
+            bgColor = 'bg-amber-50 dark:bg-amber-900/20';
+            borderColor = 'border-amber-200 dark:border-amber-800';
+            icon = '⚠️';
+            status = 'Low liquid balance';
           } else if (isPeak) {
             bgColor = 'bg-blue-50 dark:bg-blue-900/20';
             borderColor = 'border-blue-200 dark:border-blue-800';
             icon = '📈';
+            status = 'Portfolio peak';
           }
 
           return (
@@ -406,11 +421,7 @@ function MilestoneCards({ projections1, projections2, country1, country2, retire
                   <div>
                     <div className="font-medium text-gray-900 dark:text-white">Age {age}</div>
                     <div className="text-xs text-gray-500 dark:text-gray-400">
-                      {isRetirementStart && 'Retirement begins'}
-                      {isPeak && !isRetirementStart && 'Portfolio peak'}
-                      {isDepleted && (hasProperty ? 'Liquid assets depleted' : 'Portfolio depleted')}
-                      {isLow && !isDepleted && 'Low liquid balance'}
-                      {!isRetirementStart && !isPeak && !isDepleted && !isLow && (proj.isRetired ? 'Retired' : 'Working')}
+                      {status}
                     </div>
                   </div>
                 </div>
@@ -425,7 +436,7 @@ function MilestoneCards({ projections1, projections2, country1, country2, retire
                   )}
                   {proj.isRetired && proj.withdrawal > 0 && !isDepleted && (
                     <div className="text-xs text-gray-500 dark:text-gray-400">
-                      -{formatCompact(proj.withdrawal, country.currency)}/yr
+                      {formatCompact(proj.withdrawal, country.currency)}/yr spend
                     </div>
                   )}
                 </div>
