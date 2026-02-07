@@ -140,7 +140,11 @@ export function ResultsPanel({
           country={country1} 
           isLowerFIRE={comparison.lowerFIRENumber === country1Code}
           isLowerTax={comparison.lowerEffectiveTaxRate === country1Code}
-          isSoonerRetirement={comparison.earlierRetirement === country1Code}
+          isSoonerRetirement={
+            result1.yearsUntilFIRE === result2.yearsUntilFIRE
+              ? comparison.lowerFIRENumber === country1Code
+              : comparison.earlierRetirement === country1Code
+          }
           otherCountryCode={country2Code}
           portfolioValue={inputs?.portfolioValue}
           portfolioCurrency={inputs?.portfolioCurrency}
@@ -154,7 +158,11 @@ export function ResultsPanel({
             country={country2}
             isLowerFIRE={comparison.lowerFIRENumber === country2Code}
             isLowerTax={comparison.lowerEffectiveTaxRate === country2Code}
-            isSoonerRetirement={comparison.earlierRetirement === country2Code}
+            isSoonerRetirement={
+              result1.yearsUntilFIRE === result2.yearsUntilFIRE
+                ? comparison.lowerFIRENumber === country2Code
+                : comparison.earlierRetirement === country2Code
+            }
             otherCountryCode={country1Code}
             portfolioValue={inputs?.portfolioValue}
             portfolioCurrency={inputs?.portfolioCurrency}
