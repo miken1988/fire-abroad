@@ -16,13 +16,30 @@ const ThemeContext = createContext<ThemeContextType>({
   mounted: false,
 });
 
+// Safe localStorage access (Safari private browsing throws)
+function safeGetItem(key: string): string | null {
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+function safeSetItem(key: string, value: string): void {
+  try {
+    localStorage.setItem(key, value);
+  } catch {
+    // Ignore - localStorage not available
+  }
+}
+
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<Theme>('dark');
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     // Check localStorage first, otherwise default to dark
-    const stored = localStorage.getItem('fire-abroad-theme') as Theme | null;
+    const stored = safeGetItem('fire-abroad-theme') as Theme | null;
     if (stored === 'dark' || stored === 'light') {
       setTheme(stored);
       applyTheme(stored);
@@ -47,7 +64,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     const newTheme = theme === 'light' ? 'dark' : 'light';
     setTheme(newTheme);
     applyTheme(newTheme);
-    localStorage.setItem('fire-abroad-theme', newTheme);
+    safeSetItem('fire-abroad-theme', newTheme);
   }, [theme]);
 
   return (

@@ -29,20 +29,40 @@ interface CachedRates {
   timestamp: number;
 }
 
+// Safe localStorage access (Safari private browsing throws)
+function safeGetItem(key: string): string | null {
+  try {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem(key);
+    }
+  } catch {
+    // localStorage not available
+  }
+  return null;
+}
+
+function safeSetItem(key: string, value: string): void {
+  try {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(key, value);
+    }
+  } catch {
+    // localStorage not available
+  }
+}
+
 export async function fetchLiveRates(): Promise<Record<string, number>> {
   // Check cache first
-  if (typeof window !== 'undefined') {
-    const cached = localStorage.getItem(CACHE_KEY);
-    if (cached) {
-      try {
-        const { rates, timestamp }: CachedRates = JSON.parse(cached);
-        if (Date.now() - timestamp < CACHE_DURATION) {
-          console.log('Using cached FX rates');
-          return rates;
-        }
-      } catch (e) {
-        // Invalid cache, continue to fetch
+  const cached = safeGetItem(CACHE_KEY);
+  if (cached) {
+    try {
+      const { rates, timestamp }: CachedRates = JSON.parse(cached);
+      if (Date.now() - timestamp < CACHE_DURATION) {
+        console.log('Using cached FX rates');
+        return rates;
       }
+    } catch (e) {
+      // Invalid cache, continue to fetch
     }
   }
 
@@ -72,12 +92,10 @@ export async function fetchLiveRates(): Promise<Record<string, number>> {
     };
 
     // Cache the rates
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(CACHE_KEY, JSON.stringify({
-        rates,
-        timestamp: Date.now(),
-      }));
-    }
+    safeSetItem(CACHE_KEY, JSON.stringify({
+      rates,
+      timestamp: Date.now(),
+    }));
 
     console.log('Fetched live FX rates:', rates);
     return rates;

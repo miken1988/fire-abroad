@@ -154,8 +154,16 @@ function QuickStartInputs({
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Current age</label>
           <input
             ref={currentAgeRef}
-            type="number"
+            type="text"
+            inputMode="numeric"
+            pattern="[0-9]*"
             defaultValue={inputs.currentAge}
+            onChange={(e) => {
+              const val = parseInt(e.target.value);
+              if (!isNaN(val) && val >= 1 && val <= 120) {
+                handleChange('currentAge', val);
+              }
+            }}
             onBlur={(e) => {
               const val = parseInt(e.target.value);
               handleChange('currentAge', isNaN(val) || val < 1 ? 30 : val);
@@ -164,6 +172,7 @@ function QuickStartInputs({
               if (e.key === 'Enter') {
                 const val = parseInt((e.target as HTMLInputElement).value);
                 handleChange('currentAge', isNaN(val) || val < 1 ? 30 : val);
+                (e.target as HTMLInputElement).blur();
               }
             }}
             className="w-full px-3 py-2.5 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white text-sm"
@@ -173,8 +182,16 @@ function QuickStartInputs({
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Target retirement age</label>
           <input
             ref={retirementAgeRef}
-            type="number"
+            type="text"
+            inputMode="numeric"
+            pattern="[0-9]*"
             defaultValue={inputs.targetRetirementAge}
+            onChange={(e) => {
+              const val = parseInt(e.target.value);
+              if (!isNaN(val) && val >= 1 && val <= 120) {
+                handleChange('targetRetirementAge', val);
+              }
+            }}
             onBlur={(e) => {
               const val = parseInt(e.target.value);
               handleChange('targetRetirementAge', isNaN(val) || val < 1 ? 50 : val);
@@ -183,6 +200,7 @@ function QuickStartInputs({
               if (e.key === 'Enter') {
                 const val = parseInt((e.target as HTMLInputElement).value);
                 handleChange('targetRetirementAge', isNaN(val) || val < 1 ? 50 : val);
+                (e.target as HTMLInputElement).blur();
               }
             }}
             className="w-full px-3 py-2.5 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white text-sm"
@@ -200,7 +218,14 @@ function QuickStartInputs({
           <input
             ref={savingsRef}
             type="text"
+            inputMode="numeric"
             defaultValue={inputs.portfolioValue.toLocaleString()}
+            onChange={(e) => {
+              const val = parseFloat(e.target.value.replace(/,/g, ''));
+              if (!isNaN(val) && val >= 0) {
+                handleChange('portfolioValue', val);
+              }
+            }}
             onBlur={(e) => {
               const val = parseFloat(e.target.value.replace(/,/g, ''));
               handleChange('portfolioValue', isNaN(val) ? 0 : val);
@@ -209,6 +234,7 @@ function QuickStartInputs({
               if (e.key === 'Enter') {
                 const val = parseFloat((e.target as HTMLInputElement).value.replace(/,/g, ''));
                 handleChange('portfolioValue', isNaN(val) ? 0 : val);
+                (e.target as HTMLInputElement).blur();
               }
             }}
             className="w-full px-3 py-2.5 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white text-sm"
@@ -222,7 +248,14 @@ function QuickStartInputs({
           <input
             ref={spendingRef}
             type="text"
+            inputMode="numeric"
             defaultValue={inputs.annualSpending.toLocaleString()}
+            onChange={(e) => {
+              const val = parseFloat(e.target.value.replace(/,/g, ''));
+              if (!isNaN(val) && val >= 0) {
+                handleChange('annualSpending', val);
+              }
+            }}
             onBlur={(e) => {
               const val = parseFloat(e.target.value.replace(/,/g, ''));
               handleChange('annualSpending', isNaN(val) ? 0 : val);
@@ -231,6 +264,7 @@ function QuickStartInputs({
               if (e.key === 'Enter') {
                 const val = parseFloat((e.target as HTMLInputElement).value.replace(/,/g, ''));
                 handleChange('annualSpending', isNaN(val) ? 0 : val);
+                (e.target as HTMLInputElement).blur();
               }
             }}
             className="w-full px-3 py-2.5 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white text-sm"
