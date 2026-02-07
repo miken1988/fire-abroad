@@ -134,17 +134,22 @@ export function MonteCarloCard({ inputs, fireResult, countryCode }: MonteCarloCa
           <div className="grid grid-cols-3 gap-3">
             <StatBox
               label="Median balance at 85"
-              value={formatCompact(result.medianPath[Math.min(result.ages.indexOf(85), result.medianPath.length - 1)] || result.medianEndingBalance, currency)}
+              value={formatCompact(
+                result.ages.indexOf(85) >= 0 
+                  ? result.medianPath[result.ages.indexOf(85)] 
+                  : result.medianPath[result.medianPath.length - 1] || result.medianEndingBalance, 
+                currency
+              )}
               color="text-blue-600 dark:text-blue-400"
             />
             <StatBox
               label="Worst 10% scenario"
-              value={formatCompact(result.p10Path[result.p10Path.length - 1], currency)}
-              color={result.p10Path[result.p10Path.length - 1] > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-red-600 dark:text-red-400'}
+              value={formatCompact(result.p10Path[result.p10Path.length - 1] || 0, currency)}
+              color={(result.p10Path[result.p10Path.length - 1] || 0) > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-red-600 dark:text-red-400'}
             />
             <StatBox
               label={result.averageFailureAge ? 'Avg failure age' : 'Best 90% scenario'}
-              value={result.averageFailureAge ? `Age ${Math.round(result.averageFailureAge)}` : formatCompact(result.p90Path[result.p90Path.length - 1], currency)}
+              value={result.averageFailureAge ? `Age ${Math.round(result.averageFailureAge)}` : formatCompact(result.p90Path[result.p90Path.length - 1] || 0, currency)}
               color={result.averageFailureAge ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'}
             />
           </div>

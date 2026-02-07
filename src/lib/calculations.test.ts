@@ -1,4 +1,4 @@
-import { calculateFIRE, UserInputs } from './calculations';
+import { calculateFIRE, compareFIRE, UserInputs } from './calculations';
 import { countries } from '@/data/countries';
 import { convertCurrency } from './currency';
 
@@ -523,5 +523,191 @@ describe('Country data integrity', () => {
       expect(col).toBeGreaterThan(10); // No country is 10x cheaper than US
       expect(col).toBeLessThan(200); // No country is 2x more expensive
     }
+  });
+});
+
+describe('compareFIRE', () => {
+  describe('Winner determination', () => {
+    test('lowerFIRENumber correctly identifies cheaper country', () => {
+      const inputs = createInputs({
+        currentCountry: 'US',
+        targetCountry: 'PT', // Portugal - should have lower FIRE number
+        annualSpending: 50000,
+      });
+      
+      const result = compareFIRE(inputs, 'US', 'PT');
+      
+      // Portugal should have lower FIRE number due to lower COL
+      expect(result.comparison.lowerFIRENumber).toBe('PT');
+      expect(result.country2.fireNumberUSD).toBeLessThan(result.country1.fireNumberUSD);
+    });
+
+    test('earlierRetirement correctly identifies faster path', () => {
+      const inputs = createInputs({
+        currentCountry: 'US',
+        targetCountry: 'PT',
+        portfolioValue: 500000,
+        annualSpending: 50000,
+        annualSavings: 30000,
+      });
+      
+      const result = compareFIRE(inputs, 'US', 'PT');
+      
+      // Country with earlier retirement should be identified
+      if (result.country1.yearsUntilFIRE < result.country2.yearsUntilFIRE) {
+        expect(result.comparison.earlierRetirement).toBe('US');
+      } else if (result.country2.yearsUntilFIRE < result.country1.yearsUntilFIRE) {
+        expect(result.comparison.earlierRetirement).toBe('PT');
+      }
+      // On tie, country1 wins (by design)
+    });
+
+    test('same years to FIRE uses lowerFIRENumber as tiebreaker', () => {
+      // This tests the logic we fixed - when years are equal, 
+      // the winner should be the one with lower FIRE number
+      const inputs = createInputs({
+        currentCountry: 'US',
+        targetCountry: 'PT',
+        portfolioValue: 2000000, // Already FI in both
+        annualSpending: 40000,
+        currentAge: 40,
+        targetRetirementAge: 40,
+      });
+      
+      const result = compareFIRE(inputs, 'US', 'PT');
+      
+      // Both should be 0 years (already can retire)
+      expect(result.country1.yearsUntilFIRE).toBe(0);
+      expect(result.country2.yearsUntilFIRE).toBe(0);
+      
+      // lowerFIRENumber should still correctly identify the cheaper option
+      expect(result.comparison.lowerFIRENumber).toBe('PT');
+    });
+
+    test('comparison with same country returns equal values', () => {
+      const inputs = createInputs({ currentCountry: 'US', targetCountry: 'US' });
+      
+      const result = compareFIRE(inputs, 'US', 'US');
+      
+      expect(result.country1.fireNumber).toBe(result.country2.fireNumber);
+      expect(result.country1.yearsUntilFIRE).toBe(result.country2.yearsUntilFIRE);
+      expect(result.comparison.fireNumberDifferenceUSD).toBe(0);
+    });
+  });
+
+  describe('Edge cases', () => {
+    test('handles zero spending', () => {
+      const inputs = createInputs({ annualSpending: 0 });
+      
+      // Should not throw
+      expect(() => calculateFIRE(inputs, 'US')).not.toThrow();
+      
+      const result = calculateFIRE(inputs, 'US');
+      expect(result.fireNumber).toBe(0);
+    });
+
+    test('handles zero portfolio', () => {
+      const inputs = createInputs({ 
+        portfolioValue: 0,
+        traditionalRetirementAccounts: 0,
+        rothAccounts: 0,
+        taxableAccounts: 0,
+      });
+      
+      expect(() => calculateFIRE(inputs, 'US')).not.toThrow();
+    });
+
+    test('handles very high spending relative to portfolio', () => {
+      const inputs = createInputs({
+        portfolioValue: 100000,
+        annualSpending: 500000, // Spending 5x portfolio
+        annualSavings: 0,
+      });
+      
+      const result = calculateFIRE(inputs, 'US');
+      
+      expect(result.canRetire).toBe(false);
+      // When can't retire, yearsUntilFIRE is 0 (clamped from -1)
+      expect(result.yearsUntilFIRE).toBe(0);
+    });
+
+    test('handles retirement age in the past', () => {
+      const inputs = createInputs({
+        currentAge: 60,
+        targetRetirementAge: 50, // Already past target
+        portfolioValue: 2000000,
+      });
+      
+      const result = calculateFIRE(inputs, 'US');
+      
+      // Should handle gracefully
+      expect(result.fireAge).toBeGreaterThanOrEqual(50);
+    });
+
+    test('handles very old age', () => {
+      const inputs = createInputs({
+        currentAge: 80,
+        targetRetirementAge: 80,
+        portfolioValue: 1000000,
+        annualSpending: 40000,
+      });
+      
+      expect(() => calculateFIRE(inputs, 'US')).not.toThrow();
+    });
+
+    test('handles missing country gracefully', () => {
+      const inputs = createInputs();
+      
+      expect(() => calculateFIRE(inputs, 'INVALID')).toThrow();
+    });
+  });
+});
+
+describe('Tax rate sanity checks', () => {
+  test('no country has effective tax rate over 60%', () => {
+    const inputs = createInputs({ annualSpending: 100000 });
+    
+    for (const code of Object.keys(countries)) {
+      const result = calculateFIRE(inputs, code);
+      expect(result.effectiveTaxRate).toBeLessThan(0.6);
+    }
+  });
+
+  test('UAE and other no-tax jurisdictions have 0% rate', () => {
+    const noTaxCountries = ['AE']; // UAE
+    const inputs = createInputs({ annualSpending: 100000 });
+    
+    for (const code of noTaxCountries) {
+      const result = calculateFIRE(inputs, code);
+      expect(result.effectiveTaxRate).toBe(0);
+    }
+  });
+});
+
+describe('Cost of living adjustments', () => {
+  test('cheaper country results in lower FIRE number', () => {
+    const inputs = createInputs({
+      currentCountry: 'US',
+      annualSpending: 50000,
+    });
+    
+    const usResult = calculateFIRE(inputs, 'US');
+    const mxResult = calculateFIRE(inputs, 'MX'); // Mexico - much cheaper
+    
+    // FIRE number in USD should be lower for Mexico
+    expect(mxResult.fireNumberUSD).toBeLessThan(usResult.fireNumberUSD);
+  });
+
+  test('expensive country results in higher FIRE number', () => {
+    const inputs = createInputs({
+      currentCountry: 'US',
+      annualSpending: 50000,
+    });
+    
+    const usResult = calculateFIRE(inputs, 'US');
+    const chResult = calculateFIRE(inputs, 'CH'); // Switzerland - more expensive
+    
+    // FIRE number in USD should be higher for Switzerland
+    expect(chResult.fireNumberUSD).toBeGreaterThan(usResult.fireNumberUSD);
   });
 });

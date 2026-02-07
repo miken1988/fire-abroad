@@ -30,9 +30,14 @@ export function JourneyTimeline({
   const country2 = country2Code ? countries[country2Code] : null;
   const isComparison = !!projections2 && !!country2;
 
+  // Safety check for empty projections
+  if (projections1.length === 0) {
+    return <div className="text-gray-500 dark:text-gray-400 text-sm">Loading projections...</div>;
+  }
+
   // Calculate chart bounds
   const allValues = [...projections1.map(p => p.portfolioEnd), ...(projections2?.map(p => p.portfolioEnd) || [])];
-  const maxValue = Math.max(...allValues) * 1.1;
+  const maxValue = Math.max(...allValues, 1) * 1.1; // Ensure at least 1 to prevent division issues
   const minAge = projections1[0]?.age || 35;
   const maxAge = projections1[projections1.length - 1]?.age || 90;
 
