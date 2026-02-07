@@ -149,7 +149,14 @@ function QuickStartInputs({
           <input
             type="number"
             value={inputs.currentAge}
-            onChange={(e) => handleChange('currentAge', parseInt(e.target.value) || 30)}
+            onChange={(e) => {
+              const val = parseInt(e.target.value);
+              if (!isNaN(val)) handleChange('currentAge', val);
+            }}
+            onBlur={(e) => {
+              const val = parseInt(e.target.value);
+              if (isNaN(val) || val < 1) handleChange('currentAge', 30);
+            }}
             onFocus={(e) => e.target.select()}
             className="w-full px-3 py-2.5 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white text-sm"
           />
@@ -159,7 +166,14 @@ function QuickStartInputs({
           <input
             type="number"
             value={inputs.targetRetirementAge}
-            onChange={(e) => handleChange('targetRetirementAge', parseInt(e.target.value) || 50)}
+            onChange={(e) => {
+              const val = parseInt(e.target.value);
+              if (!isNaN(val)) handleChange('targetRetirementAge', val);
+            }}
+            onBlur={(e) => {
+              const val = parseInt(e.target.value);
+              if (isNaN(val) || val < 1) handleChange('targetRetirementAge', 50);
+            }}
             onFocus={(e) => e.target.select()}
             className="w-full px-3 py-2.5 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white text-sm"
           />
@@ -176,7 +190,14 @@ function QuickStartInputs({
           <input
             type="text"
             value={inputs.portfolioValue.toLocaleString()}
-            onChange={(e) => handleChange('portfolioValue', parseFloat(e.target.value.replace(/,/g, '')) || 0)}
+            onChange={(e) => {
+              const val = parseFloat(e.target.value.replace(/,/g, ''));
+              if (!isNaN(val)) handleChange('portfolioValue', val);
+            }}
+            onBlur={(e) => {
+              const val = parseFloat(e.target.value.replace(/,/g, ''));
+              if (isNaN(val)) handleChange('portfolioValue', 0);
+            }}
             onFocus={(e) => e.target.select()}
             className="w-full px-3 py-2.5 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white text-sm"
           />
@@ -189,7 +210,14 @@ function QuickStartInputs({
           <input
             type="text"
             value={inputs.annualSpending.toLocaleString()}
-            onChange={(e) => handleChange('annualSpending', parseFloat(e.target.value.replace(/,/g, '')) || 0)}
+            onChange={(e) => {
+              const val = parseFloat(e.target.value.replace(/,/g, ''));
+              if (!isNaN(val)) handleChange('annualSpending', val);
+            }}
+            onBlur={(e) => {
+              const val = parseFloat(e.target.value.replace(/,/g, ''));
+              if (isNaN(val)) handleChange('annualSpending', 0);
+            }}
             onFocus={(e) => e.target.select()}
             className="w-full px-3 py-2.5 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white text-sm"
           />
