@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect, useCallback } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { UserInputs, compareFIRE } from '@/lib/calculations';
 import { countries } from '@/data/countries';
 import { InputPanel } from './InputPanel';
@@ -107,6 +107,12 @@ function QuickStartInputs({
     onChange(newInputs);
   };
 
+  // Use refs to get values on blur instead of controlled inputs
+  const currentAgeRef = React.useRef<HTMLInputElement>(null);
+  const retirementAgeRef = React.useRef<HTMLInputElement>(null);
+  const savingsRef = React.useRef<HTMLInputElement>(null);
+  const spendingRef = React.useRef<HTMLInputElement>(null);
+
   return (
     <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4 sm:p-6 space-y-5">
       <div className="flex items-center justify-between">
@@ -147,34 +153,38 @@ function QuickStartInputs({
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Current age</label>
           <input
+            ref={currentAgeRef}
             type="number"
-            value={inputs.currentAge}
-            onChange={(e) => {
-              const val = parseInt(e.target.value);
-              if (!isNaN(val)) handleChange('currentAge', val);
-            }}
+            defaultValue={inputs.currentAge}
             onBlur={(e) => {
               const val = parseInt(e.target.value);
-              if (isNaN(val) || val < 1) handleChange('currentAge', 30);
+              handleChange('currentAge', isNaN(val) || val < 1 ? 30 : val);
             }}
-            onFocus={(e) => e.target.select()}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                const val = parseInt((e.target as HTMLInputElement).value);
+                handleChange('currentAge', isNaN(val) || val < 1 ? 30 : val);
+              }
+            }}
             className="w-full px-3 py-2.5 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white text-sm"
           />
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Target retirement age</label>
           <input
+            ref={retirementAgeRef}
             type="number"
-            value={inputs.targetRetirementAge}
-            onChange={(e) => {
-              const val = parseInt(e.target.value);
-              if (!isNaN(val)) handleChange('targetRetirementAge', val);
-            }}
+            defaultValue={inputs.targetRetirementAge}
             onBlur={(e) => {
               const val = parseInt(e.target.value);
-              if (isNaN(val) || val < 1) handleChange('targetRetirementAge', 50);
+              handleChange('targetRetirementAge', isNaN(val) || val < 1 ? 50 : val);
             }}
-            onFocus={(e) => e.target.select()}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                const val = parseInt((e.target as HTMLInputElement).value);
+                handleChange('targetRetirementAge', isNaN(val) || val < 1 ? 50 : val);
+              }
+            }}
             className="w-full px-3 py-2.5 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white text-sm"
           />
         </div>
@@ -188,17 +198,19 @@ function QuickStartInputs({
             <span className="text-gray-400 font-normal ml-1">({countries[inputs.currentCountry]?.currencySymbol})</span>
           </label>
           <input
+            ref={savingsRef}
             type="text"
-            value={inputs.portfolioValue.toLocaleString()}
-            onChange={(e) => {
-              const val = parseFloat(e.target.value.replace(/,/g, ''));
-              if (!isNaN(val)) handleChange('portfolioValue', val);
-            }}
+            defaultValue={inputs.portfolioValue.toLocaleString()}
             onBlur={(e) => {
               const val = parseFloat(e.target.value.replace(/,/g, ''));
-              if (isNaN(val)) handleChange('portfolioValue', 0);
+              handleChange('portfolioValue', isNaN(val) ? 0 : val);
             }}
-            onFocus={(e) => e.target.select()}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                const val = parseFloat((e.target as HTMLInputElement).value.replace(/,/g, ''));
+                handleChange('portfolioValue', isNaN(val) ? 0 : val);
+              }
+            }}
             className="w-full px-3 py-2.5 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white text-sm"
           />
         </div>
@@ -208,17 +220,19 @@ function QuickStartInputs({
             <span className="text-gray-400 font-normal ml-1">({countries[inputs.currentCountry]?.currencySymbol})</span>
           </label>
           <input
+            ref={spendingRef}
             type="text"
-            value={inputs.annualSpending.toLocaleString()}
-            onChange={(e) => {
-              const val = parseFloat(e.target.value.replace(/,/g, ''));
-              if (!isNaN(val)) handleChange('annualSpending', val);
-            }}
+            defaultValue={inputs.annualSpending.toLocaleString()}
             onBlur={(e) => {
               const val = parseFloat(e.target.value.replace(/,/g, ''));
-              if (isNaN(val)) handleChange('annualSpending', 0);
+              handleChange('annualSpending', isNaN(val) ? 0 : val);
             }}
-            onFocus={(e) => e.target.select()}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                const val = parseFloat((e.target as HTMLInputElement).value.replace(/,/g, ''));
+                handleChange('annualSpending', isNaN(val) ? 0 : val);
+              }
+            }}
             className="w-full px-3 py-2.5 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white text-sm"
           />
         </div>
