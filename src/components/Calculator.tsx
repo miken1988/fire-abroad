@@ -347,6 +347,11 @@ export function Calculator() {
               <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 hidden sm:block">Compare early retirement across countries</p>
             </div>
             <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+              {showFxRate && fxLoaded && (
+                <div className="hidden sm:block text-xs text-gray-500 dark:text-gray-400 border-r border-gray-200 dark:border-slate-700 pr-3">
+                  💱 1 {inputs.portfolioCurrency} = {getDisplayRate(inputs.portfolioCurrency, countries[inputs.targetCountry]?.currency || 'USD')} {countries[inputs.targetCountry]?.currency}
+                </div>
+              )}
               {results && !isSameCountry && (
                 <PDFExportButton
                   result1={results.country1}
@@ -369,11 +374,6 @@ export function Calculator() {
               <ThemeToggle />
             </div>
           </div>
-          {showFxRate && fxLoaded && (
-            <div className="text-xs text-blue-600 dark:text-blue-400 mt-1">
-              💱 1 {inputs.portfolioCurrency} = {getDisplayRate(inputs.portfolioCurrency, countries[inputs.targetCountry]?.currency || 'USD')} {countries[inputs.targetCountry]?.currency}
-            </div>
-          )}
         </div>
       </header>
 
