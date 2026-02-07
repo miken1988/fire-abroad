@@ -50,10 +50,12 @@ function useNumericInput(
     }
   };
 
-  const onFocus = () => {
+  const onFocus = (e: React.FocusEvent<HTMLInputElement>) => {
     // Show raw number without commas for easy editing
     setDraft(String(value));
     setEditing(true);
+    // Select all text so user can just type to replace
+    setTimeout(() => e.target.select(), 0);
   };
 
   const onBlur = () => {

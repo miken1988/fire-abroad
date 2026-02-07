@@ -150,6 +150,7 @@ function QuickStartInputs({
             type="number"
             value={inputs.currentAge}
             onChange={(e) => handleChange('currentAge', parseInt(e.target.value) || 30)}
+            onFocus={(e) => e.target.select()}
             className="w-full px-3 py-2.5 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white text-sm"
           />
         </div>
@@ -159,6 +160,7 @@ function QuickStartInputs({
             type="number"
             value={inputs.targetRetirementAge}
             onChange={(e) => handleChange('targetRetirementAge', parseInt(e.target.value) || 50)}
+            onFocus={(e) => e.target.select()}
             className="w-full px-3 py-2.5 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white text-sm"
           />
         </div>
@@ -175,6 +177,7 @@ function QuickStartInputs({
             type="text"
             value={inputs.portfolioValue.toLocaleString()}
             onChange={(e) => handleChange('portfolioValue', parseFloat(e.target.value.replace(/,/g, '')) || 0)}
+            onFocus={(e) => e.target.select()}
             className="w-full px-3 py-2.5 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white text-sm"
           />
         </div>
@@ -187,6 +190,7 @@ function QuickStartInputs({
             type="text"
             value={inputs.annualSpending.toLocaleString()}
             onChange={(e) => handleChange('annualSpending', parseFloat(e.target.value.replace(/,/g, '')) || 0)}
+            onFocus={(e) => e.target.select()}
             className="w-full px-3 py-2.5 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white text-sm"
           />
         </div>
