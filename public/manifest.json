@@ -1,11 +1,11 @@
 {
-  "name": "FIRE Abroad",
-  "short_name": "FIRE Abroad",
+  "name": "WhereToFIRE",
+  "short_name": "WhereToFIRE",
   "description": "Compare early retirement across countries",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#1e3a8a",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
   "icons": [
     {
       "src": "/icon-192.png",
