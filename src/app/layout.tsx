@@ -29,13 +29,18 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#0f172a" />
-        <script async src="https://www.googletagmanager.com/gtag/js?id=AW-17937453268" />
+        {/* Google Analytics 4 + Google Ads */}
+        <script
+          async
+          src="https://www.googletagmanager.com/gtag/js?id=G-584EMEC7MD"
+        />
         <script
           dangerouslySetInnerHTML={{
             __html: `
               window.dataLayer = window.dataLayer || [];
               function gtag(){dataLayer.push(arguments);}
               gtag('js', new Date());
+              gtag('config', 'G-584EMEC7MD');
               gtag('config', 'AW-17937453268');
             `,
           }}
