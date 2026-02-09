@@ -42,7 +42,7 @@ export const AFFILIATE_PARTNERS: AffiliatePartner[] = [
     shortDescription: 'Health insurance for expats from $45/month',
     commission: '10% recurring for 1 year',
     category: 'insurance',
-    url: 'https://safetywing.com/?referenceID=AFFILIATE_ID', // Replace with your SafetyWing affiliate link
+    url: 'https://safetywing.com/?referenceID=26474260&utm_source=26474260&utm_medium=Ambassador',
     ctaText: 'Get a Quote',
     icon: '🛡️',
     features: [
