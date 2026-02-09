@@ -10,6 +10,9 @@ import { MonteCarloCard } from './MonteCarloCard';
 import { ReverseCalculator } from './ReverseCalculator';
 import { TaxBreakdownCard } from './TaxBreakdownCard';
 import { UserInputs } from '@/lib/calculations';
+import HealthcareAffiliate from './HealthcareAffiliate';
+import BankingAffiliate from './BankingAffiliate';
+import NextStepsPanel from './NextStepsPanel';
 
 interface ResultsPanelProps {
   result1: FIREResult;
@@ -196,6 +199,15 @@ export function ResultsPanel({
         />
       )}
 
+      {/* Banking/Money Transfer Affiliate */}
+      {!isSameCountry && country1?.currency !== country2?.currency && (
+        <BankingAffiliate
+          fromCurrency={country1?.currency || 'USD'}
+          toCurrency={country2?.currency || 'EUR'}
+          retireCountryName={country2?.name || 'abroad'}
+        />
+      )}
+
       {/* Visa Requirements - Keep visible */}
       {!isSameCountry && (
         <VisaCard
@@ -271,6 +283,17 @@ export function ResultsPanel({
 
       {/* Warnings */}
       <Warnings result1={result1} result2={result2} country1={country1} country2={country2} isSameCountry={isSameCountry} />
+
+      {/* Plan Your Move - Affiliate Next Steps */}
+      {!isSameCountry && (
+        <NextStepsPanel
+          retireCountryName={country2?.name || 'abroad'}
+          retireCountryCode={country2Code}
+          fromCurrency={country1?.currency || 'USD'}
+          toCurrency={country2?.currency || 'EUR'}
+          showDifferentCurrencies={country1?.currency !== country2?.currency}
+        />
+      )}
     </div>
   );
 }
@@ -451,6 +474,13 @@ function CountryCard({
             <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5 line-clamp-2">
               {country.healthcare.notes}
             </p>
+          )}
+          {/* Expat Health Insurance Affiliate */}
+          {colorScheme === 'green' && (
+            <HealthcareAffiliate
+              retireCountryName={country?.name || ''}
+              retireCountryCode={otherCountryCode}
+            />
           )}
         </div>
       </div>
