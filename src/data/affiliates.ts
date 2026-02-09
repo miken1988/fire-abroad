@@ -24,7 +24,7 @@ export const AFFILIATE_PARTNERS: AffiliatePartner[] = [
     shortDescription: 'Transfer money abroad at the real exchange rate',
     commission: '£10/personal, £50/business',
     category: 'banking',
-    url: 'https://wise.com/invite/u/AFFILIATE_ID', // Replace with your Wise affiliate link
+    url: 'https://wise.com/', // Replace with Partnerize tracking link once approved
     ctaText: 'Open Free Account',
     icon: '💱',
     features: [
@@ -60,7 +60,7 @@ export const AFFILIATE_PARTNERS: AffiliatePartner[] = [
     shortDescription: 'Comprehensive expat health insurance worldwide',
     commission: 'Per-quote commission via FlexOffers',
     category: 'insurance',
-    url: 'https://www.cignaglobal.com/?AFFILIATE_ID', // Replace with your Cigna affiliate link
+    url: 'https://www.cignaglobal.com/', // Replace with FlexOffers link once approved
     ctaText: 'Compare Plans',
     icon: '🏥',
     features: [
@@ -78,7 +78,7 @@ export const AFFILIATE_PARTNERS: AffiliatePartner[] = [
     shortDescription: 'Access home services from anywhere abroad',
     commission: '$3-6 per sale',
     category: 'vpn',
-    url: 'https://nordvpn.com/?AFFILIATE_ID', // Replace with your NordVPN affiliate link
+    url: 'https://nordvpn.com/', // Replace with NordVPN affiliate link once approved
     ctaText: 'Get Protected',
     icon: '🔒',
     features: [
