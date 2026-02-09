@@ -1,3 +1,4 @@
+import Script from 'next/script';
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
@@ -51,6 +52,15 @@ export default function RootLayout({
         />
       </head>
       <body className={`${inter.variable} font-sans antialiased min-h-screen flex flex-col`}>
+        <Script async src="https://www.googletagmanager.com/gtag/js?id=AW-17937453268" strategy="afterInteractive" />
+        <Script id="google-ads" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'AW-17937453268');
+          `}
+        </Script>
         <ThemeProvider>
           <main className="flex-1">
             {children}
