@@ -162,6 +162,16 @@ export function runMonteCarloSimulation(
   const years = 50; // Simulate 50 years from current age
   const assetWeights = getAssetWeights(inputs);
   
+  // Merge expectedReturn into assetReturns so MC uses the user's slider value
+  // inputs.expectedReturn is NOMINAL, MC uses REAL returns (subtract inflation)
+  const realStockReturn = (inputs.assetReturns?.stocks ?? inputs.expectedReturn ?? 0.07) - (inputs.inflationRate ?? 0.035);
+  const effectiveAssetReturns = {
+    stocks: realStockReturn,
+    property: (inputs.assetReturns?.property ?? (inputs.inflationRate + 0.02)) - (inputs.inflationRate ?? 0.035),
+    crypto: (inputs.assetReturns?.crypto ?? ((inputs.expectedReturn ?? 0.07) + 0.03)) - (inputs.inflationRate ?? 0.035),
+    cash: (inputs.assetReturns?.cash ?? (inputs.inflationRate * 0.5)) - (inputs.inflationRate ?? 0.035),
+  };
+  
   // Collect all simulation paths
   const allPaths: number[][] = [];
   const depletedYears: number[] = [];
@@ -178,7 +188,7 @@ export function runMonteCarloSimulation(
       inputs.currentAge,
       inputs.targetRetirementAge,
       assetWeights,
-      inputs.assetReturns,
+      effectiveAssetReturns,
       years
     );
     
