@@ -167,12 +167,12 @@ export function MonteCarloCard({ inputs, fireResult, countryCode }: MonteCarloCa
             />
             <StatBox
               label="Worst 10% scenario"
-              value={fmtC(displayResult.p10Path[result.p10Path.length - 1] || 0)}
-              color={(result.p10Path[result.p10Path.length - 1] || 0) > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-red-600 dark:text-red-400'}
+              value={fmtC(displayResult.p10Path[displayResult.p10Path.length - 1] || 0)}
+              color={(displayResult.p10Path[displayResult.p10Path.length - 1] || 0) > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-red-600 dark:text-red-400'}
             />
             <StatBox
               label={result.averageFailureAge ? 'Avg failure age' : 'Best 90% scenario'}
-              value={result.averageFailureAge ? `Age ${Math.round(result.averageFailureAge)}` : fmtC(displayResult.p90Path[result.p90Path.length - 1] || 0)}
+              value={result.averageFailureAge ? `Age ${Math.round(result.averageFailureAge)}` : fmtC(displayResult.p90Path[displayResult.p90Path.length - 1] || 0)}
               color={result.averageFailureAge ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'}
             />
           </div>
