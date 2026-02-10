@@ -76,10 +76,11 @@ export function JourneyTimeline({
       <div className="flex items-start justify-between gap-4">
         <div>
           <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">Your FIRE Journey</h3>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Hover over the chart to explore</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 hidden sm:block">Hover over the chart to explore</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 sm:hidden">Portfolio projections at key milestones</p>
         </div>
         
-        <div className="flex items-start gap-4 text-right">
+        <div className="hidden sm:flex items-start gap-4 text-right">
           <div className="min-h-[52px]">
             <div className="text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-wide">{country1.flag} {country1.name}</div>
             <div className="text-lg font-bold text-blue-600 dark:text-blue-400">
@@ -143,8 +144,8 @@ export function JourneyTimeline({
         </div>
       </div>
 
-      {/* Age indicator */}
-      <div className="text-center">
+      {/* Age indicator - desktop only (for hover interaction) */}
+      <div className="text-center hidden sm:block">
         <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium transition-colors ${
           displayData.p1?.isRetired 
             ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' 
@@ -281,14 +282,103 @@ export function JourneyTimeline({
       </div>
 
       {/* Mobile: Milestone Cards */}
-      <div className="sm:hidden">
-        <MilestoneCards 
-          projections1={projections1}
-          projections2={projections2}
-          country1={country1}
-          country2={country2}
-          retirementAge={retirementAge}
-        />
+      {/* Mobile: Compact side-by-side milestone view */}
+      <div className="sm:hidden space-y-2">
+        {/* Column headers for comparison */}
+        {isComparison && (
+          <div className="grid grid-cols-[1fr_auto_1fr] gap-2 px-1 text-[10px] uppercase tracking-wide text-gray-400 dark:text-gray-500 font-medium">
+            <span>{country1.flag} {country1.name}</span>
+            <span></span>
+            <span className="text-right">{country2?.flag} {country2?.name}</span>
+          </div>
+        )}
+        {(() => {
+          const keyAges = [
+            projections1[0]?.age,
+            retirementAge,
+            retirementAge + 10,
+            retirementAge + 20,
+          ].filter((age, i, arr) => age !== undefined && arr.indexOf(age) === i && age <= 90);
+
+          return keyAges.map(age => {
+            const p1 = projections1.find(p => p.age === age);
+            const p2 = projections2?.find(p => p.age === age);
+            if (!p1) return null;
+
+            const isRetireAge = age === retirementAge;
+            const isStart = age === projections1[0]?.age;
+            const isDepleted1 = p1.liquidEnd <= 0 && !isStart;
+            const isDepleted2 = p2 ? p2.liquidEnd <= 0 && !isStart : false;
+
+            const rowBg = isRetireAge 
+              ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800' 
+              : isDepleted1 
+              ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
+              : 'bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700';
+            
+            const icon = isRetireAge ? '🎉' : isStart ? '📍' : isDepleted1 ? '🚨' : '📅';
+            const label = isRetireAge ? 'Retire' : isStart ? 'Now' : isDepleted1 ? 'Depleted' : 'Retired';
+
+            if (isComparison && p2) {
+              return (
+                <div key={age} className={`${rowBg} border rounded-lg px-3 py-2.5`}>
+                  <div className="grid grid-cols-[1fr_auto_1fr] gap-2 items-center">
+                    <div>
+                      <div className={`font-semibold text-sm ${isDepleted1 ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-white'}`}>
+                        {formatCompact(Math.max(0, p1.portfolioEnd), country1.currency)}
+                      </div>
+                      {p1.isRetired && p1.withdrawal > 0 && !isDepleted1 && (
+                        <div className="text-[10px] text-gray-500 dark:text-gray-400">
+                          {formatCompact(p1.withdrawal, country1.currency)}/yr
+                        </div>
+                      )}
+                    </div>
+                    <div className="text-center px-1">
+                      <div className="text-sm">{icon}</div>
+                      <div className="text-xs font-medium text-gray-900 dark:text-white">{age}</div>
+                      <div className="text-[10px] text-gray-500 dark:text-gray-400">{label}</div>
+                    </div>
+                    <div className="text-right">
+                      <div className={`font-semibold text-sm ${isDepleted2 ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-white'}`}>
+                        {formatCompact(Math.max(0, p2.portfolioEnd), country2?.currency || 'USD')}
+                      </div>
+                      {p2.isRetired && p2.withdrawal > 0 && !isDepleted2 && (
+                        <div className="text-[10px] text-gray-500 dark:text-gray-400">
+                          {formatCompact(p2.withdrawal, country2?.currency || 'USD')}/yr
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            }
+
+            // Single country view
+            return (
+              <div key={age} className={`${rowBg} border rounded-lg px-3 py-2.5`}>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm">{icon}</span>
+                    <div>
+                      <div className="text-xs font-medium text-gray-900 dark:text-white">Age {age}</div>
+                      <div className="text-[10px] text-gray-500 dark:text-gray-400">{label}</div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className={`font-semibold text-sm ${isDepleted1 ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-white'}`}>
+                      {formatCompact(Math.max(0, p1.portfolioEnd), country1.currency)}
+                    </div>
+                    {p1.isRetired && p1.withdrawal > 0 && !isDepleted1 && (
+                      <div className="text-[10px] text-gray-500 dark:text-gray-400">
+                        {formatCompact(p1.withdrawal, country1.currency)}/yr
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          });
+        })()}
       </div>
 
       {/* Legend */}
