@@ -83,24 +83,20 @@ export function ResultsPanel({
     const yearsDiff = Math.abs(result1.yearsUntilFIRE - result2.yearsUntilFIRE);
     const earliestDiff = Math.abs(earliest1 - earliest2);
     
-    // If same timeline, winner is the one with lower FIRE number (in USD for fair comparison)
-    const winner = result1.yearsUntilFIRE === result2.yearsUntilFIRE
-      ? comparison.lowerFIRENumber
-      : comparison.earlierRetirement;
+    // Determine winner using earliest possible FIRE age (the real comparison)
+    const winner = earliestDiff >= 1
+      ? (earliest1 <= earliest2 ? country1Code : country2Code)
+      : comparison.lowerFIRENumber;  // If same earliest age, lower FIRE number wins
     
-    // Build message - highlight earliest possible age if significantly different
+    // Build message using earliest ages
     let message: string;
-    if (result1.yearsUntilFIRE === result2.yearsUntilFIRE) {
-      const savingsUSD = comparison.fireNumberDifferenceUSD;
-      if (earliestDiff >= 2) {
-        const earlierCountry = earliest1 < earliest2 ? country1Code : country2Code;
-        const earlierAge = Math.min(earliest1, earliest2);
-        message = `Could FIRE at age ${earlierAge} in ${countries[earlierCountry]?.name} — ${earliestDiff}yr earlier!`;
-      } else {
-        message = `Same timeline, ${formatCurrency(savingsUSD, 'USD')} lower FIRE number`;
-      }
+    if (earliestDiff >= 2) {
+      const earlierAge = Math.min(earliest1, earliest2);
+      message = `FIRE at age ${earlierAge} — ${earliestDiff}yr sooner than ${countries[earliest1 <= earliest2 ? country2Code : country1Code]?.name}`;
+    } else if (earliestDiff >= 1) {
+      message = `FIRE ${earliestDiff} year sooner`;
     } else {
-      message = `FIRE ${yearsDiff} year${yearsDiff === 1 ? '' : 's'} sooner`;
+      message = `Same timeline, ${formatCurrency(comparison.fireNumberDifferenceUSD, 'USD')} lower FIRE number`;
     }
     
     return {
@@ -542,8 +538,12 @@ function CountryCard({
             });
             const earliestAge = alreadyFI ? (currentAge || 35) : earliestFI?.age;
             const targetAge2 = targetRetirementAge || 50;
-            const couldRetireEarlier = earliestAge && earliestAge < targetAge2 - 1;
-            const yearsEarly = couldRetireEarlier ? targetAge2 - earliestAge : 0;
+            const couldRetireEarlier = earliestAge !== undefined && earliestAge < targetAge2 - 1;
+            const earliestYears = earliestAge !== undefined ? Math.max(0, earliestAge - (currentAge || 35)) : null;
+            
+            // Show the earliest realistic number, not the artificial target
+            const displayYears = couldRetireEarlier ? earliestYears! : result.yearsUntilFIRE;
+            const displayAge = couldRetireEarlier ? earliestAge! : result.fireAge;
             
             return (
               <>
@@ -551,7 +551,9 @@ function CountryCard({
                   {alreadyFI ? (
                     <span className="text-green-600 dark:text-green-400">0 years</span>
                   ) : canFIRE ? (
-                    <>{result.yearsUntilFIRE} years</>
+                    <span className={couldRetireEarlier ? 'text-green-600 dark:text-green-400' : ''}>
+                      {displayYears} year{displayYears === 1 ? '' : 's'}
+                    </span>
                   ) : (
                     <span className="text-red-600 dark:text-red-400">Cannot retire</span>
                   )}
@@ -562,7 +564,7 @@ function CountryCard({
                   </p>
                 ) : couldRetireEarlier ? (
                   <p className="text-[10px] sm:text-xs text-green-600 dark:text-green-400 mt-0.5">
-                    🚀 Could FIRE at age {earliestAge} — {yearsEarly}yr earlier than target!
+                    🚀 Age {displayAge} — {targetAge2 - displayAge}yr ahead of your target!
                   </p>
                 ) : canFIRE && (
                   <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 mt-0.5">
