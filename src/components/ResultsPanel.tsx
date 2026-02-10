@@ -14,6 +14,7 @@ import HealthcareAffiliate from './HealthcareAffiliate';
 import BankingAffiliate from './BankingAffiliate';
 import NextStepsPanel from './NextStepsPanel';
 import { JourneyTimeline } from './JourneyTimeline';
+import { AnimatedNumber } from './AnimatedNumber';
 
 interface ResultsPanelProps {
   result1: FIREResult;
@@ -101,7 +102,7 @@ export function ResultsPanel({
 
       {/* 🏆 SUMMARY - Now at the TOP */}
       {!isSameCountry && winnerInfo && (
-        <div className={`rounded-xl p-4 ${
+        <div className={`rounded-xl p-4 animate-scale-in ${
           winnerInfo.type === 'success' 
             ? 'bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 border-2 border-green-400 dark:border-green-500' 
             : 'bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/30 dark:to-orange-900/30 border-2 border-amber-400 dark:border-amber-500'
@@ -436,7 +437,10 @@ function CountryCard({
         <div>
           <span className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">FIRE Number</span>
           <p className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white">
-            {formatCurrency(result.fireNumber, country?.currency || 'USD')}
+            <AnimatedNumber 
+              value={result.fireNumber} 
+              formatter={(n) => formatCurrency(Math.round(n), country?.currency || 'USD')} 
+            />
           </p>
         </div>
 

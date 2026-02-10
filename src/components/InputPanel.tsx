@@ -1171,25 +1171,38 @@ function AdvancedSettings({ inputs, onChange }: { inputs: UserInputs; onChange: 
 
 function Tooltip({ text }: { text: string }) {
   const [show, setShow] = useState(false);
+  const ref = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    if (!show) return;
+    const handleClickOutside = (e: MouseEvent | TouchEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setShow(false);
+      }
+    };
+    // Small delay to prevent the opening click from immediately closing
+    const timer = setTimeout(() => {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('touchstart', handleClickOutside);
+    }, 10);
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
+  }, [show]);
+
   return (
-    <span className="relative inline-block ml-0.5">
+    <span ref={ref} className="relative inline-block ml-0.5">
       <span 
-        className="text-gray-400 dark:text-gray-500 cursor-help text-xs"
-        onClick={() => setShow(!show)}
-        onMouseEnter={() => setShow(true)}
-        onMouseLeave={() => setShow(false)}
+        className="text-gray-400 dark:text-gray-500 cursor-help text-xs select-none"
+        onClick={(e) => { e.stopPropagation(); setShow(!show); }}
       >ⓘ</span>
       {show && (
-        <>
-          {/* Mobile backdrop */}
-          <div 
-            className="fixed inset-0 z-40 sm:hidden" 
-            onClick={() => setShow(false)}
-          />
-          <span className="absolute bottom-full left-0 sm:left-1/2 sm:-translate-x-1/2 mb-2 px-2 py-1.5 text-[10px] sm:text-xs text-white bg-gray-800 dark:bg-slate-700 rounded shadow-lg z-50 w-48 sm:w-64 text-left sm:text-center leading-relaxed max-w-[calc(100vw-3rem)]">
-            {text}
-          </span>
-        </>
+        <span className="absolute bottom-full left-0 sm:left-1/2 sm:-translate-x-1/2 mb-2 px-2.5 py-1.5 text-[10px] sm:text-xs text-white bg-gray-800 dark:bg-slate-700 rounded-lg shadow-lg z-50 w-48 sm:w-64 text-left sm:text-center leading-relaxed max-w-[calc(100vw-3rem)] animate-fade-in">
+          {text}
+          <div className="absolute top-full left-4 sm:left-1/2 sm:-translate-x-1/2 border-[6px] border-transparent border-t-gray-800 dark:border-t-slate-700" />
+        </span>
       )}
     </span>
   );

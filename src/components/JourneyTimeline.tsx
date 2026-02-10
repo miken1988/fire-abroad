@@ -228,13 +228,13 @@ export function JourneyTimeline({
 
               {projections2 && (
                 <>
-                  <path d={generateAreaPath(projections2, maxValue, minAge, maxAge)} fill="url(#gradient2)" />
-                  <path d={generateLinePath(projections2, maxValue, minAge, maxAge)} fill="none" stroke="#10b981" strokeWidth="0.8" vectorEffect="non-scaling-stroke" style={{ strokeWidth: '2px' }} />
+                  <path d={generateAreaPath(projections2, maxValue, minAge, maxAge)} fill="url(#gradient2)" className="animate-chart-area" />
+                  <path d={generateLinePath(projections2, maxValue, minAge, maxAge)} fill="none" stroke="#10b981" strokeWidth="0.8" vectorEffect="non-scaling-stroke" style={{ strokeWidth: '2px' }} className="animate-chart-line" />
                 </>
               )}
 
-              <path d={generateAreaPath(projections1, maxValue, minAge, maxAge)} fill="url(#gradient1)" />
-              <path d={generateLinePath(projections1, maxValue, minAge, maxAge)} fill="none" stroke="#3b82f6" strokeWidth="0.8" vectorEffect="non-scaling-stroke" style={{ strokeWidth: '2px' }} />
+              <path d={generateAreaPath(projections1, maxValue, minAge, maxAge)} fill="url(#gradient1)" className="animate-chart-area" />
+              <path d={generateLinePath(projections1, maxValue, minAge, maxAge)} fill="none" stroke="#3b82f6" strokeWidth="0.8" vectorEffect="non-scaling-stroke" style={{ strokeWidth: '2px' }} className="animate-chart-line" />
             </svg>
 
             {/* Hover/touch zones */}

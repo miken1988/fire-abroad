@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import { UserInputs, compareFIRE } from '@/lib/calculations';
 import { countries } from '@/data/countries';
 import { InputPanel } from './InputPanel';
@@ -343,6 +343,23 @@ export function Calculator() {
   const [advancedMode, setAdvancedMode] = useState(false);
   const [showMobileComparison, setShowMobileComparison] = useState(false);
 
+  // Swipe handling for mobile tabs
+  const touchStartX = useRef(0);
+  const touchStartY = useRef(0);
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+  }, []);
+  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+    const dx = e.changedTouches[0].clientX - touchStartX.current;
+    const dy = e.changedTouches[0].clientY - touchStartY.current;
+    // Only swipe if horizontal movement is dominant and > 80px
+    if (Math.abs(dx) > 80 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+      if (dx < 0 && activeTab === 'inputs') setActiveTab('results');
+      if (dx > 0 && activeTab === 'results') setActiveTab('inputs');
+    }
+  }, [activeTab]);
+
   // Check if URL has params (returning user) - skip explainer and use advanced mode
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -458,13 +475,21 @@ export function Calculator() {
 
       {/* Mobile Tab Navigation */}
       <div className="lg:hidden border-b border-gray-200 dark:border-slate-700 sticky top-[57px] bg-white dark:bg-slate-900 z-30 transition-colors">
-        <div className="flex">
-          <button onClick={() => setActiveTab('inputs')} className={`flex-1 py-3 text-sm font-medium text-center transition-colors ${activeTab === 'inputs' ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400 bg-blue-50/50 dark:bg-blue-900/20' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'}`}>
+        <div className="flex relative">
+          <button onClick={() => setActiveTab('inputs')} className={`flex-1 py-3 text-sm font-medium text-center transition-colors ${activeTab === 'inputs' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'}`}>
             📝 Your Details
           </button>
-          <button onClick={() => setActiveTab('results')} className={`flex-1 py-3 text-sm font-medium text-center transition-colors ${activeTab === 'results' ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400 bg-blue-50/50 dark:bg-blue-900/20' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'}`}>
+          <button onClick={() => setActiveTab('results')} className={`flex-1 py-3 text-sm font-medium text-center transition-colors ${activeTab === 'results' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'}`}>
             📊 Results
           </button>
+          {/* Animated underline indicator */}
+          <div 
+            className="absolute bottom-0 h-0.5 bg-blue-600 dark:bg-blue-400 transition-all duration-300 ease-out"
+            style={{ 
+              width: '50%', 
+              left: activeTab === 'inputs' ? '0%' : '50%' 
+            }}
+          />
         </div>
       </div>
 
@@ -479,6 +504,7 @@ export function Calculator() {
         {/* Desktop Layout */}
         <div className="hidden lg:grid lg:grid-cols-2 gap-8">
           <div className="space-y-6">
+            <div className="lg:sticky lg:top-20 lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto lg:scrollbar-thin">
             {/* Quick Start or Full Panel */}
             {!advancedMode ? (
               <QuickStartInputs 
@@ -500,6 +526,7 @@ export function Calculator() {
                 <InputPanel inputs={inputs} onChange={setInputs} />
               </div>
             )}
+            </div>
           </div>
           <div>
             {results ? (
@@ -527,9 +554,9 @@ export function Calculator() {
         </div>
 
         {/* Mobile Layout */}
-        <div className="lg:hidden">
+        <div className="lg:hidden" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
           {activeTab === 'inputs' && (
-            <div className="space-y-6">
+            <div className="space-y-6 animate-slide-in-left">
               {!advancedMode ? (
                 <QuickStartInputs 
                   inputs={inputs} 
@@ -559,7 +586,7 @@ export function Calculator() {
             </div>
           )}
           {activeTab === 'results' && results && (
-            <div className="space-y-6">
+            <div className="space-y-6 animate-slide-in-right">
               <ResultsPanel 
                 result1={results.country1} 
                 result2={results.country2} 
