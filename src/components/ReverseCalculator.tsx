@@ -135,6 +135,7 @@ export function ReverseCalculator({
               country={country1}
               getLuxuryEmoji={getLuxuryEmoji}
               getLuxuryLabel={getLuxuryLabel}
+              fmt={fmt}
             />
             {result2 && (
               <SpendingCard 
@@ -142,6 +143,7 @@ export function ReverseCalculator({
                 country={country2}
                 getLuxuryEmoji={getLuxuryEmoji}
                 getLuxuryLabel={getLuxuryLabel}
+                fmt={fmt}
               />
             )}
           </div>
@@ -174,12 +176,14 @@ function SpendingCard({
   result, 
   country,
   getLuxuryEmoji,
-  getLuxuryLabel
+  getLuxuryLabel,
+  fmt
 }: { 
   result: ReverseCalculationResult;
   country: typeof countries[string];
   getLuxuryEmoji: (level: string) => string;
   getLuxuryLabel: (level: string) => string;
+  fmt: (amount: number, currency: string) => string;
 }) {
   return (
     <div className="bg-white dark:bg-slate-800 rounded-lg p-3 space-y-2">
