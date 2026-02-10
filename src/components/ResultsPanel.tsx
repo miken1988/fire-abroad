@@ -212,7 +212,24 @@ export function ResultsPanel({
       {/* 🔥 FIRE Journey Chart - Moved up for maximum visibility */}
       <JourneyTimeline
         projections1={result1.projections}
-        projections2={isSameCountry ? undefined : result2.projections}
+        projections2={isSameCountry ? undefined : (() => {
+          // Normalize country2 projections to country1's currency for chart comparison
+          const c1Currency = country1?.currency || 'USD';
+          const c2Currency = country2?.currency || 'USD';
+          if (c1Currency === c2Currency) return result2.projections;
+          return result2.projections.map(p => ({
+            ...p,
+            portfolioEnd: convertCurrency(p.portfolioEnd, c2Currency, c1Currency),
+            portfolioStart: convertCurrency(p.portfolioStart, c2Currency, c1Currency),
+            liquidEnd: convertCurrency(p.liquidEnd, c2Currency, c1Currency),
+            liquidStart: convertCurrency(p.liquidStart, c2Currency, c1Currency),
+            illiquidEnd: convertCurrency(p.illiquidEnd || 0, c2Currency, c1Currency),
+            illiquidStart: convertCurrency(p.illiquidStart || 0, c2Currency, c1Currency),
+            growth: convertCurrency(p.growth, c2Currency, c1Currency),
+            withdrawal: convertCurrency(p.withdrawal, c2Currency, c1Currency),
+            savings: convertCurrency(p.savings, c2Currency, c1Currency),
+          }));
+        })()}
         country1Code={country1Code}
         country2Code={isSameCountry ? undefined : country2Code}
         retirementAge={inputs?.targetRetirementAge || 50}
