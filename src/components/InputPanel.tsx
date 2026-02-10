@@ -611,7 +611,7 @@ export function InputPanel({ inputs, onChange }: InputPanelProps) {
     if (accountId.includes('pension') || accountId.includes('traditional') || accountId.includes('401k') || accountId.includes('ira') || accountId.includes('rrsp') || accountId.includes('super') || accountId.includes('per') || accountId.includes('pillar') || accountId.includes('cpf') || accountId.includes('afore')) {
       return inputs.traditionalRetirementAccounts;
     }
-    if (accountId.includes('roth') || accountId.includes('isa') || accountId.includes('tfsa') || accountId.includes('srs')) {
+    if (accountId.includes('roth') || accountId.includes('isa') || accountId.includes('tfsa') || accountId.includes('srs') || accountId.includes('_av')) {
       return inputs.rothAccounts;
     }
     return inputs.taxableAccounts;
@@ -620,7 +620,7 @@ export function InputPanel({ inputs, onChange }: InputPanelProps) {
   const setAccountValue = (accountId: string, value: number) => {
     if (accountId.includes('pension') || accountId.includes('traditional') || accountId.includes('401k') || accountId.includes('ira') || accountId.includes('rrsp') || accountId.includes('super') || accountId.includes('per') || accountId.includes('pillar') || accountId.includes('cpf') || accountId.includes('afore')) {
       handleChange('traditionalRetirementAccounts', value);
-    } else if (accountId.includes('roth') || accountId.includes('isa') || accountId.includes('tfsa') || accountId.includes('srs')) {
+    } else if (accountId.includes('roth') || accountId.includes('isa') || accountId.includes('tfsa') || accountId.includes('srs') || accountId.includes('_av')) {
       handleChange('rothAccounts', value);
     } else {
       handleChange('taxableAccounts', value);

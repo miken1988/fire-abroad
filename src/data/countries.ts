@@ -182,17 +182,14 @@ countries['IE'] = {
 // Add Ireland account types
 countryAccountTypes['IE'] = [
   { id: 'ie_pension', name: 'Occupational Pension / PRSA', shortName: 'Pension', description: 'Tax-relieved pension. 25% tax-free lump sum (limits apply), rest taxed as income.', taxTreatmentDomestic: 'Tax-relieved', icon: '🏦' },
-  { id: 'ie_shares', name: 'Direct Shares', shortName: 'Shares', description: 'Individual stocks. 33% CGT, NO deemed disposal (unlike ETFs).', taxTreatmentDomestic: '33% CGT', icon: '📈' },
-  { id: 'ie_etf', name: 'ETFs / Funds', shortName: 'ETFs', description: 'ETFs and funds. 41% exit tax with deemed disposal every 8 years. Very unfavorable.', taxTreatmentDomestic: '41% Exit Tax', icon: '⚠️' },
+  { id: 'ie_investment', name: 'Stocks & ETFs', shortName: 'Stocks & ETFs', description: 'Direct shares: 33% CGT. ETFs/funds: 41% exit tax with deemed disposal every 8 years.', taxTreatmentDomestic: '33% CGT / 41% exit', icon: '📈' },
 ];
 
 // Add Ireland cross-border treatments
 crossBorderTreatment['ie_pension->US'] = { treatment: 'Recognized under US-Ireland treaty. Withdrawals taxed as income in US.', effectiveTaxType: 'income' };
 crossBorderTreatment['ie_pension->UK'] = { treatment: 'Recognized under UK-Ireland arrangements. Withdrawals taxed as income.', effectiveTaxType: 'income' };
-crossBorderTreatment['ie_shares->US'] = { treatment: 'Subject to US CGT on gains realized while US resident.', effectiveTaxType: 'capitalGains' };
-crossBorderTreatment['ie_shares->UK'] = { treatment: 'Subject to UK CGT at 18/24%.', effectiveTaxType: 'capitalGains' };
-crossBorderTreatment['ie_etf->US'] = { treatment: 'Irish ETFs may be PFICs. Consider selling before moving.', warning: 'Irish-domiciled ETFs are likely PFICs - punitive US taxation.', effectiveTaxType: 'capitalGains' };
-crossBorderTreatment['ie_etf->UK'] = { treatment: 'UK has reporting fund rules. Check if your ETFs qualify.', warning: 'Non-reporting funds taxed as income, not CGT.', effectiveTaxType: 'capitalGains' };
+crossBorderTreatment['ie_investment->US'] = { treatment: 'Subject to US CGT on gains. Irish-domiciled ETFs may be PFICs - consider selling before moving.', warning: 'Irish-domiciled ETFs are likely PFICs - punitive US taxation.', effectiveTaxType: 'capitalGains' };
+crossBorderTreatment['ie_investment->UK'] = { treatment: 'Subject to UK CGT at 18/24%. Check if ETFs qualify as reporting funds.', warning: 'Non-reporting funds taxed as income, not CGT.', effectiveTaxType: 'capitalGains' };
 
 // Treatments for moving TO Ireland
 crossBorderTreatment['us_traditional->IE'] = { treatment: 'US-Ireland treaty applies. Withdrawals taxed as income in Ireland at 20-40%.', effectiveTaxType: 'income' };
