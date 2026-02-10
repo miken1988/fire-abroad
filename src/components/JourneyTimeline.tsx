@@ -316,7 +316,7 @@ export function JourneyTimeline({
               ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
               : 'bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700';
             
-            const icon = isRetireAge ? '🎉' : isStart ? '📍' : isDepleted1 ? '🚨' : '📅';
+            const icon = isRetireAge ? '🎉' : isStart ? '📍' : isDepleted1 ? '🚨' : null;
             const label = isRetireAge ? 'Retire' : isStart ? 'Now' : isDepleted1 ? 'Depleted' : 'Retired';
 
             if (isComparison && p2) {
@@ -334,8 +334,8 @@ export function JourneyTimeline({
                       )}
                     </div>
                     <div className="text-center px-1">
-                      <div className="text-sm">{icon}</div>
-                      <div className="text-xs font-medium text-gray-900 dark:text-white">{age}</div>
+                      {icon && <div className="text-sm">{icon}</div>}
+                      <div className={`font-bold text-gray-900 dark:text-white ${icon ? 'text-xs' : 'text-base'}`}>{age}</div>
                       <div className="text-[10px] text-gray-500 dark:text-gray-400">{label}</div>
                     </div>
                     <div className="text-right">
@@ -358,7 +358,7 @@ export function JourneyTimeline({
               <div key={age} className={`${rowBg} border rounded-lg px-3 py-2.5`}>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <span className="text-sm">{icon}</span>
+                    {icon && <span className="text-sm">{icon}</span>}
                     <div>
                       <div className="text-xs font-medium text-gray-900 dark:text-white">Age {age}</div>
                       <div className="text-[10px] text-gray-500 dark:text-gray-400">{label}</div>
@@ -499,7 +499,7 @@ function MilestoneCards({ projections1, projections2, country1, country2, retire
 
           let bgColor = 'bg-white dark:bg-slate-800';
           let borderColor = 'border-gray-200 dark:border-slate-700';
-          let icon = '📅';
+          let icon: string | null = null;
           let status = proj.isRetired ? 'Retired' : 'Working';
 
           // Priority order for status (only one shows)
@@ -529,7 +529,7 @@ function MilestoneCards({ projections1, projections2, country1, country2, retire
             <div key={age} className={`${bgColor} border ${borderColor} rounded-lg p-3`}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="text-lg">{icon}</span>
+                  {icon && <span className="text-lg">{icon}</span>}
                   <div>
                     <div className="font-medium text-gray-900 dark:text-white">Age {age}</div>
                     <div className="text-xs text-gray-500 dark:text-gray-400">
