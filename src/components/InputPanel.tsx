@@ -1121,14 +1121,14 @@ function AdvancedSettings({ inputs, onChange }: { inputs: UserInputs; onChange: 
                 Expected Return (Stocks)
                 <Tooltip text="Expected annual return for stocks/equities. Property grows at ~inflation+2%, crypto at this rate+3%, cash at ~0% real." />
               </label>
-              <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">{(inputs.expectedReturn * 100).toFixed(1)}%</span>
+              <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">{((inputs.assetReturns?.stocks ?? inputs.expectedReturn) * 100).toFixed(1)}%</span>
             </div>
             <input
               type="range"
-              min="0.01"
-              max="0.15"
+              min="-0.05"
+              max="0.20"
               step="0.005"
-              value={inputs.expectedReturn}
+              value={inputs.assetReturns?.stocks ?? inputs.expectedReturn}
               onChange={(e) => onChange('expectedReturn', parseFloat(e.target.value))}
               className="w-full h-2 bg-gray-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-600"
             />
