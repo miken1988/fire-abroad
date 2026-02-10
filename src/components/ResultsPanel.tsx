@@ -124,15 +124,15 @@ export function ResultsPanel({
                 {winnerInfo.message}
               </p>
               <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0"></span>
-                  <span className="text-gray-600 dark:text-gray-400">
+                <div className="flex items-start gap-2">
+                  <span className="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0 mt-1"></span>
+                  <span className="text-gray-600 dark:text-gray-400 break-words">
                     FIRE # {formatCurrency(comparison.fireNumberDifferenceUSD, 'USD')} {comparison.lowerFIRENumber === country1Code ? 'lower in ' + country1?.name : 'lower in ' + country2?.name}
                   </span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0"></span>
-                  <span className="text-gray-600 dark:text-gray-400">
+                <div className="flex items-start gap-2">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0 mt-1"></span>
+                  <span className="text-gray-600 dark:text-gray-400 break-words">
                     Tax {formatPercent(comparison.taxRateDifference)} {comparison.lowerEffectiveTaxRate === country1Code ? 'lower in ' + country1?.name : 'lower in ' + country2?.name}
                   </span>
                 </div>
@@ -499,7 +499,7 @@ function CountryCard({
           <p className="text-sm sm:text-base font-medium text-gray-900 dark:text-white">
             {formatPercent(result.effectiveTaxRate)}
           </p>
-          <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5">
+          <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5 break-words">
             Gross {formatCurrency(result.annualWithdrawalGross, country?.currency || 'USD')} → Net {formatCurrency(result.annualWithdrawalNet, country?.currency || 'USD')}
           </p>
         </div>

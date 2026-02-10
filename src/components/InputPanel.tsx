@@ -186,7 +186,7 @@ function MoneySlider({
             onChange={handleTextChange}
             onFocus={handleTextFocus}
             onBlur={handleTextBlur}
-            className="w-24 sm:w-28 px-2 py-1 text-right text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="w-24 sm:w-28 px-2 py-1 text-right text-base sm:text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
       </div>
@@ -650,12 +650,12 @@ export function InputPanel({ inputs, onChange }: InputPanelProps) {
           <div>
             <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Current Age</label>
             <input
-              type="number"
+              type="text" inputMode="numeric"
               value={currentAgeInput.value}
               onChange={currentAgeInput.onChange}
               onFocus={currentAgeInput.onFocus}
               onBlur={currentAgeInput.onBlur}
-              className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-800 text-gray-900 dark:text-white"
+              className="w-full px-3 py-2 text-base sm:text-sm border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-800 text-gray-900 dark:text-white"
             />
           </div>
           <div>
@@ -664,12 +664,12 @@ export function InputPanel({ inputs, onChange }: InputPanelProps) {
               <Tooltip text="The age you want to stop working and live off investments" />
             </label>
             <input
-              type="number"
+              type="text" inputMode="numeric"
               value={retirementAgeInput.value}
               onChange={retirementAgeInput.onChange}
               onFocus={retirementAgeInput.onFocus}
               onBlur={retirementAgeInput.onBlur}
-              className="w-full px-3 py-2 text-sm sm:text-base border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-800 text-gray-900 dark:text-white"
+              className="w-full px-3 py-2 text-base sm:text-sm border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-800 text-gray-900 dark:text-white"
             />
           </div>
         </div>
@@ -684,7 +684,7 @@ export function InputPanel({ inputs, onChange }: InputPanelProps) {
             <select
               value={inputs.currentCountry}
               onChange={(e) => handleChange('currentCountry', e.target.value)}
-              className="w-full px-2 sm:px-3 py-2 text-sm sm:text-base border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-800 text-gray-900 dark:text-white"
+              className="w-full px-2 sm:px-3 py-2 text-base sm:text-sm border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-800 text-gray-900 dark:text-white"
             >
               {countryOptions.map(opt => (
                 <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -699,7 +699,7 @@ export function InputPanel({ inputs, onChange }: InputPanelProps) {
             <select
               value={inputs.targetCountry}
               onChange={(e) => handleChange('targetCountry', e.target.value)}
-              className="w-full px-2 sm:px-3 py-2 text-sm sm:text-base border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-800 text-gray-900 dark:text-white"
+              className="w-full px-2 sm:px-3 py-2 text-base sm:text-sm border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-800 text-gray-900 dark:text-white"
             >
               {countryOptions.map(opt => (
                 <option key={opt.value} value={opt.value}>{opt.label}</option>
@@ -739,7 +739,7 @@ export function InputPanel({ inputs, onChange }: InputPanelProps) {
               onChange={portfolioValueInput.onChange}
               onFocus={portfolioValueInput.onFocus}
               onBlur={portfolioValueInput.onBlur}
-              className="flex-1 min-w-0 px-3 py-2 text-sm sm:text-base border border-gray-300 dark:border-slate-600 rounded-r-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-800 text-gray-900 dark:text-white"
+              className="flex-1 min-w-0 px-3 py-2 text-base sm:text-sm border border-gray-300 dark:border-slate-600 rounded-r-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-800 text-gray-900 dark:text-white"
             />
           </div>
           {totalAllocated > inputs.portfolioValue && (
@@ -859,7 +859,7 @@ export function InputPanel({ inputs, onChange }: InputPanelProps) {
                 onChange={annualSpendingInput.onChange}
                 onFocus={annualSpendingInput.onFocus}
                 onBlur={annualSpendingInput.onBlur}
-                className="flex-1 min-w-0 px-3 py-2 text-sm sm:text-base border border-gray-300 dark:border-slate-600 rounded-r-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-800 text-gray-900 dark:text-white"
+                className="flex-1 min-w-0 px-3 py-2 text-base sm:text-sm border border-gray-300 dark:border-slate-600 rounded-r-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-800 text-gray-900 dark:text-white"
               />
             </div>
             <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-1">
@@ -890,7 +890,7 @@ export function InputPanel({ inputs, onChange }: InputPanelProps) {
                     onChange={annualSavingsInput.onChange}
                     onFocus={annualSavingsInput.onFocus}
                     onBlur={annualSavingsInput.onBlur}
-                    className="flex-1 min-w-0 px-3 py-2 text-sm sm:text-base border border-gray-300 dark:border-slate-600 rounded-r-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-800 text-gray-900 dark:text-white"
+                    className="flex-1 min-w-0 px-3 py-2 text-base sm:text-sm border border-gray-300 dark:border-slate-600 rounded-r-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-800 text-gray-900 dark:text-white"
                     placeholder="0"
                   />
                 </div>
@@ -933,12 +933,12 @@ export function InputPanel({ inputs, onChange }: InputPanelProps) {
                   <div>
                     <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">Start Age</label>
                     <input
-                      type="number"
+                      type="text" inputMode="numeric"
                       value={pensionAgeInput.value}
                       onChange={pensionAgeInput.onChange}
                       onFocus={pensionAgeInput.onFocus}
                       onBlur={pensionAgeInput.onBlur}
-                      className="w-full px-2 py-1.5 text-sm border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-800 text-gray-900 dark:text-white"
+                      className="w-full px-2 py-1.5 text-base sm:text-sm border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-800 text-gray-900 dark:text-white"
                     />
                   </div>
                   <div>
@@ -954,7 +954,7 @@ export function InputPanel({ inputs, onChange }: InputPanelProps) {
                         onChange={pensionAmountInput.onChange}
                         onFocus={pensionAmountInput.onFocus}
                         onBlur={pensionAmountInput.onBlur}
-                        className="flex-1 min-w-0 px-2 py-1.5 text-sm border border-gray-300 dark:border-slate-600 rounded-r-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-800 text-gray-900 dark:text-white"
+                        className="flex-1 min-w-0 px-2 py-1.5 text-base sm:text-sm border border-gray-300 dark:border-slate-600 rounded-r-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-800 text-gray-900 dark:text-white"
                       />
                     </div>
                   </div>
@@ -1018,12 +1018,12 @@ export function InputPanel({ inputs, onChange }: InputPanelProps) {
                   <div>
                     <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">Start Age</label>
                     <input
-                      type="number"
+                      type="text" inputMode="numeric"
                       value={destPensionAgeInput.value}
                       onChange={destPensionAgeInput.onChange}
                       onFocus={destPensionAgeInput.onFocus}
                       onBlur={destPensionAgeInput.onBlur}
-                      className="w-full px-2 py-1.5 text-sm border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-white dark:bg-slate-800 text-gray-900 dark:text-white"
+                      className="w-full px-2 py-1.5 text-base sm:text-sm border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-white dark:bg-slate-800 text-gray-900 dark:text-white"
                     />
                   </div>
                   <div>
@@ -1039,7 +1039,7 @@ export function InputPanel({ inputs, onChange }: InputPanelProps) {
                         onChange={destPensionAmountInput.onChange}
                         onFocus={destPensionAmountInput.onFocus}
                         onBlur={destPensionAmountInput.onBlur}
-                        className="flex-1 min-w-0 px-2 py-1.5 text-sm border border-gray-300 dark:border-slate-600 rounded-r-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-white dark:bg-slate-800 text-gray-900 dark:text-white"
+                        className="flex-1 min-w-0 px-2 py-1.5 text-base sm:text-sm border border-gray-300 dark:border-slate-600 rounded-r-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-white dark:bg-slate-800 text-gray-900 dark:text-white"
                       />
                     </div>
                   </div>
@@ -1170,12 +1170,27 @@ function AdvancedSettings({ inputs, onChange }: { inputs: UserInputs; onChange: 
 }
 
 function Tooltip({ text }: { text: string }) {
+  const [show, setShow] = useState(false);
   return (
-    <span className="group relative inline-block ml-0.5">
-      <span className="text-gray-400 dark:text-gray-500 cursor-help text-xs">ⓘ</span>
-      <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-[10px] sm:text-xs text-white bg-gray-800 dark:bg-slate-700 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-50 max-w-[200px] sm:max-w-xs text-center">
-        {text}
-      </span>
+    <span className="relative inline-block ml-0.5">
+      <span 
+        className="text-gray-400 dark:text-gray-500 cursor-help text-xs"
+        onClick={() => setShow(!show)}
+        onMouseEnter={() => setShow(true)}
+        onMouseLeave={() => setShow(false)}
+      >ⓘ</span>
+      {show && (
+        <>
+          {/* Mobile backdrop */}
+          <div 
+            className="fixed inset-0 z-40 sm:hidden" 
+            onClick={() => setShow(false)}
+          />
+          <span className="absolute bottom-full left-0 sm:left-1/2 sm:-translate-x-1/2 mb-2 px-2 py-1.5 text-[10px] sm:text-xs text-white bg-gray-800 dark:bg-slate-700 rounded shadow-lg z-50 w-48 sm:w-64 text-left sm:text-center leading-relaxed max-w-[calc(100vw-3rem)]">
+            {text}
+          </span>
+        </>
+      )}
     </span>
   );
 }

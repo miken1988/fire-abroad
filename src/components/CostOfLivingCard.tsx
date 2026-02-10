@@ -48,17 +48,17 @@ export function CostOfLivingCard({
       
       {/* Main comparison */}
       <div className="bg-gray-50 dark:bg-slate-700/50 rounded-lg p-3 mb-4">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-sm text-gray-600 dark:text-gray-300">Your {formatCurrency(annualSpending, spendingCurrency)}/yr in {from.name}</span>
+        <div className="mb-2">
+          <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 break-words">Your {formatCurrency(annualSpending, spendingCurrency)}/yr in {from.name}</span>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="text-xl dark:text-gray-300">→</span>
-          <div>
-            <span className="text-lg font-bold text-purple-600 dark:text-purple-400">
+        <div className="flex items-start gap-2">
+          <span className="text-xl dark:text-gray-300 flex-shrink-0">→</span>
+          <div className="min-w-0">
+            <span className="text-base sm:text-lg font-bold text-purple-600 dark:text-purple-400 break-words">
               {formatCurrency(adjustedInLocalCurrency, to.currency)}/yr
             </span>
-            <span className="text-sm text-gray-500 dark:text-gray-400 ml-2">
-              equivalent in {to.name}
+            <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 ml-1 sm:ml-2">
+              in {to.name}
             </span>
           </div>
         </div>

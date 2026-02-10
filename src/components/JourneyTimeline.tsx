@@ -237,13 +237,17 @@ export function JourneyTimeline({
               <path d={generateLinePath(projections1, maxValue, minAge, maxAge)} fill="none" stroke="#3b82f6" strokeWidth="0.8" vectorEffect="non-scaling-stroke" style={{ strokeWidth: '2px' }} />
             </svg>
 
-            {/* Hover zones */}
-            <div className="absolute inset-0 flex z-20">
+            {/* Hover/touch zones */}
+            <div 
+              className="absolute inset-0 flex z-20"
+              onTouchEnd={() => setHoveredAge(null)}
+            >
               {projections1.map((proj) => (
                 <div
                   key={proj.age}
                   className="flex-1 cursor-crosshair hover:bg-blue-500/5"
                   onMouseEnter={() => setHoveredAge(proj.age)}
+                  onTouchStart={(e) => { e.preventDefault(); setHoveredAge(proj.age); }}
                 />
               ))}
             </div>

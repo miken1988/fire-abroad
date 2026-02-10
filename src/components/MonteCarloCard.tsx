@@ -54,7 +54,7 @@ export function MonteCarloCard({ inputs, fireResult, countryCode }: MonteCarloCa
             </div>
             <div className="flex items-center gap-3">
               <div className="text-right">
-                <div className="text-2xl font-bold text-gray-400">—%</div>
+                <div className="text-xl sm:text-2xl font-bold text-gray-400">—%</div>
                 <div className="text-xs font-medium text-gray-400">Loading</div>
               </div>
             </div>
@@ -97,7 +97,7 @@ export function MonteCarloCard({ inputs, fireResult, countryCode }: MonteCarloCa
           </div>
           <div className="flex items-center gap-3">
             <div className="text-right">
-              <div className={`text-2xl font-bold ${ratingColor}`}>{successPct}%</div>
+              <div className={`text-xl sm:text-2xl font-bold ${ratingColor}`}>{successPct}%</div>
               <div className={`text-xs font-medium ${ratingColor}`}>{ratingLabel}</div>
             </div>
             <svg

@@ -89,8 +89,8 @@ export function VisaCard({ countryCode, userAge, annualIncome = 0, portfolioValu
               >
                 <div className="flex items-center gap-2">
                   <span className="text-lg">{getTypeIcon(option.type)}</span>
-                  <div>
-                    <p className="text-sm font-medium text-gray-900 dark:text-white">{option.name}</p>
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{option.name}</p>
                     <p className="text-[10px] text-gray-500 dark:text-gray-400">
                       {getTypeLabel(option.type)} • {option.duration}
                       {option.renewable && ' • Renewable'}
