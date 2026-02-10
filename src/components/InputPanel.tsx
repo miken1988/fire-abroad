@@ -527,6 +527,11 @@ export function InputPanel({ inputs, onChange }: InputPanelProps) {
   const handleChange = (field: keyof UserInputs, value: any) => {
     const newInputs = { ...inputs, [field]: value };
     
+    // Keep expectedReturn and assetReturns.stocks in sync
+    if (field === 'expectedReturn') {
+      newInputs.assetReturns = { ...newInputs.assetReturns, stocks: value };
+    }
+    
     if (field === 'currentCountry') {
       newInputs.portfolioCurrency = countries[value]?.currency || 'USD';
       newInputs.spendingCurrency = countries[value]?.currency || 'USD';
@@ -568,8 +573,7 @@ export function InputPanel({ inputs, onChange }: InputPanelProps) {
   };
 
   const handleAssetReturnChange = (assetType: 'stocks' | 'property' | 'crypto' | 'cash', rate: number) => {
-    onChange({
-      ...inputs,
+    const updates: Partial<UserInputs> = {
       assetReturns: { 
         ...inputs.assetReturns,
         stocks: inputs.assetReturns?.stocks ?? inputs.expectedReturn,
@@ -578,7 +582,12 @@ export function InputPanel({ inputs, onChange }: InputPanelProps) {
         cash: inputs.assetReturns?.cash ?? (inputs.inflationRate * 0.5),
         [assetType]: rate 
       },
-    });
+    };
+    // Keep expectedReturn in sync when stocks return changes
+    if (assetType === 'stocks') {
+      updates.expectedReturn = rate;
+    }
+    onChange({ ...inputs, ...updates });
   };
 
   // Default asset returns (for display)
