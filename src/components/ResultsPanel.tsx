@@ -13,6 +13,7 @@ import { UserInputs } from '@/lib/calculations';
 import HealthcareAffiliate from './HealthcareAffiliate';
 import BankingAffiliate from './BankingAffiliate';
 import NextStepsPanel from './NextStepsPanel';
+import { JourneyTimeline } from './JourneyTimeline';
 
 interface ResultsPanelProps {
   result1: FIREResult;
@@ -24,6 +25,8 @@ interface ResultsPanelProps {
   spendingCurrency?: string;
   userAge?: number;
   inputs?: UserInputs;
+  expectedReturn?: number;
+  inflationRate?: number;
 }
 
 export function ResultsPanel({ 
@@ -35,9 +38,12 @@ export function ResultsPanel({
   annualSpending = 50000,
   spendingCurrency = 'USD',
   userAge = 35,
-  inputs
+  inputs,
+  expectedReturn,
+  inflationRate
 }: ResultsPanelProps) {
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [showTaxNotes, setShowTaxNotes] = useState(false);
   const country1 = countries[country1Code];
   const country2 = countries[country2Code];
   const isSameCountry = country1Code === country2Code;
@@ -176,6 +182,17 @@ export function ResultsPanel({
         )}
       </div>
 
+      {/* 🔥 FIRE Journey Chart - Moved up for maximum visibility */}
+      <JourneyTimeline
+        projections1={result1.projections}
+        projections2={isSameCountry ? undefined : result2.projections}
+        country1Code={country1Code}
+        country2Code={isSameCountry ? undefined : country2Code}
+        retirementAge={inputs?.targetRetirementAge || 50}
+        expectedReturn={expectedReturn}
+        inflationRate={inflationRate}
+      />
+
       {/* If You Retired Today (renamed from "What Can I Spend?") */}
       {inputs && (
         <ReverseCalculator
@@ -207,6 +224,9 @@ export function ResultsPanel({
           retireCountryName={country2?.name || 'abroad'}
         />
       )}
+
+      {/* Tax Notes - Collapsed by default */}
+      <CollapsibleTaxNotes result1={result1} result2={result2} country1={country1} country2={country2} isSameCountry={isSameCountry} showTaxNotes={showTaxNotes} setShowTaxNotes={setShowTaxNotes} />
 
       {/* Visa Requirements - Keep visible */}
       {!isSameCountry && (
@@ -278,9 +298,6 @@ export function ResultsPanel({
         </div>
       )}
 
-      {/* Tax Notes */}
-      <TaxNotes result1={result1} result2={result2} country1={country1} country2={country2} isSameCountry={isSameCountry} />
-
       {/* Warnings */}
       <Warnings result1={result1} result2={result2} country1={country1} country2={country2} isSameCountry={isSameCountry} />
 
@@ -294,6 +311,33 @@ export function ResultsPanel({
           showDifferentCurrencies={country1?.currency !== country2?.currency}
         />
       )}
+
+      {/* Bottom CTA */}
+      <div className="bg-gradient-to-r from-slate-50 to-gray-50 dark:from-slate-800/50 dark:to-slate-800/50 rounded-xl border border-gray-200 dark:border-slate-700 p-4 sm:p-5">
+        <div className="text-center space-y-3">
+          <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Want to explore other options?</p>
+          <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3">
+            <button
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+              className="px-4 py-2 text-xs sm:text-sm font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
+            >
+              🌍 Compare Another Country
+            </button>
+            <button
+              onClick={() => {
+                if (typeof window !== 'undefined' && navigator.share) {
+                  navigator.share({ title: 'My FIRE Plan', url: window.location.href });
+                } else if (typeof window !== 'undefined') {
+                  navigator.clipboard.writeText(window.location.href);
+                }
+              }}
+              className="px-4 py-2 text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
+            >
+              📤 Share Results
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -488,30 +532,50 @@ function CountryCard({
   );
 }
 
-function TaxNotes({ result1, result2, country1, country2, isSameCountry }: {
+function CollapsibleTaxNotes({ result1, result2, country1, country2, isSameCountry, showTaxNotes, setShowTaxNotes }: {
   result1: FIREResult;
   result2: FIREResult;
   country1: typeof countries[string];
   country2: typeof countries[string];
   isSameCountry: boolean;
+  showTaxNotes: boolean;
+  setShowTaxNotes: (v: boolean) => void;
 }) {
   const allNotes = [...(result1.countrySpecificNotes || []), ...(!isSameCountry ? (result2.countrySpecificNotes || []) : [])];
   
   if (allNotes.length === 0) return null;
 
   return (
-    <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-3 sm:p-4">
-      <h3 className="text-sm font-semibold text-amber-800 dark:text-amber-200 mb-2 flex items-center gap-2">
-        ⚠️ Important Tax Considerations
-      </h3>
-      <ul className="space-y-1.5">
-        {allNotes.map((note, i) => (
-          <li key={i} className="text-xs text-amber-700 dark:text-amber-300 flex items-start gap-2">
-            <span className="text-amber-500 mt-0.5">•</span>
-            <span>{note}</span>
-          </li>
-        ))}
-      </ul>
+    <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl overflow-hidden">
+      <button
+        onClick={() => setShowTaxNotes(!showTaxNotes)}
+        className="w-full p-3 sm:p-4 flex items-center justify-between text-left hover:bg-amber-100/50 dark:hover:bg-amber-800/20 transition-colors"
+      >
+        <h3 className="text-sm font-semibold text-amber-800 dark:text-amber-200 flex items-center gap-2">
+          ⚠️ Important Tax Considerations
+          <span className="text-[10px] font-normal text-amber-600 dark:text-amber-400">({allNotes.length} note{allNotes.length > 1 ? 's' : ''})</span>
+        </h3>
+        <svg 
+          className={`w-5 h-5 text-amber-500 transition-transform ${showTaxNotes ? 'rotate-180' : ''}`} 
+          fill="none" 
+          stroke="currentColor" 
+          viewBox="0 0 24 24"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+      {showTaxNotes && (
+        <div className="px-3 pb-3 sm:px-4 sm:pb-4">
+          <ul className="space-y-1.5">
+            {allNotes.map((note, i) => (
+              <li key={i} className="text-xs text-amber-700 dark:text-amber-300 flex items-start gap-2">
+                <span className="text-amber-500 mt-0.5">•</span>
+                <span>{note}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 }

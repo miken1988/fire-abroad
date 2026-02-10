@@ -5,7 +5,6 @@ import { UserInputs, compareFIRE } from '@/lib/calculations';
 import { countries } from '@/data/countries';
 import { InputPanel } from './InputPanel';
 import { ResultsPanel } from './ResultsPanel';
-import { JourneyTimeline } from './JourneyTimeline';
 import { fetchLiveRates, setRates, getDisplayRate } from '@/lib/currency';
 import { decodeStateFromURL, encodeStateToURL, getShareableURL } from '@/lib/urlState';
 import { PDFExportButton } from './PDFExport';
@@ -514,14 +513,7 @@ export function Calculator() {
                   annualSpending={inputs.annualSpending} 
                   spendingCurrency={inputs.spendingCurrency} 
                   userAge={inputs.currentAge} 
-                  inputs={inputs} 
-                />
-                <JourneyTimeline
-                  projections1={results.country1.projections}
-                  projections2={isSameCountry ? undefined : results.country2.projections}
-                  country1Code={inputs.currentCountry}
-                  country2Code={isSameCountry ? undefined : inputs.targetCountry}
-                  retirementAge={inputs.targetRetirementAge}
+                  inputs={inputs}
                   expectedReturn={inputs.expectedReturn}
                   inflationRate={inputs.inflationRate}
                 />
@@ -577,14 +569,7 @@ export function Calculator() {
                 annualSpending={inputs.annualSpending} 
                 spendingCurrency={inputs.spendingCurrency} 
                 userAge={inputs.currentAge} 
-                inputs={inputs} 
-              />
-              <JourneyTimeline
-                projections1={results.country1.projections}
-                projections2={isSameCountry ? undefined : results.country2.projections}
-                country1Code={inputs.currentCountry}
-                country2Code={isSameCountry ? undefined : inputs.targetCountry}
-                retirementAge={inputs.targetRetirementAge}
+                inputs={inputs}
                 expectedReturn={inputs.expectedReturn}
                 inflationRate={inputs.inflationRate}
               />
