@@ -464,11 +464,26 @@ export function calculateFIRE(inputs: UserInputs, targetCountryCode: string): FI
 
 function estimateEffectiveTaxRate(income: number, country: typeof countries[string], usStateCode?: string): number {
   if (income <= 0) return 0;
-  let tax = calculateTax(income, country.incomeTax.brackets, country);
+  
+  // FIRE retirees live off investments — blend income tax (pension portion) + capital gains (investment portion)
+  // Assume ~25% from pension-like accounts (income tax) and ~75% from investments (capital gains)
+  const pensionPortion = 0.25;
+  const investmentPortion = 0.75;
+  
+  // Income tax on pension portion
+  const pensionIncome = income * pensionPortion;
+  const incomeTax = calculateTax(pensionIncome, country.incomeTax.brackets, country);
+  
+  // Capital gains tax on investment portion
+  const investmentIncome = income * investmentPortion;
+  const cgBrackets = country.capitalGains.longTerm;
+  const cgRate = cgBrackets.length > 0 ? cgBrackets[Math.min(1, cgBrackets.length - 1)].rate : 0;
+  const cgTax = investmentIncome * cgRate;
+  
+  let tax = incomeTax + cgTax;
   
   // Add US state tax if applicable
   if (country.code === 'US' && usStateCode) {
-    // Dynamic import would be better but for simplicity, we'll use a lookup
     const stateTaxRates: Record<string, number> = {
       'AL': 0.05, 'AK': 0, 'AZ': 0.025, 'AR': 0.047, 'CA': 0.133, 'CO': 0.044,
       'CT': 0.0699, 'DE': 0.066, 'FL': 0, 'GA': 0.0549, 'HI': 0.11, 'ID': 0.058,
@@ -674,8 +689,32 @@ export function calculateTaxBreakdown(
   }
   
   // For withdrawal income type, use income tax; for capital gains, use CG tax
-  const incomeTax = incomeType === 'capitalGains' ? 0 : totalIncomeTax;
-  const finalCapitalGainsTax = incomeType === 'withdrawal' ? 0 : capitalGainsTax;
+  // For mixed (FIRE retiree): pension portion taxed as income, investment portion as capital gains
+  // Default assumption: most FIRE withdrawals come from investments (capital gains)
+  const pensionPortion = incomeType === 'mixed' ? 0.25 : (incomeType === 'withdrawal' ? 1 : 0);
+  const investmentPortion = 1 - pensionPortion;
+  
+  const incomeTax = incomeType === 'capitalGains' ? 0 
+    : incomeType === 'withdrawal' ? totalIncomeTax
+    : (() => {
+      // For mixed: recalculate income tax on just the pension portion
+      let pensionIncome = grossIncome * pensionPortion;
+      let tax = 0;
+      for (const bracket of country.incomeTax.brackets) {
+        const bracketSize = (bracket.max || Infinity) - bracket.min;
+        const taxable = Math.min(pensionIncome, bracketSize);
+        if (taxable > 0) tax += taxable * bracket.rate;
+        pensionIncome -= taxable;
+        if (pensionIncome <= 0) break;
+      }
+      return tax;
+    })();
+  
+  const finalCapitalGainsTax = incomeType === 'withdrawal' ? 0 
+    : (() => {
+      const cgPortion = grossIncome * investmentPortion;
+      return cgPortion * capitalGainsRate;
+    })();
   
   const totalTax = incomeTax + finalCapitalGainsTax + socialTaxes;
   const effectiveRate = grossIncome > 0 ? totalTax / grossIncome : 0;

@@ -51,7 +51,7 @@ export function TaxBreakdownCard({
               Tax Breakdown
             </h3>
             <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">
-              {country?.flag} {country?.name} • {formatPercent(breakdown.effectiveRate)} effective rate
+              {country?.flag} {country?.name} • {formatPercent(breakdown.effectiveRate)} effective rate on withdrawals
             </p>
           </div>
         </div>
@@ -105,7 +105,9 @@ export function TaxBreakdownCard({
             
             {breakdown.incomeTax > 0 && (
               <div className="flex justify-between items-center text-xs">
-                <span className="text-gray-600 dark:text-gray-400">Income Tax</span>
+                <span className="text-gray-600 dark:text-gray-400">
+                  {incomeType === 'mixed' ? 'Income Tax (pension portion)' : 'Income Tax'}
+                </span>
                 <span className="font-medium text-gray-900 dark:text-white">
                   {fmt(breakdown.incomeTax, breakdown.currency)} ({formatPercent(breakdown.incomeTaxRate)})
                 </span>
@@ -114,7 +116,9 @@ export function TaxBreakdownCard({
             
             {breakdown.capitalGainsTax > 0 && (
               <div className="flex justify-between items-center text-xs">
-                <span className="text-gray-600 dark:text-gray-400">Capital Gains Tax</span>
+                <span className="text-gray-600 dark:text-gray-400">
+                  {incomeType === 'mixed' ? 'Capital Gains (investment portion)' : 'Capital Gains Tax'}
+                </span>
                 <span className="font-medium text-gray-900 dark:text-white">
                   {fmt(breakdown.capitalGainsTax, breakdown.currency)} ({formatPercent(breakdown.capitalGainsRate)})
                 </span>
@@ -132,9 +136,11 @@ export function TaxBreakdownCard({
           </div>
           
           {/* Bracket Breakdown */}
-          {breakdown.brackets.length > 0 && (
+          {breakdown.brackets.length > 0 && breakdown.incomeTax > 0 && (
             <div className="space-y-2">
-              <h4 className="text-xs font-medium text-gray-700 dark:text-gray-300">Income Tax Brackets</h4>
+              <h4 className="text-xs font-medium text-gray-700 dark:text-gray-300">
+                {incomeType === 'mixed' ? 'Income Tax Brackets (pension portion)' : 'Income Tax Brackets'}
+              </h4>
               <div className="space-y-1">
                 {breakdown.brackets.map((b, i) => (
                   <div key={i} className="relative">
