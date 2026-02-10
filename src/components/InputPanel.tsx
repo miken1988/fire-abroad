@@ -529,7 +529,12 @@ export function InputPanel({ inputs, onChange }: InputPanelProps) {
     
     // Keep expectedReturn and assetReturns.stocks in sync
     if (field === 'expectedReturn') {
-      newInputs.assetReturns = { ...newInputs.assetReturns, stocks: value };
+      newInputs.assetReturns = { 
+        stocks: value,
+        property: newInputs.assetReturns?.property ?? (newInputs.inflationRate + 0.02),
+        crypto: newInputs.assetReturns?.crypto ?? (value + 0.03),
+        cash: newInputs.assetReturns?.cash ?? (newInputs.inflationRate * 0.5),
+      };
     }
     
     if (field === 'currentCountry') {
