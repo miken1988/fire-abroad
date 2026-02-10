@@ -181,6 +181,24 @@ export function JourneyTimeline({
           
           {/* Chart area */}
           <div className="absolute left-16 right-4 top-2 bottom-6">
+            {/* "You are here" dot at starting position */}
+            {(() => {
+              const startValue = projections1[0]?.portfolioEnd || 0;
+              const yPercent = maxValue > 0 ? (1 - startValue / maxValue) * 100 : 100;
+              return (
+                <div 
+                  className="absolute z-30"
+                  style={{ left: '0%', top: `${yPercent}%` }}
+                >
+                  <div className="absolute w-3 h-3 bg-blue-500 rounded-full -translate-x-1/2 -translate-y-1/2 shadow-md border-2 border-white dark:border-slate-800" />
+                  <div className="absolute w-3 h-3 bg-blue-400/50 rounded-full animate-pulse-dot" />
+                  <div className="absolute left-2 -top-3 bg-gray-800 dark:bg-slate-600 text-white text-[8px] px-1.5 py-0.5 rounded whitespace-nowrap font-medium shadow">
+                    You · {minAge}
+                  </div>
+                </div>
+              );
+            })()}
+
             {/* Retirement line */}
             <div 
               className="absolute top-0 bottom-0 w-0.5 bg-green-500/60 z-10"
