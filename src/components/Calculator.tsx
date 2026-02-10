@@ -338,7 +338,11 @@ export function Calculator() {
   const [fxError, setFxError] = useState(false);
   const [showShareToast, setShowShareToast] = useState(false);
   const [initialized, setInitialized] = useState(false);
-  const [activeTab, setActiveTab] = useState<'inputs' | 'results'>('inputs');
+  const [activeTab, setActiveTabRaw] = useState<'inputs' | 'results'>('inputs');
+  const setActiveTab = useCallback((tab: 'inputs' | 'results') => {
+    setActiveTabRaw(tab);
+    window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
+  }, []);
   const [showExplainer, setShowExplainer] = useState(false);
   const [advancedMode, setAdvancedMode] = useState(false);
   const [showMobileComparison, setShowMobileComparison] = useState(false);
