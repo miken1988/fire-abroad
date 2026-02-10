@@ -114,29 +114,29 @@ export function JourneyTimeline({
             <div className="min-h-[52px]">
               <div className="text-[10px] text-gray-400 dark:text-gray-500 uppercase tracking-wide">{country2?.flag} {country2?.name}</div>
               <div className="text-lg font-bold text-emerald-600 dark:text-emerald-400">
-                {formatCompact(displayData.p2?.portfolioEnd || 0, country2?.currency || 'USD')}
+                {formatCompact(displayData.p2?.portfolioEnd || 0, country1.currency)}
               </div>
               {showRealValue && (
                 <div className="text-[10px] text-gray-500 dark:text-gray-400">
-                  ≈ {formatCompact(toRealValue(displayData.p2?.portfolioEnd || 0), country2?.currency || 'USD')} today
+                  ≈ {formatCompact(toRealValue(displayData.p2?.portfolioEnd || 0), country1.currency)} today
                 </div>
               )}
               {hasIlliquid2 ? (
                 <div className="text-[10px] text-gray-500 dark:text-gray-400">
-                  <span className="text-green-600 dark:text-green-400">{formatCompact(displayData.p2?.liquidEnd || 0, country2?.currency || 'USD')}</span>
+                  <span className="text-green-600 dark:text-green-400">{formatCompact(displayData.p2?.liquidEnd || 0, country1.currency)}</span>
                   <span className="text-gray-400 dark:text-gray-500"> liquid</span>
                   <span className="mx-1">•</span>
-                  <span className="text-amber-600 dark:text-amber-400">{formatCompact(displayData.p2?.illiquidEnd || 0, country2?.currency || 'USD')}</span>
+                  <span className="text-amber-600 dark:text-amber-400">{formatCompact(displayData.p2?.illiquidEnd || 0, country1.currency)}</span>
                   <span className="text-gray-400 dark:text-gray-500"> property</span>
                 </div>
               ) : (
                 <div className="text-[10px] text-gray-500 dark:text-gray-400 h-4">
-                  {displayData.p2?.isRetired ? `-${formatCompact(displayData.p2.withdrawal, country2?.currency || 'USD')}/yr` : ''}
+                  {displayData.p2?.isRetired ? `-${formatCompact(displayData.p2.withdrawal, country1.currency)}/yr` : ''}
                 </div>
               )}
               {hasIlliquid2 && displayData.p2?.isRetired && (
                 <div className="text-[10px] text-gray-500 dark:text-gray-400">
-                  -{formatCompact(displayData.p2.withdrawal, country2?.currency || 'USD')}/yr withdrawal
+                  -{formatCompact(displayData.p2.withdrawal, country1.currency)}/yr withdrawal
                 </div>
               )}
             </div>
@@ -340,11 +340,11 @@ export function JourneyTimeline({
                     </div>
                     <div className="text-right">
                       <div className={`font-semibold text-sm ${isDepleted2 ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-white'}`}>
-                        {formatCompact(Math.max(0, p2.portfolioEnd), country2?.currency || 'USD')}
+                        {formatCompact(Math.max(0, p2.portfolioEnd), country1.currency)}
                       </div>
                       {p2.isRetired && p2.withdrawal > 0 && !isDepleted2 && (
                         <div className="text-[10px] text-gray-500 dark:text-gray-400">
-                          {formatCompact(p2.withdrawal, country2?.currency || 'USD')}/yr
+                          {formatCompact(p2.withdrawal, country1.currency)}/yr
                         </div>
                       )}
                     </div>

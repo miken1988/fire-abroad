@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { FIREResult, ComparisonSummary, UserInputs } from '@/lib/calculations';
 import { countries } from '@/data/countries';
-import { formatCurrency, formatPercent, formatCompact } from '@/lib/formatters';
+import { formatCurrency, formatPercent, formatCompact, smartCurrency } from '@/lib/formatters';
 import { getVisaInfo } from '@/data/visaRequirements';
 import { getCostOfLivingComparison } from '@/data/costOfLiving';
 import { runMonteCarloSimulation, MonteCarloResult } from '@/lib/monteCarlo';
@@ -47,6 +47,17 @@ function generatePDFContent(
   const country2 = countries[country2Code];
   const visaInfo = getVisaInfo(country2Code);
   const colComparison = getCostOfLivingComparison(country1Code, country2Code);
+  const userCurrency = inputs.portfolioCurrency || 'USD';
+  
+  // Smart format for PDF - convert extreme currencies to user's currency
+  const fmtPDF = (amount: number, currency: string) => {
+    const s = smartCurrency(amount, currency, userCurrency);
+    return formatCurrency(s.amount, s.currency);
+  };
+  const fmtPDFCompact = (amount: number, currency: string) => {
+    const s = smartCurrency(amount, currency, userCurrency);
+    return formatCompact(s.amount, s.currency);
+  };
   
   const mc1Success = mc1 ? Math.round(mc1.successRate * 100) : null;
   const mc2Success = mc2 ? Math.round(mc2.successRate * 100) : null;
@@ -66,11 +77,11 @@ function generatePDFContent(
           <div class="mc-stats">
             <div class="mc-stat">
               <div class="label">Median at 85</div>
-              <div class="value">${formatCompact(mc1.medianPath[Math.min(mc1.ages.indexOf(85), mc1.medianPath.length - 1)] || mc1.medianEndingBalance, country1?.currency || 'USD')}</div>
+              <div class="value">${fmtPDFCompact(mc1.medianPath[Math.min(mc1.ages.indexOf(85), mc1.medianPath.length - 1)] || mc1.medianEndingBalance, country1?.currency || 'USD')}</div>
             </div>
             <div class="mc-stat">
               <div class="label">Worst 10%</div>
-              <div class="value">${formatCompact(mc1.p10Path[mc1.p10Path.length - 1], country1?.currency || 'USD')}</div>
+              <div class="value">${fmtPDFCompact(mc1.p10Path[mc1.p10Path.length - 1], country1?.currency || 'USD')}</div>
             </div>
           </div>
         </div>
@@ -81,11 +92,11 @@ function generatePDFContent(
           <div class="mc-stats">
             <div class="mc-stat">
               <div class="label">Median at 85</div>
-              <div class="value">${formatCompact(mc2.medianPath[Math.min(mc2.ages.indexOf(85), mc2.medianPath.length - 1)] || mc2.medianEndingBalance, country2?.currency || 'USD')}</div>
+              <div class="value">${fmtPDFCompact(mc2.medianPath[Math.min(mc2.ages.indexOf(85), mc2.medianPath.length - 1)] || mc2.medianEndingBalance, country2?.currency || 'USD')}</div>
             </div>
             <div class="mc-stat">
               <div class="label">Worst 10%</div>
-              <div class="value">${formatCompact(mc2.p10Path[mc2.p10Path.length - 1], country2?.currency || 'USD')}</div>
+              <div class="value">${fmtPDFCompact(mc2.p10Path[mc2.p10Path.length - 1], country2?.currency || 'USD')}</div>
             </div>
           </div>
         </div>
@@ -99,7 +110,7 @@ function generatePDFContent(
     <h2>Cost of Living</h2>
     <p style="font-size: 13px; margin-bottom: 12px;">
       Your ${formatCurrency(inputs.annualSpending, country1?.currency || 'USD')}/year in ${country1?.name} ≈ 
-      <strong>${formatCurrency(inputs.annualSpending * colComparison.overall, country2?.currency || 'EUR')}/year</strong> in ${country2?.name}.
+      <strong>${fmtPDF(inputs.annualSpending * colComparison.overall, country2?.currency || 'EUR')}/year</strong> in ${country2?.name}.
       ${colComparison.overall < 1 ? `${country2?.name} is ${Math.round((1 - colComparison.overall) * 100)}% cheaper overall.` : `${country2?.name} is ${Math.round((colComparison.overall - 1) * 100)}% more expensive overall.`}
     </p>
     <div class="col-grid">
@@ -122,7 +133,7 @@ function generatePDFContent(
       ${visaInfo.options.slice(0, 2).map(opt => `
         <div class="visa-option">
           <h4>${opt.name}</h4>
-          <p>${opt.minIncome ? `Min income: ${formatCurrency(opt.minIncome, opt.currency)}/yr` : ''}${opt.minWealth ? `${opt.minIncome ? ' • ' : ''}Min investment: ${formatCurrency(opt.minWealth, opt.currency)}` : ''}${opt.pathToCitizenship ? ` • Citizenship: ${opt.pathToCitizenship}` : ''}</p>
+          <p>${opt.minIncome ? `Min income: ${fmtPDF(opt.minIncome, opt.currency)}/yr` : ''}${opt.minWealth ? `${opt.minIncome ? ' • ' : ''}Min investment: ${fmtPDF(opt.minWealth, opt.currency)}` : ''}${opt.pathToCitizenship ? ` • Citizenship: ${opt.pathToCitizenship}` : ''}</p>
           <p style="margin-top: 4px;">${opt.notes}</p>
         </div>
       `).join('')}
@@ -168,10 +179,10 @@ function generatePDFContent(
 <div class="stat"><div class="stat-label">After Tax Withdrawal</div><div class="stat-value">${formatCurrency(result1.annualWithdrawalNet, country1?.currency || 'USD')}</div></div>
 </div>
 <div class="country-card"><h3>${country2?.flag} ${country2?.name}</h3>
-<div class="stat"><div class="stat-label">FIRE Number</div><div class="stat-value ${comparison.lowerFIRENumber === country2Code ? 'highlight' : ''}">${formatCurrency(result2.fireNumber, country2?.currency || 'USD')}</div></div>
+<div class="stat"><div class="stat-label">FIRE Number</div><div class="stat-value ${comparison.lowerFIRENumber === country2Code ? 'highlight' : ''}">${fmtPDF(result2.fireNumber, country2?.currency || 'USD')}</div></div>
 <div class="stat"><div class="stat-label">Years to FIRE</div><div class="stat-value ${comparison.earlierRetirement === country2Code ? 'highlight' : ''}">${result2.yearsUntilFIRE} years</div></div>
 <div class="stat"><div class="stat-label">Effective Tax Rate</div><div class="stat-value ${comparison.lowerEffectiveTaxRate === country2Code ? 'highlight' : ''}">${formatPercent(result2.effectiveTaxRate)}</div></div>
-<div class="stat"><div class="stat-label">After Tax Withdrawal</div><div class="stat-value">${formatCurrency(result2.annualWithdrawalNet, country2?.currency || 'USD')}</div></div>
+<div class="stat"><div class="stat-label">After Tax Withdrawal</div><div class="stat-value">${fmtPDF(result2.annualWithdrawalNet, country2?.currency || 'USD')}</div></div>
 </div></div>
 <div class="summary-box"><h3>✓ Summary</h3><ul>
 <li>• FIRE number is <strong>${formatCurrency(comparison.fireNumberDifferenceUSD, 'USD')}</strong> (${formatPercent(comparison.fireNumberDifferencePercent)}) lower in <strong>${countries[comparison.lowerFIRENumber]?.name}</strong></li>

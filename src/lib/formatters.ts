@@ -1,3 +1,30 @@
+import { convertCurrency } from './currency';
+
+/**
+ * Smart currency display: if the amount in localCurrency is absurdly large
+ * (due to high exchange rate currencies like VND, IDR, KRW, COP),
+ * convert to the user's currency for readability.
+ * Returns { amount, currency } ready for formatting.
+ */
+export function smartCurrency(
+  amount: number,
+  localCurrency: string,
+  userCurrency: string
+): { amount: number; currency: string; converted: boolean } {
+  if (!amount || localCurrency === userCurrency) {
+    return { amount, currency: localCurrency, converted: false };
+  }
+  // If the absolute amount exceeds 10M, it's likely an extreme exchange rate
+  if (Math.abs(amount) > 10_000_000) {
+    return {
+      amount: convertCurrency(amount, localCurrency, userCurrency),
+      currency: userCurrency,
+      converted: true,
+    };
+  }
+  return { amount, currency: localCurrency, converted: false };
+}
+
 /**
  * Format a number as currency
  */

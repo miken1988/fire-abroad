@@ -328,12 +328,14 @@ export function ResultsPanel({
                   grossIncome={result1.annualWithdrawalGross}
                   countryCode={country1Code}
                   incomeType="mixed"
+                  userCurrency={inputs?.portfolioCurrency || 'USD'}
                 />
                 {!isSameCountry && (
                   <TaxBreakdownCard
                     grossIncome={result2.annualWithdrawalGross}
                     countryCode={country2Code}
                     incomeType="mixed"
+                    userCurrency={inputs?.portfolioCurrency || 'USD'}
                   />
                 )}
               </div>
@@ -620,11 +622,16 @@ function CountryCard({
         <div>
           <span className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">Healthcare</span>
           <p className="text-xs sm:text-sm text-gray-700 dark:text-gray-300">
-            {country?.healthcare?.estimatedAnnualCostPreRetirement > 5000 ? (
-              <span className="text-amber-600 dark:text-amber-400">~{formatCurrency(country?.healthcare?.estimatedAnnualCostPreRetirement, country?.currency || 'USD')}/yr</span>
-            ) : (
-              <span className="text-green-600 dark:text-green-400">✓ Public + ~{formatCurrency(country?.healthcare?.estimatedAnnualCostPreRetirement || 500, country?.currency || 'USD')}/yr</span>
-            )}
+            {(() => {
+              const cost = country?.healthcare?.estimatedAnnualCostPreRetirement || 500;
+              const s = smartCurrency(cost, country?.currency || 'USD', portfolioCurrency || 'USD');
+              const formatted = formatCurrency(s.amount, s.currency);
+              return cost > 5000 ? (
+                <span className="text-amber-600 dark:text-amber-400">~{formatted}/yr</span>
+              ) : (
+                <span className="text-green-600 dark:text-green-400">✓ Public + ~{formatted}/yr</span>
+              );
+            })()}
           </p>
           {country?.healthcare?.notes && (
             <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5 line-clamp-2">

@@ -3,8 +3,9 @@
 import React, { useState } from 'react';
 import { MonteCarloResult, runMonteCarloSimulation } from '@/lib/monteCarlo';
 import { UserInputs, FIREResult } from '@/lib/calculations';
+import { convertCurrency } from '@/lib/currency';
 import { countries } from '@/data/countries';
-import { formatCompact, formatPercent } from '@/lib/formatters';
+import { formatCompact, formatPercent, smartCurrency } from '@/lib/formatters';
 
 interface MonteCarloCardProps {
   inputs: UserInputs;
@@ -19,7 +20,14 @@ export function MonteCarloCard({ inputs, fireResult, countryCode }: MonteCarloCa
   const [isClient, setIsClient] = useState(false);
 
   const country = countries[countryCode];
-  const currency = country?.currency || 'USD';
+  const localCurrency = country?.currency || 'USD';
+  const userCurrency = inputs.portfolioCurrency || 'USD';
+  // Use user's currency for display if local currency produces huge numbers
+  const fmtC = (amount: number) => {
+    const s = smartCurrency(amount, localCurrency, userCurrency);
+    return formatCompact(s.amount, s.currency);
+  };
+  const currency = smartCurrency(1000000, localCurrency, userCurrency).converted ? userCurrency : localCurrency;
 
   // Only run simulation on client to avoid hydration mismatch
   // (random numbers differ between server and client)
@@ -70,6 +78,22 @@ export function MonteCarloCard({ inputs, fireResult, countryCode }: MonteCarloCa
   }
 
   if (!result) return null;
+
+  // Convert all MC paths to user's currency if local currency produces extreme numbers
+  const needsConvert = smartCurrency(1000000, localCurrency, userCurrency).converted;
+  const convertPath = (path: number[]) => {
+    if (!needsConvert) return path;
+    return path.map((v: number) => convertCurrency(v, localCurrency, userCurrency));
+  };
+  const displayResult: MonteCarloResult = needsConvert ? {
+    ...result,
+    medianPath: convertPath(result.medianPath),
+    p10Path: convertPath(result.p10Path),
+    p25Path: convertPath(result.p25Path),
+    p75Path: convertPath(result.p75Path),
+    p90Path: convertPath(result.p90Path),
+    medianEndingBalance: smartCurrency(result.medianEndingBalance, localCurrency, userCurrency).amount,
+  } : result;
 
   const successPct = Math.round(result.successRate * 100);
   const ratingColor = getSuccessColor(successPct);
@@ -134,22 +158,21 @@ export function MonteCarloCard({ inputs, fireResult, countryCode }: MonteCarloCa
           <div className="grid grid-cols-3 gap-3">
             <StatBox
               label="Median balance at 85"
-              value={formatCompact(
+              value={fmtC(
                 result.ages.indexOf(85) >= 0 
-                  ? result.medianPath[result.ages.indexOf(85)] 
-                  : result.medianPath[result.medianPath.length - 1] || result.medianEndingBalance, 
-                currency
+                  ? displayResult.medianPath[result.ages.indexOf(85)] 
+                  : displayResult.medianPath[displayResult.medianPath.length - 1] || displayResult.medianEndingBalance
               )}
               color="text-blue-600 dark:text-blue-400"
             />
             <StatBox
               label="Worst 10% scenario"
-              value={formatCompact(result.p10Path[result.p10Path.length - 1] || 0, currency)}
+              value={fmtC(displayResult.p10Path[result.p10Path.length - 1] || 0)}
               color={(result.p10Path[result.p10Path.length - 1] || 0) > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-red-600 dark:text-red-400'}
             />
             <StatBox
               label={result.averageFailureAge ? 'Avg failure age' : 'Best 90% scenario'}
-              value={result.averageFailureAge ? `Age ${Math.round(result.averageFailureAge)}` : formatCompact(result.p90Path[result.p90Path.length - 1] || 0, currency)}
+              value={result.averageFailureAge ? `Age ${Math.round(result.averageFailureAge)}` : fmtC(displayResult.p90Path[result.p90Path.length - 1] || 0)}
               color={result.averageFailureAge ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'}
             />
           </div>
@@ -160,13 +183,13 @@ export function MonteCarloCard({ inputs, fireResult, countryCode }: MonteCarloCa
               <h4 className="text-xs font-semibold text-gray-700 dark:text-gray-300">Portfolio Projections</h4>
               {hoveredYear !== null && (
                 <span className="text-xs text-gray-500 dark:text-gray-400">
-                  Age {result.ages[hoveredYear]} • Median: {formatCompact(result.medianPath[hoveredYear], currency)}
+                  Age {result.ages[hoveredYear]} • Median: {fmtC(displayResult.medianPath[hoveredYear])}
                 </span>
               )}
             </div>
             
             <ConfidenceBandChart
-              result={result}
+              result={displayResult}
               currency={currency}
               retirementAge={inputs.targetRetirementAge}
               onHover={setHoveredYear}

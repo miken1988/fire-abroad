@@ -3,20 +3,28 @@
 import { useState, useMemo } from 'react';
 import { calculateTaxBreakdown, TaxBreakdown } from '@/lib/calculations';
 import { countries } from '@/data/countries';
-import { formatCurrency, formatPercent } from '@/lib/formatters';
+import { formatCurrency, formatPercent, smartCurrency } from '@/lib/formatters';
 
 interface TaxBreakdownCardProps {
   grossIncome: number;
   countryCode: string;
   incomeType?: 'withdrawal' | 'capitalGains' | 'mixed';
+  userCurrency?: string;
 }
 
 export function TaxBreakdownCard({ 
   grossIncome, 
   countryCode,
-  incomeType = 'mixed'
+  incomeType = 'mixed',
+  userCurrency = 'USD'
 }: TaxBreakdownCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
+  
+  // Smart format for extreme currencies
+  const fmt = (amount: number, currency: string) => {
+    const s = smartCurrency(amount, currency, userCurrency);
+    return formatCurrency(s.amount, s.currency);
+  };
   
   const country = countries[countryCode];
   
@@ -50,7 +58,7 @@ export function TaxBreakdownCard({
         <div className="flex items-center gap-3">
           <div className="text-right">
             <div className="text-sm font-semibold text-gray-900 dark:text-white">
-              {formatCurrency(breakdown.totalTax, breakdown.currency)}
+              {fmt(breakdown.totalTax, breakdown.currency)}
             </div>
             <div className="text-[10px] text-gray-500 dark:text-gray-400">
               total tax
@@ -74,19 +82,19 @@ export function TaxBreakdownCard({
             <div className="bg-white dark:bg-slate-700 rounded-lg p-2">
               <div className="text-xs text-gray-500 dark:text-gray-400">Gross</div>
               <div className="text-sm font-semibold text-gray-900 dark:text-white">
-                {formatCurrency(breakdown.grossIncome, breakdown.currency)}
+                {fmt(breakdown.grossIncome, breakdown.currency)}
               </div>
             </div>
             <div className="bg-red-50 dark:bg-red-900/20 rounded-lg p-2">
               <div className="text-xs text-red-600 dark:text-red-400">Tax</div>
               <div className="text-sm font-semibold text-red-700 dark:text-red-300">
-                -{formatCurrency(breakdown.totalTax, breakdown.currency)}
+                -{fmt(breakdown.totalTax, breakdown.currency)}
               </div>
             </div>
             <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-2">
               <div className="text-xs text-green-600 dark:text-green-400">Net</div>
               <div className="text-sm font-semibold text-green-700 dark:text-green-300">
-                {formatCurrency(breakdown.netIncome, breakdown.currency)}
+                {fmt(breakdown.netIncome, breakdown.currency)}
               </div>
             </div>
           </div>
@@ -99,7 +107,7 @@ export function TaxBreakdownCard({
               <div className="flex justify-between items-center text-xs">
                 <span className="text-gray-600 dark:text-gray-400">Income Tax</span>
                 <span className="font-medium text-gray-900 dark:text-white">
-                  {formatCurrency(breakdown.incomeTax, breakdown.currency)} ({formatPercent(breakdown.incomeTaxRate)})
+                  {fmt(breakdown.incomeTax, breakdown.currency)} ({formatPercent(breakdown.incomeTaxRate)})
                 </span>
               </div>
             )}
@@ -108,7 +116,7 @@ export function TaxBreakdownCard({
               <div className="flex justify-between items-center text-xs">
                 <span className="text-gray-600 dark:text-gray-400">Capital Gains Tax</span>
                 <span className="font-medium text-gray-900 dark:text-white">
-                  {formatCurrency(breakdown.capitalGainsTax, breakdown.currency)} ({formatPercent(breakdown.capitalGainsRate)})
+                  {fmt(breakdown.capitalGainsTax, breakdown.currency)} ({formatPercent(breakdown.capitalGainsRate)})
                 </span>
               </div>
             )}
@@ -117,7 +125,7 @@ export function TaxBreakdownCard({
               <div className="flex justify-between items-center text-xs">
                 <span className="text-gray-600 dark:text-gray-400">Social Taxes</span>
                 <span className="font-medium text-gray-900 dark:text-white">
-                  {formatCurrency(breakdown.socialTaxes, breakdown.currency)} ({formatPercent(breakdown.socialTaxRate)})
+                  {fmt(breakdown.socialTaxes, breakdown.currency)} ({formatPercent(breakdown.socialTaxRate)})
                 </span>
               </div>
             )}
@@ -133,7 +141,7 @@ export function TaxBreakdownCard({
                     <div className="flex justify-between items-center text-[10px] sm:text-xs py-1">
                       <span className="text-gray-500 dark:text-gray-400">{b.bracket}</span>
                       <span className="text-gray-600 dark:text-gray-300">
-                        {formatPercent(b.rate)} → {formatCurrency(b.taxPaid, breakdown.currency)}
+                        {formatPercent(b.rate)} → {fmt(b.taxPaid, breakdown.currency)}
                       </span>
                     </div>
                     {/* Progress bar showing how much of this bracket is used */}

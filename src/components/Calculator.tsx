@@ -9,7 +9,9 @@ import { fetchLiveRates, setRates, getDisplayRate } from '@/lib/currency';
 import { decodeStateFromURL, encodeStateToURL, getShareableURL } from '@/lib/urlState';
 import { PDFExportButton } from './PDFExport';
 import { ThemeToggle } from './ThemeProvider';
-import { formatCurrency } from '@/lib/formatters';
+import { formatCurrency, smartCurrency } from '@/lib/formatters';
+import { Confetti } from './Confetti';
+import { ResultsSkeleton } from './ResultsSkeleton';
 
 const defaultInputs: UserInputs = {
   currentAge: 35,
@@ -321,7 +323,10 @@ function MobileStickyComparison({
         <div className="flex-1 text-center">
           <div className="text-xs text-gray-500 dark:text-gray-400">{country2?.flag} {country2?.name}</div>
           <div className="text-sm font-bold text-gray-900 dark:text-white">
-            {formatCurrency(result2?.fireNumber || 0, country2?.currency || 'USD')}
+            {(() => {
+              const s = smartCurrency(result2?.fireNumber || 0, country2?.currency || 'USD', country1?.currency || 'USD');
+              return formatCurrency(s.amount, s.currency);
+            })()}
           </div>
           <div className="text-xs text-gray-500">
             {result2?.canRetire ? `Age ${result2?.fireAge}` : 'Cannot FIRE'}
@@ -343,9 +348,11 @@ export function Calculator() {
     setActiveTabRaw(tab);
     window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
   }, []);
-  const [showExplainer, setShowExplainer] = useState(false);
+  const [showExplainer, setShowExplainer] = useState(true);
   const [advancedMode, setAdvancedMode] = useState(false);
   const [showMobileComparison, setShowMobileComparison] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const prevResultsRef = useRef<string>('');
 
   // Swipe handling for mobile tabs
   const touchStartX = useRef(0);
@@ -372,6 +379,7 @@ export function Calculator() {
         const loadedInputs = decodeStateFromURL(searchParams, defaultInputs);
         setInputs(loadedInputs);
         setAdvancedMode(true); // Returning users get advanced mode
+        setShowExplainer(false); // Returning users already know FIRE
       }
       setInitialized(true);
     }
@@ -422,8 +430,23 @@ export function Calculator() {
   const isSameCountry = inputs.currentCountry === inputs.targetCountry;
   const showFxRate = !isSameCountry && inputs.portfolioCurrency !== countries[inputs.targetCountry]?.currency;
 
+  // Confetti on significant wins (5+ years earlier retirement)
+  useEffect(() => {
+    if (!results || isSameCountry) return;
+    const key = `${inputs.currentCountry}-${inputs.targetCountry}`;
+    const yearsDiff = Math.abs(results.country1.yearsUntilFIRE - results.country2.yearsUntilFIRE);
+    if (yearsDiff >= 5 && key !== prevResultsRef.current) {
+      prevResultsRef.current = key;
+      setShowConfetti(true);
+      setTimeout(() => setShowConfetti(false), 100);
+    }
+  }, [results, isSameCountry, inputs.currentCountry, inputs.targetCountry]);
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-slate-900 transition-colors pb-20 lg:pb-0">
+      {/* Confetti celebration on big wins */}
+      <Confetti trigger={showConfetti} />
+
       {/* Share Toast - More prominent */}
       {showShareToast && (
         <div className="fixed top-4 left-1/2 -translate-x-1/2 bg-green-600 text-white px-6 py-3 rounded-xl shadow-2xl z-[100] animate-fade-in flex items-center gap-3">
@@ -551,9 +574,7 @@ export function Calculator() {
                 />
               </div>
             ) : (
-              <div className="text-center text-gray-500 dark:text-gray-400 py-12">
-                <p>Unable to calculate results.</p>
-              </div>
+              <ResultsSkeleton />
             )}
           </div>
         </div>

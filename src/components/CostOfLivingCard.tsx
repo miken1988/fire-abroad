@@ -2,7 +2,7 @@
 
 import { countries } from '@/data/countries';
 import { costOfLiving, getCostOfLivingComparison, getAdjustedSpending } from '@/data/costOfLiving';
-import { formatCurrency } from '@/lib/formatters';
+import { formatCurrency, smartCurrency } from '@/lib/formatters';
 import { convertCurrency } from '@/lib/currency';
 
 interface CostOfLivingCardProps {
@@ -31,6 +31,7 @@ export function CostOfLivingCard({
   // Calculate equivalent spending in destination
   const adjustedSpending = getAdjustedSpending(annualSpending, fromCountry, toCountry);
   const adjustedInLocalCurrency = convertCurrency(adjustedSpending, spendingCurrency, to.currency);
+  const displayAdjusted = smartCurrency(adjustedInLocalCurrency, to.currency, spendingCurrency);
   
   const categories = [
     { key: 'rent', label: 'Housing', icon: '🏠' },
@@ -55,7 +56,7 @@ export function CostOfLivingCard({
           <span className="text-xl dark:text-gray-300 flex-shrink-0">→</span>
           <div className="min-w-0">
             <span className="text-base sm:text-lg font-bold text-purple-600 dark:text-purple-400 break-words">
-              {formatCurrency(adjustedInLocalCurrency, to.currency)}/yr
+              {formatCurrency(displayAdjusted.amount, displayAdjusted.currency)}/yr
             </span>
             <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 ml-1 sm:ml-2">
               in {to.name}

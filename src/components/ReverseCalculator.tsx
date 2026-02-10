@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react';
 import { calculateSustainableSpending, ReverseCalculationResult } from '@/lib/calculations';
 import { countries } from '@/data/countries';
-import { formatCurrency } from '@/lib/formatters';
+import { formatCurrency, smartCurrency } from '@/lib/formatters';
 
 interface ReverseCalculatorProps {
   portfolioValue: number;
@@ -61,6 +61,12 @@ export function ReverseCalculator({
     }
   }, [portfolioValue, portfolioCurrency, country2Code, safeWithdrawalRate, currentSpending, isSameCountry, usState]);
 
+  // Smart format: convert extreme currencies to user's currency
+  const fmt = (amount: number, currency: string) => {
+    const s = smartCurrency(amount, currency, portfolioCurrency);
+    return formatCurrency(s.amount, s.currency);
+  };
+
   const getLuxuryEmoji = (level: string) => {
     switch (level) {
       case 'lean': return '🥗';
@@ -103,7 +109,7 @@ export function ReverseCalculator({
         <div className="flex items-center gap-3">
           <div className="text-right">
             <div className="text-sm sm:text-base font-bold text-purple-600 dark:text-purple-400">
-              {formatCurrency(result1.sustainableSpendingNet, result1.currency)}/yr
+              {fmt(result1.sustainableSpendingNet, result1.currency)}/yr
             </div>
             <div className="text-[10px] text-gray-500 dark:text-gray-400">
               {getLuxuryEmoji(result1.luxuryLevel)} {getLuxuryLabel(result1.luxuryLevel)}
@@ -184,10 +190,10 @@ function SpendingCard({
       
       <div>
         <div className="text-lg font-bold text-gray-900 dark:text-white">
-          {formatCurrency(result.sustainableSpendingNet, result.currency)}<span className="text-xs font-normal text-gray-500">/yr</span>
+          {fmt(result.sustainableSpendingNet, result.currency)}<span className="text-xs font-normal text-gray-500">/yr</span>
         </div>
         <div className="text-xs text-gray-500 dark:text-gray-400">
-          {formatCurrency(result.monthlyNet, result.currency)}/month
+          {fmt(result.monthlyNet, result.currency)}/month
         </div>
       </div>
       
@@ -197,7 +203,7 @@ function SpendingCard({
       </div>
       
       <div className="text-[10px] text-gray-400 dark:text-gray-500 pt-1 border-t border-gray-100 dark:border-slate-700">
-        Gross: {formatCurrency(result.sustainableSpendingGross, result.currency)} • 
+        Gross: {fmt(result.sustainableSpendingGross, result.currency)} • 
         Tax: {(result.effectiveTaxRate * 100).toFixed(1)}%
       </div>
     </div>
