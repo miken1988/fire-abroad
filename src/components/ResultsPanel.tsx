@@ -387,7 +387,7 @@ function CountryCard({
   currentAge,
   colorScheme = 'blue',
   hideAffiliate = false,
-  isWinner = false
+  isWinner: isWinnerProp = false
 }: { 
   result: FIREResult; 
   country: typeof countries[string];
@@ -418,7 +418,7 @@ function CountryCard({
   
   // Determine card status - alreadyFI means hitsTarget
   const effectivelyOnTarget = hitsTarget || alreadyFI;
-  const isWinner = effectivelyOnTarget && isSoonerRetirement;
+  const isWinner = isWinnerProp || (effectivelyOnTarget && isSoonerRetirement);
   const isOnTarget = effectivelyOnTarget && !isSoonerRetirement;
   const isBehindTarget = missesTarget && !alreadyFI;
   
