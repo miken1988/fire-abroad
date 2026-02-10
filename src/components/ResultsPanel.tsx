@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { FIREResult, ComparisonSummary } from '@/lib/calculations';
 import { countries } from '@/data/countries';
 import { formatCurrency, formatPercent } from '@/lib/formatters';
+import { convertCurrency } from '@/lib/currency';
 import { CostOfLivingCard } from './CostOfLivingCard';
 import { VisaCard } from './VisaCard';
 import { MonteCarloCard } from './MonteCarloCard';
@@ -71,19 +72,43 @@ export function ResultsPanel({
       };
     }
     
+    // Calculate earliest possible FIRE age for each country
+    const findEarliestFI = (result: FIREResult) => {
+      const earliest = result.projections?.find(p => (p.liquidEnd || 0) >= result.fireNumber * 0.95);
+      return earliest?.age || result.fireAge;
+    };
+    const earliest1 = findEarliestFI(result1);
+    const earliest2 = findEarliestFI(result2);
+    
     const yearsDiff = Math.abs(result1.yearsUntilFIRE - result2.yearsUntilFIRE);
+    const earliestDiff = Math.abs(earliest1 - earliest2);
     
     // If same timeline, winner is the one with lower FIRE number (in USD for fair comparison)
     const winner = result1.yearsUntilFIRE === result2.yearsUntilFIRE
       ? comparison.lowerFIRENumber
       : comparison.earlierRetirement;
     
+    // Build message - highlight earliest possible age if significantly different
+    let message: string;
+    if (result1.yearsUntilFIRE === result2.yearsUntilFIRE) {
+      const savingsUSD = comparison.fireNumberDifferenceUSD;
+      if (earliestDiff >= 2) {
+        const earlierCountry = earliest1 < earliest2 ? country1Code : country2Code;
+        const earlierAge = Math.min(earliest1, earliest2);
+        message = `Could FIRE at age ${earlierAge} in ${countries[earlierCountry]?.name} — ${earliestDiff}yr earlier!`;
+      } else {
+        message = `Same timeline, ${formatCurrency(savingsUSD, 'USD')} lower FIRE number`;
+      }
+    } else {
+      message = `FIRE ${yearsDiff} year${yearsDiff === 1 ? '' : 's'} sooner`;
+    }
+    
     return {
       type: 'success' as const,
       winner: countries[winner]?.name,
-      message: result1.yearsUntilFIRE === result2.yearsUntilFIRE 
-        ? 'Same timeline, lower FIRE number'
-        : `FIRE ${yearsDiff} year${yearsDiff === 1 ? '' : 's'} sooner`
+      winnerCode: winner,
+      message,
+      yearsDiff,
     };
   };
 
@@ -163,6 +188,7 @@ export function ResultsPanel({
           targetRetirementAge={inputs?.targetRetirementAge}
           currentAge={inputs?.currentAge}
           colorScheme="blue"
+          isWinner={winnerInfo?.type === 'success' && winnerInfo?.winnerCode === country1Code}
         />
         {!isSameCountry && (
           <CountryCard 
@@ -182,6 +208,7 @@ export function ResultsPanel({
             currentAge={inputs?.currentAge}
             colorScheme="green"
             hideAffiliate={simplifiedMode}
+            isWinner={winnerInfo?.type === 'success' && winnerInfo?.winnerCode === country2Code}
           />
         )}
       </div>
@@ -317,15 +344,16 @@ export function ResultsPanel({
       )}
 
       {/* Bottom CTA */}
-      <div className="bg-gradient-to-r from-slate-50 to-gray-50 dark:from-slate-800/50 dark:to-slate-800/50 rounded-xl border border-gray-200 dark:border-slate-700 p-4 sm:p-5">
+      <div className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-blue-900/20 dark:via-indigo-900/20 dark:to-purple-900/20 rounded-xl border border-blue-200 dark:border-blue-800/50 p-5 sm:p-6">
         <div className="text-center space-y-3">
-          <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Want to explore other options?</p>
-          <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3">
+          <p className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">🌍 Try a different destination</p>
+          <p className="text-sm text-gray-600 dark:text-gray-400">Your FIRE number changes dramatically by country. Portugal, Thailand, Mexico — where could <em>you</em> retire earliest?</p>
+          <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 pt-1">
             <button
               onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-              className="px-4 py-2 text-xs sm:text-sm font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
+              className="px-5 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all shadow-md hover:shadow-lg"
             >
-              🌍 Compare Another Country
+              Compare Another Country →
             </button>
             <button
               onClick={() => {
@@ -335,7 +363,7 @@ export function ResultsPanel({
                   navigator.clipboard.writeText(window.location.href);
                 }
               }}
-              className="px-4 py-2 text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
+              className="px-5 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors shadow-sm"
             >
               📤 Share Results
             </button>
@@ -358,7 +386,8 @@ function CountryCard({
   targetRetirementAge,
   currentAge,
   colorScheme = 'blue',
-  hideAffiliate = false
+  hideAffiliate = false,
+  isWinner = false
 }: { 
   result: FIREResult; 
   country: typeof countries[string];
@@ -372,6 +401,7 @@ function CountryCard({
   currentAge?: number;
   colorScheme?: 'blue' | 'green';
   hideAffiliate?: boolean;
+  isWinner?: boolean;
 }) {
   const canFIRE = result.canRetire;
   
@@ -399,7 +429,7 @@ function CountryCard({
   
   // Card styling based on status - clean card with left accent border
   const cardStyles = isWinner
-    ? 'bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 border-l-4 border-l-green-500'
+    ? 'bg-white dark:bg-slate-800 border-2 border-green-400 dark:border-green-500 animate-winner-glow'
     : isOnTarget
     ? 'bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 border-l-4 border-l-green-500'
     : isBehindTarget
@@ -441,28 +471,55 @@ function CountryCard({
         {/* FIRE Number */}
         <div>
           <span className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">FIRE Number</span>
-          <p className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white">
-            <AnimatedNumber 
-              value={result.fireNumber} 
-              formatter={(n) => formatCurrency(Math.round(n), country?.currency || 'USD')} 
-            />
-          </p>
+          {(() => {
+            const localCurrency = country?.currency || 'USD';
+            const userCurrency = portfolioCurrency || 'USD';
+            // Show in user's currency when local currency would produce huge numbers (VND, IDR, KRW, COP, etc.)
+            const showInUserCurrency = localCurrency !== userCurrency && result.fireNumber > 10_000_000;
+            const displayValue = showInUserCurrency 
+              ? convertCurrency(result.fireNumber, localCurrency, userCurrency)
+              : result.fireNumber;
+            const displayCurrency = showInUserCurrency ? userCurrency : localCurrency;
+            
+            return (
+              <>
+                <p className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white">
+                  <AnimatedNumber 
+                    value={displayValue} 
+                    formatter={(n) => formatCurrency(Math.round(n), displayCurrency)} 
+                  />
+                </p>
+                {showInUserCurrency && (
+                  <p className="text-[10px] text-gray-400 dark:text-gray-500">
+                    ≈ {formatCurrency(Math.round(result.fireNumber), localCurrency)} local
+                  </p>
+                )}
+              </>
+            );
+          })()}
         </div>
 
         {/* Portfolio Breakdown - show if there's illiquid (property) */}
-        {result.illiquidPortfolioValue > 0 && (
+        {result.illiquidPortfolioValue > 0 && (() => {
+          const localCurrency = country?.currency || 'USD';
+          const userCurrency = portfolioCurrency || 'USD';
+          const showInUser = localCurrency !== userCurrency && result.liquidPortfolioValue > 10_000_000;
+          const dispCurr = showInUser ? userCurrency : localCurrency;
+          const liq = showInUser ? convertCurrency(result.liquidPortfolioValue, localCurrency, userCurrency) : result.liquidPortfolioValue;
+          const illiq = showInUser ? convertCurrency(result.illiquidPortfolioValue, localCurrency, userCurrency) : result.illiquidPortfolioValue;
+          return (
           <div className="bg-white/50 dark:bg-slate-800/50 rounded-lg p-2 -mx-1">
             <span className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">Your Portfolio</span>
             <div className="flex items-center justify-between mt-1">
               <div>
                 <p className="text-xs sm:text-sm font-semibold text-gray-900 dark:text-white">
-                  {formatCurrency(result.liquidPortfolioValue, country?.currency || 'USD')}
+                  {formatCurrency(liq, dispCurr)}
                 </p>
                 <p className="text-[10px] text-gray-500 dark:text-gray-400">Liquid (withdrawable)</p>
               </div>
               <div className="text-right">
                 <p className="text-xs sm:text-sm font-semibold text-gray-600 dark:text-gray-400">
-                  {formatCurrency(result.illiquidPortfolioValue, country?.currency || 'USD')}
+                  {formatCurrency(illiq, dispCurr)}
                 </p>
                 <p className="text-[10px] text-gray-500 dark:text-gray-400">Property (illiquid)</p>
               </div>
@@ -471,35 +528,54 @@ function CountryCard({
               ⚠️ Withdrawals only come from liquid assets
             </p>
           </div>
-        )}
+          );
+        })()}
 
         {/* Years to FIRE */}
         <div>
           <span className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">Years to FIRE</span>
-          <p className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">
-            {alreadyFI ? (
-              <span className="text-green-600 dark:text-green-400">0 years</span>
-            ) : canFIRE ? (
+          {(() => {
+            // Calculate earliest possible FIRE age from projections
+            const earliestFI = result.projections?.find(p => {
+              const liquidAtAge = p.liquidEnd || 0;
+              return liquidAtAge >= result.fireNumber * 0.95;
+            });
+            const earliestAge = alreadyFI ? (currentAge || 35) : earliestFI?.age;
+            const targetAge2 = targetRetirementAge || 50;
+            const couldRetireEarlier = earliestAge && earliestAge < targetAge2 - 1;
+            const yearsEarly = couldRetireEarlier ? targetAge2 - earliestAge : 0;
+            
+            return (
               <>
-                {result.yearsUntilFIRE} years
+                <p className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">
+                  {alreadyFI ? (
+                    <span className="text-green-600 dark:text-green-400">0 years</span>
+                  ) : canFIRE ? (
+                    <>{result.yearsUntilFIRE} years</>
+                  ) : (
+                    <span className="text-red-600 dark:text-red-400">Cannot retire</span>
+                  )}
+                </p>
+                {alreadyFI ? (
+                  <p className="text-[10px] sm:text-xs text-green-600 dark:text-green-400 mt-0.5">
+                    ✓ Liquid assets exceed FIRE number - ready now!
+                  </p>
+                ) : couldRetireEarlier ? (
+                  <p className="text-[10px] sm:text-xs text-green-600 dark:text-green-400 mt-0.5">
+                    🚀 Could FIRE at age {earliestAge} — {yearsEarly}yr earlier than target!
+                  </p>
+                ) : canFIRE && (
+                  <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                    {yearsLate === 0 ? (
+                      <span className="text-green-600 dark:text-green-400">✓ Age {result.fireAge} (on target)</span>
+                    ) : (
+                      <span className="text-amber-600 dark:text-amber-400">Age {result.fireAge} ({yearsLate}yr late)</span>
+                    )}
+                  </p>
+                )}
               </>
-            ) : (
-              <span className="text-red-600 dark:text-red-400">Cannot retire</span>
-            )}
-          </p>
-          {alreadyFI ? (
-            <p className="text-[10px] sm:text-xs text-green-600 dark:text-green-400 mt-0.5">
-              ✓ Liquid assets exceed FIRE number - ready now!
-            </p>
-          ) : canFIRE && (
-            <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-              {yearsLate === 0 ? (
-                <span className="text-green-600 dark:text-green-400">✓ Age {result.fireAge} (on target)</span>
-              ) : (
-                <span className="text-amber-600 dark:text-amber-400">Age {result.fireAge} ({yearsLate}yr late)</span>
-              )}
-            </p>
-          )}
+            );
+          })()}
         </div>
 
         {/* Tax Rate */}
@@ -509,7 +585,15 @@ function CountryCard({
             {formatPercent(result.effectiveTaxRate)}
           </p>
           <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5 break-words">
-            Gross {formatCurrency(result.annualWithdrawalGross, country?.currency || 'USD')} → Net {formatCurrency(result.annualWithdrawalNet, country?.currency || 'USD')}
+          {(() => {
+            const localCurrency = country?.currency || 'USD';
+            const userCurrency = portfolioCurrency || 'USD';
+            const showInUser = localCurrency !== userCurrency && result.annualWithdrawalGross > 10_000_000;
+            const dispCurr = showInUser ? userCurrency : localCurrency;
+            const gross = showInUser ? convertCurrency(result.annualWithdrawalGross, localCurrency, userCurrency) : result.annualWithdrawalGross;
+            const net = showInUser ? convertCurrency(result.annualWithdrawalNet, localCurrency, userCurrency) : result.annualWithdrawalNet;
+            return `Gross ${formatCurrency(gross, dispCurr)} → Net ${formatCurrency(net, dispCurr)}`;
+          })()}
           </p>
         </div>
 
