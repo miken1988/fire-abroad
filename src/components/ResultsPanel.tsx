@@ -28,6 +28,7 @@ interface ResultsPanelProps {
   inputs?: UserInputs;
   expectedReturn?: number;
   inflationRate?: number;
+  simplifiedMode?: boolean;
 }
 
 export function ResultsPanel({ 
@@ -41,7 +42,8 @@ export function ResultsPanel({
   userAge = 35,
   inputs,
   expectedReturn,
-  inflationRate
+  inflationRate,
+  simplifiedMode = false
 }: ResultsPanelProps) {
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [showTaxNotes, setShowTaxNotes] = useState(false);
@@ -179,6 +181,7 @@ export function ResultsPanel({
             targetRetirementAge={inputs?.targetRetirementAge}
             currentAge={inputs?.currentAge}
             colorScheme="green"
+            hideAffiliate={simplifiedMode}
           />
         )}
       </div>
@@ -194,8 +197,8 @@ export function ResultsPanel({
         inflationRate={inflationRate}
       />
 
-      {/* If You Retired Today (renamed from "What Can I Spend?") */}
-      {inputs && (
+      {/* If You Retired Today */}
+      {!simplifiedMode && inputs && (
         <ReverseCalculator
           portfolioValue={inputs.portfolioValue}
           portfolioCurrency={inputs.portfolioCurrency}
@@ -207,7 +210,7 @@ export function ResultsPanel({
         />
       )}
 
-      {/* Cost of Living Comparison - Keep visible */}
+      {/* Cost of Living Comparison */}
       {!isSameCountry && (
         <CostOfLivingCard
           fromCountry={country1Code}
@@ -218,7 +221,7 @@ export function ResultsPanel({
       )}
 
       {/* Banking/Money Transfer Affiliate */}
-      {!isSameCountry && country1?.currency !== country2?.currency && (
+      {!simplifiedMode && !isSameCountry && country1?.currency !== country2?.currency && (
         <BankingAffiliate
           fromCurrency={country1?.currency || 'USD'}
           toCurrency={country2?.currency || 'EUR'}
@@ -226,19 +229,19 @@ export function ResultsPanel({
         />
       )}
 
-      {/* Tax Notes - Collapsed by default */}
-      <CollapsibleTaxNotes result1={result1} result2={result2} country1={country1} country2={country2} isSameCountry={isSameCountry} showTaxNotes={showTaxNotes} setShowTaxNotes={setShowTaxNotes} />
+      {/* Tax Notes - Hidden in simplified, merged into Advanced in full mode */}
+      {!simplifiedMode && <CollapsibleTaxNotes result1={result1} result2={result2} country1={country1} country2={country2} isSameCountry={isSameCountry} showTaxNotes={showTaxNotes} setShowTaxNotes={setShowTaxNotes} />}
 
-      {/* Visa Requirements - Keep visible */}
-      {!isSameCountry && (
+      {/* Visa Requirements */}
+      {!simplifiedMode && !isSameCountry && (
         <VisaCard
           countryCode={country2Code}
           userAge={userAge}
         />
       )}
 
-      {/* Advanced Details - Collapsed by default */}
-      {inputs && (
+      {/* Advanced Details - Collapsed by default, hidden in simplified */}
+      {!simplifiedMode && inputs && (
         <div className="border border-gray-200 dark:border-slate-700 rounded-xl overflow-hidden">
           <button
             onClick={() => setShowAdvanced(!showAdvanced)}
@@ -299,11 +302,11 @@ export function ResultsPanel({
         </div>
       )}
 
-      {/* Warnings */}
+      {/* Warnings - always show, these are important */}
       <Warnings result1={result1} result2={result2} country1={country1} country2={country2} isSameCountry={isSameCountry} />
 
       {/* Plan Your Move - Affiliate Next Steps */}
-      {!isSameCountry && (
+      {!simplifiedMode && !isSameCountry && (
         <NextStepsPanel
           retireCountryName={country2?.name || 'abroad'}
           retireCountryCode={country2Code}
@@ -354,7 +357,8 @@ function CountryCard({
   portfolioCurrency,
   targetRetirementAge,
   currentAge,
-  colorScheme = 'blue'
+  colorScheme = 'blue',
+  hideAffiliate = false
 }: { 
   result: FIREResult; 
   country: typeof countries[string];
@@ -367,6 +371,7 @@ function CountryCard({
   targetRetirementAge?: number;
   currentAge?: number;
   colorScheme?: 'blue' | 'green';
+  hideAffiliate?: boolean;
 }) {
   const canFIRE = result.canRetire;
   
@@ -524,7 +529,7 @@ function CountryCard({
             </p>
           )}
           {/* Expat Health Insurance Affiliate */}
-          {colorScheme === 'green' && (
+          {colorScheme === 'green' && !hideAffiliate && (
             <HealthcareAffiliate
               retireCountryName={country?.name || ''}
               retireCountryCode={otherCountryCode}

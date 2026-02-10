@@ -547,6 +547,7 @@ export function Calculator() {
                   inputs={inputs}
                   expectedReturn={inputs.expectedReturn}
                   inflationRate={inputs.inflationRate}
+                  simplifiedMode={!advancedMode}
                 />
               </div>
             ) : (
@@ -603,6 +604,7 @@ export function Calculator() {
                 inputs={inputs}
                 expectedReturn={inputs.expectedReturn}
                 inflationRate={inputs.inflationRate}
+                simplifiedMode={!advancedMode}
               />
             </div>
           )}
