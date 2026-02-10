@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { FIREResult, ComparisonSummary } from '@/lib/calculations';
 import { countries } from '@/data/countries';
-import { formatCurrency, formatPercent } from '@/lib/formatters';
+import { formatCurrency, formatPercent, smartCurrency } from '@/lib/formatters';
 import { convertCurrency } from '@/lib/currency';
 import { CostOfLivingCard } from './CostOfLivingCard';
 import { VisaCard } from './VisaCard';
