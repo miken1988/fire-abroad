@@ -468,6 +468,28 @@ export function Calculator() {
     catch (error) { console.error('Calculation error:', error); return null; }
   }, [inputs, fxLoaded]);
 
+  // Track calculation
+  useEffect(() => {
+    if (!results) return;
+    analytics.trackCalculation({
+      fromCountry: inputs.currentCountry,
+      toCountry: inputs.targetCountry,
+      portfolioValue: inputs.portfolioValue,
+      annualSpending: inputs.annualSpending,
+      currentAge: inputs.currentAge,
+      retirementAge: inputs.targetRetirementAge,
+      fireNumber1: results.country1.fireNumber,
+      fireNumber2: results.country2.fireNumber,
+      canRetire1: results.country1.canRetire,
+      canRetire2: results.country2.canRetire,
+      winner: results.comparison.earlierRetirement,
+    });
+    analytics.trackCalculationDepth();
+  }, [inputs.currentCountry, inputs.targetCountry, inputs.portfolioValue, inputs.annualSpending]);
+
+  const isSameCountry = inputs.currentCountry === inputs.targetCountry;
+  const showFxRate = !isSameCountry && inputs.portfolioCurrency !== countries[inputs.targetCountry]?.currency;
+
   const getShareText = useCallback(() => {
     if (!results || isSameCountry) return 'Check out this FIRE calculator for retiring abroad!';
     const c1 = countries[inputs.currentCountry]?.name || '';
@@ -509,28 +531,6 @@ export function Calculator() {
       setTimeout(() => setShowShareToast(false), 3000);
     } catch { prompt('Copy this URL to share:', url); }
   }, [inputs, getShareText]);
-
-  // Track calculation
-  useEffect(() => {
-    if (!results) return;
-    analytics.trackCalculation({
-      fromCountry: inputs.currentCountry,
-      toCountry: inputs.targetCountry,
-      portfolioValue: inputs.portfolioValue,
-      annualSpending: inputs.annualSpending,
-      currentAge: inputs.currentAge,
-      retirementAge: inputs.targetRetirementAge,
-      fireNumber1: results.country1.fireNumber,
-      fireNumber2: results.country2.fireNumber,
-      canRetire1: results.country1.canRetire,
-      canRetire2: results.country2.canRetire,
-      winner: results.comparison.earlierRetirement,
-    });
-    analytics.trackCalculationDepth();
-  }, [inputs.currentCountry, inputs.targetCountry, inputs.portfolioValue, inputs.annualSpending]);
-
-  const isSameCountry = inputs.currentCountry === inputs.targetCountry;
-  const showFxRate = !isSameCountry && inputs.portfolioCurrency !== countries[inputs.targetCountry]?.currency;
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-slate-900 transition-colors pb-20 lg:pb-0">
