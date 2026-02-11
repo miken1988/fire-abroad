@@ -89,7 +89,7 @@ export function CoastFIRECard({ result, inputs, countryCode, label }: CoastFIREP
     <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden">
       <button
         onClick={handleToggle}
-        className="w-full px-4 py-3 sm:px-5 sm:py-4 flex items-center justify-between text-left hover:bg-gray-50 dark:hover:bg-slate-750 transition-colors"
+        className="w-full px-4 py-3 sm:px-5 sm:py-4 flex items-center justify-between text-left hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
       >
         <div className="flex items-center gap-3 min-w-0">
           <span className="text-lg">⛵</span>
@@ -99,7 +99,7 @@ export function CoastFIRECard({ result, inputs, countryCode, label }: CoastFIREP
             </h3>
             <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
               {coast65.alreadyCoast 
-                ? 'You could stop saving and still retire by 65'
+                ? '✓ Reached — you could stop saving entirely'
                 : `${formatCurrency(deficit65 > 0 ? deficit65 : 0, currency)} more to reach CoastFIRE for age 65`
               }
             </p>
