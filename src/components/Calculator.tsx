@@ -553,7 +553,7 @@ export function Calculator() {
           <div className="flex items-center justify-between">
             <div className="min-w-0 flex-1">
               <h1 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white truncate">
-                Where to <span className="fire-gradient">FIRE</span>
+                <a href="/" className="hover:opacity-80 transition-opacity">Where to <span className="fire-gradient">FIRE</span></a>
               </h1>
               <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 hidden sm:block">Compare early retirement across 24 countries · Real tax data · Free</p>
             </div>
