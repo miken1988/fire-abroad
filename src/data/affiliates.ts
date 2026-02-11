@@ -24,7 +24,7 @@ export const AFFILIATE_PARTNERS: AffiliatePartner[] = [
     shortDescription: 'Transfer money abroad at the real exchange rate',
     commission: '£10/personal, £50/business',
     category: 'banking',
-    url: 'https://wise.com/', // Replace with Partnerize tracking link once approved
+    url: 'https://wise.prf.hn/click/camref:1101l5Dpcd', // USD default
     ctaText: 'Open Free Account',
     icon: '💱',
     features: [
@@ -113,4 +113,29 @@ export function trackAffiliateClick(partnerId: string, section: string): void {
       affiliate_section: section,
     });
   }
+}
+
+// Currency-specific Wise tracking links
+const WISE_CURRENCY_LINKS: Record<string, string> = {
+  EUR: 'https://wise.prf.hn/click/camref:1101l5Dpca',
+  USD: 'https://wise.prf.hn/click/camref:1101l5Dpcd',
+  JPY: 'https://wise.prf.hn/click/camref:1101l5Dpcc',
+  AUD: 'https://wise.prf.hn/click/camref:1101l5Dpc9',
+  GBP: 'https://wise.prf.hn/click/camref:1101l5Dpcb',
+};
+
+/** Get the best Wise affiliate URL based on user's currency */
+export function getWiseUrl(currency?: string): string {
+  if (currency && WISE_CURRENCY_LINKS[currency]) {
+    return WISE_CURRENCY_LINKS[currency];
+  }
+  return WISE_CURRENCY_LINKS.USD; // default
+}
+
+/** Get affiliate URL - handles currency-specific links for partners like Wise */
+export function getAffiliateUrl(partner: AffiliatePartner, currency?: string): string {
+  if (partner.id === 'wise') {
+    return getWiseUrl(currency);
+  }
+  return partner.url;
 }

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { AFFILIATE_PARTNERS, trackAffiliateClick, type AffiliatePartner } from '@/data/affiliates';
+import { AFFILIATE_PARTNERS, trackAffiliateClick, getAffiliateUrl, type AffiliatePartner } from '@/data/affiliates';
 
 interface NextStepsPanelProps {
   retireCountryName: string;
@@ -11,14 +11,14 @@ interface NextStepsPanelProps {
   showDifferentCurrencies: boolean;
 }
 
-function PartnerCard({ partner, section }: { partner: AffiliatePartner; section: string }) {
+function PartnerCard({ partner, section, currency }: { partner: AffiliatePartner; section: string; currency?: string }) {
   const handleClick = () => {
     trackAffiliateClick(partner.id, section);
   };
 
   return (
     <a
-      href={partner.url}
+      href={getAffiliateUrl(partner, currency)}
       target="_blank"
       rel="noopener noreferrer sponsored"
       onClick={handleClick}
@@ -247,7 +247,7 @@ export default function NextStepsPanel({
                       </div>
                       {partner && (
                         <a
-                          href={partner.url}
+                          href={getAffiliateUrl(partner, toCurrency)}
                           target="_blank"
                           rel="noopener noreferrer sponsored"
                           onClick={(e) => {
@@ -273,7 +273,7 @@ export default function NextStepsPanel({
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {AFFILIATE_PARTNERS.map((partner) => (
-                <PartnerCard key={partner.id} partner={partner} section="nextsteps_tools" />
+                <PartnerCard key={partner.id} partner={partner} section="nextsteps_tools" currency={toCurrency} />
               ))}
             </div>
           </div>

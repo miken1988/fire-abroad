@@ -8,10 +8,7 @@ interface HealthcareAffiliateProps {
 }
 
 export default function HealthcareAffiliate({ retireCountryName, retireCountryCode }: HealthcareAffiliateProps) {
-  // Only show partners with real affiliate tracking (not placeholder URLs)
-  const partners = getPartnersForSection('healthcare').filter(p => 
-    !p.url.endsWith('/') || p.id === 'safetywing'
-  );
+  const partners = getPartnersForSection('healthcare');
 
   if (partners.length === 0) return null;
 

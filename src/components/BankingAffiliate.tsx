@@ -1,6 +1,6 @@
 'use client';
 
-import { getPartnersForSection, trackAffiliateClick, type AffiliatePartner } from '@/data/affiliates';
+import { getPartnersForSection, trackAffiliateClick, getAffiliateUrl, type AffiliatePartner } from '@/data/affiliates';
 
 interface BankingAffiliateProps {
   fromCurrency: string;
@@ -23,7 +23,7 @@ export default function BankingAffiliate({ fromCurrency, toCurrency, retireCount
 
   return (
     <a
-      href={wise.url}
+      href={getAffiliateUrl(wise, toCurrency)}
       target="_blank"
       rel="noopener noreferrer sponsored"
       onClick={handleClick}
