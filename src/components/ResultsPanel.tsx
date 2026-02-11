@@ -168,26 +168,32 @@ export function ResultsPanel({
       )}
 
       {/* Country Cards - Stack on mobile, side-by-side on tablet+ */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-        <CountryCard 
-          result={result1} 
-          country={country1} 
-          isLowerFIRE={comparison.lowerFIRENumber === country1Code}
-          isLowerTax={comparison.lowerEffectiveTaxRate === country1Code}
-          isSoonerRetirement={
-            result1.yearsUntilFIRE === result2.yearsUntilFIRE
-              ? comparison.lowerFIRENumber === country1Code
-              : comparison.earlierRetirement === country1Code
-          }
-          otherCountryCode={country2Code}
-          portfolioValue={inputs?.portfolioValue}
-          portfolioCurrency={inputs?.portfolioCurrency}
-          targetRetirementAge={inputs?.targetRetirementAge}
-          currentAge={inputs?.currentAge}
-          colorScheme="blue"
-          isWinner={winnerInfo?.type === 'success' && winnerInfo?.winnerCode === country1Code}
-        />
-        {!isSameCountry && (
+      {/* Winner card shows first on mobile for immediate impact */}
+      {(() => {
+        const country2IsWinner = !isSameCountry && winnerInfo?.type === 'success' && winnerInfo?.winnerCode === country2Code;
+        
+        const card1 = (
+          <CountryCard 
+            result={result1} 
+            country={country1} 
+            isLowerFIRE={comparison.lowerFIRENumber === country1Code}
+            isLowerTax={comparison.lowerEffectiveTaxRate === country1Code}
+            isSoonerRetirement={
+              result1.yearsUntilFIRE === result2.yearsUntilFIRE
+                ? comparison.lowerFIRENumber === country1Code
+                : comparison.earlierRetirement === country1Code
+            }
+            otherCountryCode={country2Code}
+            portfolioValue={inputs?.portfolioValue}
+            portfolioCurrency={inputs?.portfolioCurrency}
+            targetRetirementAge={inputs?.targetRetirementAge}
+            currentAge={inputs?.currentAge}
+            colorScheme={country2IsWinner ? "green" : "blue"}
+            isWinner={winnerInfo?.type === 'success' && winnerInfo?.winnerCode === country1Code}
+          />
+        );
+        
+        const card2 = !isSameCountry ? (
           <CountryCard 
             result={result2} 
             country={country2}
@@ -203,11 +209,19 @@ export function ResultsPanel({
             portfolioCurrency={inputs?.portfolioCurrency}
             targetRetirementAge={inputs?.targetRetirementAge}
             currentAge={inputs?.currentAge}
-            colorScheme="green"
+            colorScheme={country2IsWinner ? "blue" : "green"}
             hideAffiliate={simplifiedMode}
             isWinner={winnerInfo?.type === 'success' && winnerInfo?.winnerCode === country2Code}
           />
-        )}
+        ) : null;
+
+        return (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+            {country2IsWinner ? card2 : card1}
+            {country2IsWinner ? card1 : card2}
+          </div>
+        );
+      })()}
       </div>
 
       {/* 🔥 FIRE Journey Chart - Moved up for maximum visibility */}
