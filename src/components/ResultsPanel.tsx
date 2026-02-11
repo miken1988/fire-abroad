@@ -10,6 +10,7 @@ import { VisaCard } from './VisaCard';
 import { MonteCarloCard } from './MonteCarloCard';
 import { ReverseCalculator } from './ReverseCalculator';
 import { TaxBreakdownCard } from './TaxBreakdownCard';
+import { CoastFIRECard } from './CoastFIRECard';
 import { UserInputs } from '@/lib/calculations';
 import HealthcareAffiliate from './HealthcareAffiliate';
 import BankingAffiliate from './BankingAffiliate';
@@ -236,6 +237,26 @@ export function ResultsPanel({
         expectedReturn={expectedReturn}
         inflationRate={inflationRate}
       />
+
+      {/* CoastFIRE Insight */}
+      {inputs && (
+        <div className={`grid ${isSameCountry ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-2'} gap-3`}>
+          <CoastFIRECard
+            result={result1}
+            inputs={inputs}
+            countryCode={country1Code}
+            label={isSameCountry ? undefined : country1?.name}
+          />
+          {!isSameCountry && (
+            <CoastFIRECard
+              result={result2}
+              inputs={inputs}
+              countryCode={country2Code}
+              label={country2?.name}
+            />
+          )}
+        </div>
+      )}
 
       {/* If You Retired Today */}
       {!simplifiedMode && inputs && (
