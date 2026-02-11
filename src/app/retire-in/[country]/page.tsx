@@ -28,17 +28,17 @@ function getCountryContent(code: string) {
     ? 'zero capital gains tax'
     : `${(c.capitalGains.longTerm[0]?.rate * 100).toFixed(0)}% capital gains tax`;
 
-  const colIndex = c.costOfLivingIndex;
+  const colIndex = c.costOfLiving.index;
   const colCompare = colIndex < 40 ? 'very low' : colIndex < 60 ? 'moderate' : colIndex < 80 ? 'relatively high' : 'high';
 
-  const visaInfo = c.visaOptions?.[0];
+  const visaInfo = c.expatRules?.specialRegimes?.[0];
   const visaSummary = visaInfo 
-    ? `${visaInfo.name} available${visaInfo.minimumIncome ? ` with minimum income of ${c.currencySymbol}${visaInfo.minimumIncome.toLocaleString()}/year` : ''}`
-    : 'Various visa options available';
+    ? `${visaInfo.name} available — ${visaInfo.benefits}`
+    : 'Various residency options available';
 
-  const healthcareSummary = c.healthcare?.publicAvailable
-    ? `Public healthcare available${c.healthcare.monthlyCost ? ` (private from ${c.currencySymbol}${c.healthcare.monthlyCost}/month)` : ''}`
-    : 'Private healthcare recommended';
+  const healthcareSummary = c.healthcare.publicAccessForResidents
+    ? `Public healthcare available for residents (estimated $${c.healthcare.estimatedAnnualCostPostRetirement.toLocaleString()}/year post-retirement)`
+    : `Private healthcare recommended (estimated $${c.healthcare.estimatedAnnualCostPostRetirement.toLocaleString()}/year)`;
 
   return { c, taxHighlight, colCompare, visaSummary, healthcareSummary, colIndex };
 }
@@ -203,32 +203,26 @@ export default function RetireInCountryPage({ params }: { params: { country: str
           </h2>
           <div className="bg-white dark:bg-slate-800 rounded-lg p-6 border border-gray-200 dark:border-slate-700">
             <p className="text-gray-700 dark:text-gray-300">{healthcareSummary}.</p>
-            {c.healthcare?.notes && (
+            {c.healthcare.notes && (
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">{c.healthcare.notes}</p>
             )}
           </div>
         </section>
 
         {/* Visa Options */}
-        {c.visaOptions && c.visaOptions.length > 0 && (
+        {c.expatRules?.specialRegimes && c.expatRules.specialRegimes.length > 0 && (
           <section>
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-              Retirement Visa Options for {c.name}
+              Special Tax Regimes & Visa Options for {c.name}
             </h2>
             <div className="space-y-3">
-              {c.visaOptions.map((visa, i) => (
+              {c.expatRules.specialRegimes.map((regime, i) => (
                 <div key={i} className="bg-white dark:bg-slate-800 rounded-lg p-5 border border-gray-200 dark:border-slate-700">
-                  <h3 className="font-semibold text-gray-900 dark:text-white">{visa.name}</h3>
-                  {visa.description && (
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{visa.description}</p>
-                  )}
+                  <h3 className="font-semibold text-gray-900 dark:text-white">{regime.name}</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{regime.benefits}</p>
                   <div className="flex flex-wrap gap-4 mt-3 text-sm text-gray-500 dark:text-gray-400">
-                    {visa.minimumIncome && (
-                      <span>💰 Min income: {c.currencySymbol}{visa.minimumIncome.toLocaleString()}/yr</span>
-                    )}
-                    {visa.minimumWealth && (
-                      <span>🏦 Min wealth: {c.currencySymbol}{visa.minimumWealth.toLocaleString()}</span>
-                    )}
+                    <span>⏱ Duration: {regime.duration}</span>
+                    <span>📋 Eligibility: {regime.eligibility}</span>
                   </div>
                 </div>
               ))}
