@@ -316,7 +316,7 @@ export function JourneyTimeline({
               ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
               : 'bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700';
             
-            const icon = isRetireAge ? '🎉' : isStart ? '📍' : isDepleted1 ? '🚨' : null;
+            const icon = isRetireAge ? '✓' : isStart ? '📍' : isDepleted1 ? '🚨' : null;
             const label = isRetireAge ? 'Retire' : isStart ? 'Now' : isDepleted1 ? 'Depleted' : 'Retired';
 
             if (isComparison && p2) {
@@ -511,7 +511,7 @@ function MilestoneCards({ projections1, projections2, country1, country2, retire
           } else if (isRetirementStart) {
             bgColor = 'bg-green-50 dark:bg-green-900/20';
             borderColor = 'border-green-200 dark:border-green-800';
-            icon = '🎉';
+            icon = '✓';
             status = 'Retirement begins';
           } else if (isLowLiquid) {
             bgColor = 'bg-amber-50 dark:bg-amber-900/20';

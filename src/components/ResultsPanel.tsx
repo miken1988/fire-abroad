@@ -123,22 +123,22 @@ export function ResultsPanel({
         </p>
       </div>
 
-      {/* 🏆 SUMMARY - Now at the TOP */}
+      {/* SUMMARY - Now at the TOP */}
       {!isSameCountry && winnerInfo && (
         <div className={`rounded-xl p-4 animate-scale-in ${
           winnerInfo.type === 'success' 
-            ? 'bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 border-2 border-green-400 dark:border-green-500' 
-            : 'bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/30 dark:to-orange-900/30 border-2 border-amber-400 dark:border-amber-500'
+            ? 'bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 border border-green-300 dark:border-green-600' 
+            : 'bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/30 dark:to-orange-900/30 border border-amber-300 dark:border-amber-600'
         }`}>
           <div className="flex items-start gap-3">
-            <span className="text-2xl">{winnerInfo.type === 'success' ? '🏆' : '⚠️'}</span>
+            <span className="text-2xl">{winnerInfo.type === 'success' ? '✦' : '⚠️'}</span>
             <div className="flex-1">
               <h3 className={`font-bold text-base sm:text-lg ${
                 winnerInfo.type === 'success' 
                   ? 'text-green-700 dark:text-green-300' 
                   : 'text-amber-700 dark:text-amber-300'
               }`}>
-                {winnerInfo.type === 'success' ? `${winnerInfo.winner} wins!` : 'Close call'}
+                {winnerInfo.type === 'success' ? `${winnerInfo.winner} comes out ahead` : 'Close call'}
               </h3>
               <p className={`text-sm mt-0.5 ${
                 winnerInfo.type === 'success' 
@@ -444,7 +444,7 @@ function CountryCard({
   
   // Card styling based on status - clean card with left accent border
   const cardStyles = isWinner
-    ? 'bg-white dark:bg-slate-800 border-2 border-green-400 dark:border-green-500 animate-winner-glow'
+    ? 'bg-white dark:bg-slate-800 border-2 border-green-400 dark:border-green-500'
     : isOnTarget
     ? 'bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 border-l-4 border-l-green-500'
     : isBehindTarget
@@ -460,13 +460,13 @@ function CountryCard({
     : 'bg-red-500 text-white';
   
   const badgeText = alreadyFI
-    ? '🎉 Already FI'
+    ? '✓ Already FI'
     : isWinner 
-    ? '🏆 Best Option' 
+    ? '✓ Recommended' 
     : isOnTarget 
     ? '✓ On Target'
     : isBehindTarget
-    ? `⚠️ ${yearsLate}yr${yearsLate > 1 ? 's' : ''} behind`
+    ? `⚠ ${yearsLate}yr${yearsLate > 1 ? 's' : ''} behind`
     : '✗ Cannot FIRE';
 
   return (

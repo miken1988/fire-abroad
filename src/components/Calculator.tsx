@@ -12,7 +12,6 @@ import { PDFExportButton } from './PDFExport';
 import { ThemeToggle } from './ThemeProvider';
 import * as analytics from '@/lib/analytics';
 import { formatCurrency, smartCurrency } from '@/lib/formatters';
-import { Confetti } from './Confetti';
 import { ResultsSkeleton } from './ResultsSkeleton';
 
 const defaultInputs: UserInputs = {
@@ -382,7 +381,6 @@ export function Calculator() {
     analytics.trackModeSwitch(mode ? 'advanced' : 'simplified');
   }, []);
   const [showMobileComparison, setShowMobileComparison] = useState(false);
-  const [showConfetti, setShowConfetti] = useState(false);
   const prevResultsRef = useRef<string>('');
 
   // Swipe handling for mobile tabs
@@ -488,22 +486,8 @@ export function Calculator() {
   const isSameCountry = inputs.currentCountry === inputs.targetCountry;
   const showFxRate = !isSameCountry && inputs.portfolioCurrency !== countries[inputs.targetCountry]?.currency;
 
-  // Confetti on significant wins (5+ years earlier retirement)
-  useEffect(() => {
-    if (!results || isSameCountry) return;
-    const key = `${inputs.currentCountry}-${inputs.targetCountry}`;
-    const yearsDiff = Math.abs(results.country1.yearsUntilFIRE - results.country2.yearsUntilFIRE);
-    if (yearsDiff >= 5 && key !== prevResultsRef.current) {
-      prevResultsRef.current = key;
-      setShowConfetti(true);
-      setTimeout(() => setShowConfetti(false), 100);
-    }
-  }, [results, isSameCountry, inputs.currentCountry, inputs.targetCountry]);
-
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-slate-900 transition-colors pb-20 lg:pb-0">
-      {/* Confetti celebration on big wins */}
-      <Confetti trigger={showConfetti} />
 
       {/* Share Toast - More prominent */}
       {showShareToast && (

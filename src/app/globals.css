@@ -374,20 +374,6 @@ html.dark .lg\:scrollbar-thin {
   animation: confetti-fall 2.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
 }
 
-/* Winner card glow */
-@keyframes winner-glow {
-  0%, 100% {
-    box-shadow: 0 0 15px rgba(34, 197, 94, 0.2), 0 0 30px rgba(34, 197, 94, 0.1);
-  }
-  50% {
-    box-shadow: 0 0 20px rgba(34, 197, 94, 0.35), 0 0 40px rgba(34, 197, 94, 0.15);
-  }
-}
-
-.animate-winner-glow {
-  animation: winner-glow 2s ease-in-out 3;
-}
-
 /* "You are here" pulsing dot */
 @keyframes pulse-dot {
   0%, 100% {
