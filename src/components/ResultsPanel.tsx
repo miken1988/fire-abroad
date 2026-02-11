@@ -68,7 +68,7 @@ export function ResultsPanel({
       const bestYearsBehind = Math.min(yearsBehind1, yearsBehind2);
       return {
         type: 'warning' as const,
-        message: `Neither option hits your target age ${targetAge}. ${countries[bestOption]?.name} is closest (${bestYearsBehind} yr${bestYearsBehind > 1 ? 's' : ''} behind)`
+        message: `Neither option reaches your target age of ${targetAge}. ${countries[bestOption]?.name} is closest (${bestYearsBehind} yr${bestYearsBehind > 1 ? 's' : ''} later).`
       };
     }
     
@@ -92,11 +92,11 @@ export function ResultsPanel({
     let message: string;
     if (earliestDiff >= 2) {
       const earlierAge = Math.min(earliest1, earliest2);
-      message = `FIRE at age ${earlierAge} — ${earliestDiff}yr sooner than ${countries[earliest1 <= earliest2 ? country2Code : country1Code]?.name}`;
+      message = `Reach FI at age ${earlierAge} — ${earliestDiff} yr${earliestDiff > 1 ? 's' : ''} earlier than ${countries[earliest1 <= earliest2 ? country2Code : country1Code]?.name}`;
     } else if (earliestDiff >= 1) {
-      message = `FIRE ${earliestDiff} year sooner`;
+      message = `Reach FI ${earliestDiff} year earlier`;
     } else {
-      message = `Same timeline, ${formatCurrency(comparison.fireNumberDifferenceUSD, 'USD')} lower FIRE number`;
+      message = `Similar timeline — ${formatCurrency(comparison.fireNumberDifferenceUSD, 'USD')} lower FIRE number`;
     }
     
     return {
@@ -138,7 +138,7 @@ export function ResultsPanel({
                   ? 'text-green-700 dark:text-green-300' 
                   : 'text-amber-700 dark:text-amber-300'
               }`}>
-                {winnerInfo.type === 'success' ? `${winnerInfo.winner} comes out ahead` : 'Close call'}
+                {winnerInfo.type === 'success' ? `${winnerInfo.winner} is more favorable` : 'Similar outcome'}
               </h3>
               <p className={`text-sm mt-0.5 ${
                 winnerInfo.type === 'success' 
@@ -462,12 +462,12 @@ function CountryCard({
   const badgeText = alreadyFI
     ? '✓ Already FI'
     : isWinner 
-    ? '✓ Recommended' 
+    ? '✓ More favorable' 
     : isOnTarget 
-    ? '✓ On Target'
+    ? '✓ On track'
     : isBehindTarget
-    ? `⚠ ${yearsLate}yr${yearsLate > 1 ? 's' : ''} behind`
-    : '✗ Cannot FIRE';
+    ? `${yearsLate} yr${yearsLate > 1 ? 's' : ''} later`
+    : '✗ Shortfall';
 
   return (
     <div className={`relative rounded-xl p-3 sm:p-4 ${cardStyles}`}>
