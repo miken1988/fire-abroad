@@ -73,9 +73,7 @@ export const defaultMetadata: Metadata = {
     creator: siteConfig.twitter,
   },
   verification: {
-    // Add these when you have them
-    // google: 'your-google-verification-code',
-    // yandex: 'your-yandex-verification-code',
+    google: 'hsHG-Wq-tLxisRkfr9QNr_SNPRKBWmuxrVEQqQQyiC0',
   },
   alternates: {
     canonical: siteConfig.url,
