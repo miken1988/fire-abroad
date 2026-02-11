@@ -29,22 +29,6 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#0f172a" />
-        {/* Google Analytics 4 + Google Ads */}
-        <script
-          async
-          src="https://www.googletagmanager.com/gtag/js?id=G-584EMEC7MD"
-        />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              gtag('js', new Date());
-              gtag('config', 'G-584EMEC7MD');
-              gtag('config', 'AW-17937453268');
-            `,
-          }}
-        />
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -68,6 +52,20 @@ export default function RootLayout({
         />
       </head>
       <body className={`${inter.variable} font-sans antialiased min-h-screen flex flex-col`}>
+        {/* Google Analytics 4 + Google Ads */}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-584EMEC7MD"
+          strategy="afterInteractive"
+        />
+        <Script id="ga4-init" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-584EMEC7MD');
+            gtag('config', 'AW-17937453268');
+          `}
+        </Script>
         <ThemeProvider>
           <main className="flex-1">
             {children}
