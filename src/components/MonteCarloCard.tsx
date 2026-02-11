@@ -6,6 +6,7 @@ import { UserInputs, FIREResult } from '@/lib/calculations';
 import { convertCurrency } from '@/lib/currency';
 import { countries } from '@/data/countries';
 import { formatCompact, formatPercent, smartCurrency } from '@/lib/formatters';
+import { trackMonteCarloView, trackSectionToggle } from '@/lib/analytics';
 
 interface MonteCarloCardProps {
   inputs: UserInputs;
@@ -103,7 +104,14 @@ export function MonteCarloCard({ inputs, fireResult, countryCode }: MonteCarloCa
     <div className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-xl shadow-sm overflow-hidden">
       {/* Header - always visible */}
       <button
-        onClick={() => setIsExpanded(!isExpanded)}
+        onClick={() => {
+          const newState = !isExpanded;
+          setIsExpanded(newState);
+          if (newState && result) {
+            trackSectionToggle('monte_carlo', 'expand');
+            trackMonteCarloView(result.successRate * 100, countryCode);
+          }
+        }}
         className="w-full p-3 sm:p-4 text-left hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors"
       >
         <div className="flex items-center justify-between">

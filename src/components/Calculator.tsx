@@ -10,6 +10,7 @@ import { usStates } from '@/data/usStateTaxes';
 import { decodeStateFromURL, encodeStateToURL, getShareableURL } from '@/lib/urlState';
 import { PDFExportButton } from './PDFExport';
 import { ThemeToggle } from './ThemeProvider';
+import * as analytics from '@/lib/analytics';
 import { formatCurrency, smartCurrency } from '@/lib/formatters';
 import { Confetti } from './Confetti';
 import { ResultsSkeleton } from './ResultsSkeleton';
@@ -105,6 +106,10 @@ function QuickStartInputs({
     if (field === 'currentCountry') {
       newInputs.portfolioCurrency = countries[value]?.currency || 'USD';
       newInputs.spendingCurrency = countries[value]?.currency || 'USD';
+      analytics.trackCountrySelect('from', value, countries[value]?.name || value);
+    }
+    if (field === 'targetCountry') {
+      analytics.trackCountrySelect('to', value, countries[value]?.name || value);
     }
     onChange(newInputs);
   };
@@ -367,10 +372,15 @@ export function Calculator() {
   const [activeTab, setActiveTabRaw] = useState<'inputs' | 'results'>('inputs');
   const setActiveTab = useCallback((tab: 'inputs' | 'results') => {
     setActiveTabRaw(tab);
+    if (tab === 'results') analytics.trackResultsView();
     window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
   }, []);
   const [showExplainer, setShowExplainer] = useState(true);
-  const [advancedMode, setAdvancedMode] = useState(false);
+  const [advancedMode, setAdvancedModeRaw] = useState(false);
+  const setAdvancedMode = useCallback((mode: boolean) => {
+    setAdvancedModeRaw(mode);
+    analytics.trackModeSwitch(mode ? 'advanced' : 'simplified');
+  }, []);
   const [showMobileComparison, setShowMobileComparison] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const prevResultsRef = useRef<string>('');
@@ -393,6 +403,13 @@ export function Calculator() {
   }, [activeTab]);
 
   // Check if URL has params (returning user) - skip explainer and use advanced mode
+  // Init engagement tracking
+  useEffect(() => {
+    analytics.trackEngagementTime();
+    const cleanup = analytics.initScrollTracking();
+    return cleanup;
+  }, []);
+
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const searchParams = new URLSearchParams(window.location.search);
@@ -436,6 +453,7 @@ export function Calculator() {
 
   const handleShare = useCallback(async () => {
     const url = getShareableURL(inputs);
+    analytics.trackShare('clipboard');
     try {
       await navigator.clipboard.writeText(url);
       setShowShareToast(true);
@@ -447,6 +465,25 @@ export function Calculator() {
     try { return compareFIRE(inputs, inputs.currentCountry, inputs.targetCountry); }
     catch (error) { console.error('Calculation error:', error); return null; }
   }, [inputs, fxLoaded]);
+
+  // Track calculation
+  useEffect(() => {
+    if (!results) return;
+    analytics.trackCalculation({
+      fromCountry: inputs.currentCountry,
+      toCountry: inputs.targetCountry,
+      portfolioValue: inputs.portfolioValue,
+      annualSpending: inputs.annualSpending,
+      currentAge: inputs.currentAge,
+      retirementAge: inputs.targetRetirementAge,
+      fireNumber1: results.country1.fireNumber,
+      fireNumber2: results.country2.fireNumber,
+      canRetire1: results.country1.canRetire,
+      canRetire2: results.country2.canRetire,
+      winner: results.comparison.earlierRetirement,
+    });
+    analytics.trackCalculationDepth();
+  }, [inputs.currentCountry, inputs.targetCountry, inputs.portfolioValue, inputs.annualSpending]);
 
   const isSameCountry = inputs.currentCountry === inputs.targetCountry;
   const showFxRate = !isSameCountry && inputs.portfolioCurrency !== countries[inputs.targetCountry]?.currency;
@@ -545,7 +582,11 @@ export function Calculator() {
         {/* What is FIRE Explainer - Show for new users */}
         {!advancedMode && (
           <div className="mb-6">
-            <WhatIsFIRE isOpen={showExplainer} onToggle={() => setShowExplainer(!showExplainer)} />
+            <WhatIsFIRE isOpen={showExplainer} onToggle={() => {
+              const newState = !showExplainer;
+              setShowExplainer(newState);
+              if (newState) analytics.trackExplainerView();
+            }} />
           </div>
         )}
 

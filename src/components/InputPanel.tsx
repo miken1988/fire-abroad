@@ -6,6 +6,7 @@ import { getStatePension } from '@/data/statePensions';
 import { usStates, USState } from '@/data/usStateTaxes';
 import { formatCurrency } from '@/lib/formatters';
 import { useState, useCallback, useRef, useEffect } from 'react';
+import * as analytics from '@/lib/analytics';
 
 /**
  * Format number with commas (e.g., 5000000 -> "5,000,000")
@@ -538,6 +539,7 @@ export function InputPanel({ inputs, onChange }: InputPanelProps) {
     }
     
     if (field === 'currentCountry') {
+      analytics.trackCountrySelect('from', value, countries[value]?.name || value);
       newInputs.portfolioCurrency = countries[value]?.currency || 'USD';
       newInputs.spendingCurrency = countries[value]?.currency || 'USD';
       
@@ -934,7 +936,10 @@ export function InputPanel({ inputs, onChange }: InputPanelProps) {
                 <input
                   type="checkbox"
                   checked={inputs.expectStatePension || false}
-                  onChange={(e) => handleChange('expectStatePension', e.target.checked)}
+                  onChange={(e) => {
+                    handleChange('expectStatePension', e.target.checked);
+                    analytics.trackPensionToggle(e.target.checked, inputs.currentCountry);
+                  }}
                   className="sr-only peer"
                 />
                 <div className="w-9 h-5 bg-gray-300 dark:bg-slate-600 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>

@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react';
 import { calculateTaxBreakdown, TaxBreakdown } from '@/lib/calculations';
 import { countries } from '@/data/countries';
 import { formatCurrency, formatPercent, smartCurrency } from '@/lib/formatters';
+import { trackTaxBreakdownView, trackSectionToggle } from '@/lib/analytics';
 
 interface TaxBreakdownCardProps {
   grossIncome: number;
@@ -41,7 +42,14 @@ export function TaxBreakdownCard({
   return (
     <div className="bg-gray-50 dark:bg-slate-800/50 rounded-xl border border-gray-200 dark:border-slate-700">
       <button
-        onClick={() => setIsExpanded(!isExpanded)}
+        onClick={() => {
+          const newState = !isExpanded;
+          setIsExpanded(newState);
+          if (newState) {
+            trackSectionToggle('tax_breakdown', 'expand');
+            trackTaxBreakdownView(countryCode, breakdown.effectiveRate);
+          }
+        }}
         className="w-full p-3 sm:p-4 flex items-center justify-between text-left"
       >
         <div className="flex items-center gap-2">

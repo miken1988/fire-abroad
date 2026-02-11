@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { FIREResult, ComparisonSummary, UserInputs } from '@/lib/calculations';
 import { countries } from '@/data/countries';
 import { formatCurrency, formatPercent, formatCompact, smartCurrency } from '@/lib/formatters';
+import { trackPDFExport } from '@/lib/analytics';
 import { getVisaInfo } from '@/data/visaRequirements';
 import { getCostOfLivingComparison } from '@/data/costOfLiving';
 import { runMonteCarloSimulation, MonteCarloResult } from '@/lib/monteCarlo';
@@ -199,6 +200,7 @@ export function PDFExportButton({ result1, result2, comparison, country1Code, co
 
   const generatePDF = async () => {
     setIsGenerating(true);
+    trackPDFExport(country1Code, country2Code);
     
     let mc1: MonteCarloResult | null = null;
     let mc2: MonteCarloResult | null = null;
