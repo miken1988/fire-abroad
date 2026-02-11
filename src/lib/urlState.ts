@@ -112,6 +112,6 @@ export function decodeStateFromURL(params: URLSearchParams, defaults: UserInputs
 
 export function getShareableURL(inputs: UserInputs): string {
   const params = encodeStateToURL(inputs);
-  const baseURL = typeof window !== 'undefined' ? window.location.origin : 'https://fireabroad.com';
+  const baseURL = typeof window !== 'undefined' ? window.location.origin : 'https://wheretofire.com';
   return `${baseURL}?${params}`;
 }

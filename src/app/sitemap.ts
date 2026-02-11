@@ -1,11 +1,26 @@
 import { MetadataRoute } from 'next';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://fireabroad.com';
+  const baseUrl = 'https://wheretofire.com';
   
-  // Generate comparison URLs for popular routes
-  const popularFromCountries = ['US', 'UK', 'CA', 'AU', 'DE'];
-  const popularToCountries = ['PT', 'ES', 'MX', 'TH', 'CR', 'PA', 'IT'];
+  // Country landing pages
+  const countryPages = [
+    'portugal', 'spain', 'mexico', 'thailand', 'costa-rica', 'italy', 'greece',
+    'france', 'germany', 'netherlands', 'ireland', 'uk', 'canada', 'australia',
+    'japan', 'new-zealand', 'colombia', 'panama', 'malaysia', 'vietnam',
+    'switzerland', 'uae', 'singapore', 'united-states',
+  ];
+
+  const countryUrls: MetadataRoute.Sitemap = countryPages.map(country => ({
+    url: `${baseUrl}/retire-in/${country}`,
+    lastModified: new Date(),
+    changeFrequency: 'weekly' as const,
+    priority: 0.9,
+  }));
+
+  // Comparison URLs for popular routes
+  const popularFromCountries = ['US', 'UK', 'CA', 'AU', 'DE', 'IE'];
+  const popularToCountries = ['PT', 'ES', 'MX', 'TH', 'CR', 'PA', 'IT', 'GR', 'FR', 'VN', 'MY', 'CO'];
   
   const comparisonUrls: MetadataRoute.Sitemap = [];
   
@@ -13,10 +28,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
     for (const to of popularToCountries) {
       if (from !== to) {
         comparisonUrls.push({
-          url: `${baseUrl}/?from=${from}%26to=${to}`,
+          url: `${baseUrl}/?from=${from}&to=${to}`,
           lastModified: new Date(),
-          changeFrequency: 'weekly',
-          priority: 0.8,
+          changeFrequency: 'weekly' as const,
+          priority: 0.7,
         });
       }
     }
@@ -26,9 +41,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
     {
       url: baseUrl,
       lastModified: new Date(),
-      changeFrequency: 'daily',
+      changeFrequency: 'daily' as const,
       priority: 1,
     },
+    ...countryUrls,
     ...comparisonUrls,
   ];
 }
