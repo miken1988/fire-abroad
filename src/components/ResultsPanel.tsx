@@ -222,7 +222,6 @@ export function ResultsPanel({
           </div>
         );
       })()}
-      </div>
 
       {/* 🔥 FIRE Journey Chart - Moved up for maximum visibility */}
       <JourneyTimeline
