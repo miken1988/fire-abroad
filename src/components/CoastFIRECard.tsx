@@ -79,7 +79,7 @@ export function CoastFIRECard({ result, inputs, countryCode, label }: CoastFIREP
   const handleToggle = () => {
     const newState = !isOpen;
     setIsOpen(newState);
-    if (newState) analytics.trackSectionToggle('coast_fire', true);
+    if (newState) analytics.trackSectionToggle('coast_fire', 'expand');
   };
 
   const deficit = coastTarget.coastNumber - result.liquidPortfolioValue;
