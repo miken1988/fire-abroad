@@ -463,6 +463,11 @@ export function Calculator() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [showShareMenu]);
 
+  const results = useMemo(() => {
+    try { return compareFIRE(inputs, inputs.currentCountry, inputs.targetCountry); }
+    catch (error) { console.error('Calculation error:', error); return null; }
+  }, [inputs, fxLoaded]);
+
   const getShareText = useCallback(() => {
     if (!results || isSameCountry) return 'Check out this FIRE calculator for retiring abroad!';
     const c1 = countries[inputs.currentCountry]?.name || '';
@@ -504,11 +509,6 @@ export function Calculator() {
       setTimeout(() => setShowShareToast(false), 3000);
     } catch { prompt('Copy this URL to share:', url); }
   }, [inputs, getShareText]);
-
-  const results = useMemo(() => {
-    try { return compareFIRE(inputs, inputs.currentCountry, inputs.targetCountry); }
-    catch (error) { console.error('Calculation error:', error); return null; }
-  }, [inputs, fxLoaded]);
 
   // Track calculation
   useEffect(() => {
