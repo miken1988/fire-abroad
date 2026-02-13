@@ -87,8 +87,8 @@ export function JourneyTimeline({
               {formatCompact(displayData.p1?.portfolioEnd || 0, country1.currency)}
             </div>
             {showRealValue && (
-              <div className="text-[10px] text-gray-500 dark:text-gray-400">
-                ≈ {formatCompact(toRealValue(displayData.p1?.portfolioEnd || 0), country1.currency)} today
+              <div className="text-xs font-semibold text-gray-600 dark:text-gray-300">
+                ≈ {formatCompact(toRealValue(displayData.p1?.portfolioEnd || 0), country1.currency)} <span className="font-normal text-gray-400 dark:text-gray-500">today</span>
               </div>
             )}
             {hasIlliquid1 ? (
@@ -117,8 +117,8 @@ export function JourneyTimeline({
                 {formatCompact(displayData.p2?.portfolioEnd || 0, country1.currency)}
               </div>
               {showRealValue && (
-                <div className="text-[10px] text-gray-500 dark:text-gray-400">
-                  ≈ {formatCompact(toRealValue(displayData.p2?.portfolioEnd || 0), country1.currency)} today
+                <div className="text-xs font-semibold text-gray-600 dark:text-gray-300">
+                  ≈ {formatCompact(toRealValue(displayData.p2?.portfolioEnd || 0), country1.currency)} <span className="font-normal text-gray-400 dark:text-gray-500">today</span>
                 </div>
               )}
               {hasIlliquid2 ? (
