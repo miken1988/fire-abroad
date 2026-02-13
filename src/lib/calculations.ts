@@ -155,10 +155,11 @@ function getCountrySpecificNotes(countryCode: string, inputs: UserInputs): strin
   // Check for tax treaty notes - only show if relevant to the country pair
   if (countryCode === inputs.targetCountry && country.expatRules?.taxTreatyNotes) {
     const treatyNotes = country.expatRules.taxTreatyNotes;
-    // Only show treaty notes if they mention the current country
+    // Only show treaty notes if they mention the current country (word boundary match)
     const currentCountryName = countries[inputs.currentCountry]?.name || '';
-    if (treatyNotes.toLowerCase().includes(inputs.currentCountry.toLowerCase()) || 
-        treatyNotes.toLowerCase().includes(currentCountryName.toLowerCase())) {
+    const codeRegex = new RegExp(`\\b${inputs.currentCountry}\\b`, 'i');
+    const nameRegex = new RegExp(`\\b${currentCountryName}\\b`, 'i');
+    if (codeRegex.test(treatyNotes) || nameRegex.test(treatyNotes)) {
       notes.push(treatyNotes);
     }
   }
