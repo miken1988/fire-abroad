@@ -154,6 +154,23 @@ function QuickStartInputs({
         </div>
       </div>
 
+      {/* US State - directly under country selectors */}
+      {(inputs.currentCountry === 'US' || inputs.targetCountry === 'US') && (
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">US State (for state taxes)</label>
+          <select
+            value={inputs.usState || ''}
+            onChange={(e) => handleChange('usState', e.target.value)}
+            className="w-full px-3 py-2.5 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white text-base sm:text-sm"
+          >
+            <option value="">Select state...</option>
+            {usStates.map(s => (
+              <option key={s.code} value={s.code}>{s.name}</option>
+            ))}
+          </select>
+        </div>
+      )}
+
       {/* Age */}
       <div className="grid grid-cols-2 gap-4">
         <div>
@@ -277,23 +294,6 @@ function QuickStartInputs({
           />
         </div>
       </div>
-
-      {/* US State - show when US is selected */}
-      {(inputs.currentCountry === 'US' || inputs.targetCountry === 'US') && (
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">US State (for state taxes)</label>
-          <select
-            value={inputs.usState || ''}
-            onChange={(e) => handleChange('usState', e.target.value)}
-            className="w-full px-3 py-2.5 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white text-base sm:text-sm"
-          >
-            <option value="">Select state...</option>
-            {usStates.map(s => (
-              <option key={s.code} value={s.code}>{s.name}</option>
-            ))}
-          </select>
-        </div>
-      )}
 
       {/* Show Advanced Button */}
       <button
@@ -512,7 +512,7 @@ export function Calculator() {
 
     if (method === 'native' && navigator.share) {
       try {
-        await navigator.share({ title: 'WhereToFIRE', text, url });
+        await navigator.share({ title: 'Where To FIRE', text, url });
         return;
       } catch { /* user cancelled */ return; }
     }
