@@ -6,7 +6,7 @@ import { countries } from '@/data/countries';
 import { formatCurrency, formatPercent, smartCurrency } from '@/lib/formatters';
 import { convertCurrency } from '@/lib/currency';
 import { CostOfLivingCard } from './CostOfLivingCard';
-import { VisaCard } from './VisaCard';
+import MoveToCountryPanel from './MoveToCountryPanel';
 import { MonteCarloCard } from './MonteCarloCard';
 import { ReverseCalculator } from './ReverseCalculator';
 import { TaxBreakdownCard } from './TaxBreakdownCard';
@@ -14,7 +14,6 @@ import { CoastFIRECard } from './CoastFIRECard';
 import { UserInputs } from '@/lib/calculations';
 import HealthcareAffiliate from './HealthcareAffiliate';
 import BankingAffiliate from './BankingAffiliate';
-import NextStepsPanel from './NextStepsPanel';
 import { JourneyTimeline } from './JourneyTimeline';
 import { AnimatedNumber } from './AnimatedNumber';
 
@@ -306,11 +305,14 @@ export function ResultsPanel({
       {/* Tax Notes - Hidden in simplified, merged into Advanced in full mode */}
       {!simplifiedMode && <CollapsibleTaxNotes result1={result1} result2={result2} country1={country1} country2={country2} isSameCountry={isSameCountry} showTaxNotes={showTaxNotes} setShowTaxNotes={setShowTaxNotes} />}
 
-      {/* Visa Requirements */}
+      {/* Plan Your Move - Visa, checklist & tools combined */}
       {!simplifiedMode && !isSameCountry && (
-        <VisaCard
+        <MoveToCountryPanel
           countryCode={country2Code}
           userAge={userAge}
+          fromCurrency={country1?.currency || 'USD'}
+          toCurrency={country2?.currency || 'EUR'}
+          showDifferentCurrencies={country1?.currency !== country2?.currency}
         />
       )}
 
@@ -381,44 +383,6 @@ export function ResultsPanel({
       {/* Warnings - always show, these are important */}
       <Warnings result1={result1} result2={result2} country1={country1} country2={country2} isSameCountry={isSameCountry} />
 
-      {/* Plan Your Move - Affiliate Next Steps */}
-      {!simplifiedMode && !isSameCountry && (
-        <NextStepsPanel
-          retireCountryName={country2?.name || 'abroad'}
-          retireCountryCode={country2Code}
-          fromCurrency={country1?.currency || 'USD'}
-          toCurrency={country2?.currency || 'EUR'}
-          showDifferentCurrencies={country1?.currency !== country2?.currency}
-        />
-      )}
-
-      {/* Bottom CTA */}
-      <div className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-blue-900/20 dark:via-indigo-900/20 dark:to-purple-900/20 rounded-xl border border-blue-200 dark:border-blue-800/50 p-5 sm:p-6">
-        <div className="text-center space-y-3">
-          <p className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">🌍 Try a different destination</p>
-          <p className="text-sm text-gray-600 dark:text-gray-400">Your FIRE number changes dramatically by country. Portugal, Thailand, Mexico — where could <em>you</em> retire earliest?</p>
-          <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 pt-1">
-            <button
-              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-              className="px-5 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all shadow-md hover:shadow-lg"
-            >
-              Compare Another Country →
-            </button>
-            <button
-              onClick={() => {
-                if (typeof window !== 'undefined' && navigator.share) {
-                  navigator.share({ title: 'My FIRE Plan', url: window.location.href });
-                } else if (typeof window !== 'undefined') {
-                  navigator.clipboard.writeText(window.location.href);
-                }
-              }}
-              className="px-5 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-600 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors shadow-sm"
-            >
-              📤 Share Results
-            </button>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }
