@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import { countries } from '@/data/countries';
 
 const siteConfig = {
-  name: 'WhereToFIRE',
+  name: 'Where To FIRE',
   description: 'Compare early retirement across countries. Calculate your FIRE number, compare taxes, cost of living, and visa requirements for retiring abroad.',
   url: 'https://wheretofire.com',
   ogImage: '/og-image.png',
@@ -12,8 +12,8 @@ const siteConfig = {
 export const defaultMetadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
   title: {
-    default: 'WhereToFIRE - Compare Early Retirement Across Countries',
-    template: '%s | WhereToFIRE',
+    default: 'Where To FIRE - Compare Early Retirement Across Countries',
+    template: '%s | Where To FIRE',
   },
   description: siteConfig.description,
   keywords: [
@@ -35,9 +35,9 @@ export const defaultMetadata: Metadata = {
     'geographic arbitrage',
     'where to retire',
   ],
-  authors: [{ name: 'WhereToFIRE' }],
-  creator: 'WhereToFIRE',
-  publisher: 'WhereToFIRE',
+  authors: [{ name: 'Where To FIRE' }],
+  creator: 'Where To FIRE',
+  publisher: 'Where To FIRE',
   robots: {
     index: true,
     follow: true,
@@ -54,20 +54,20 @@ export const defaultMetadata: Metadata = {
     locale: 'en_US',
     url: siteConfig.url,
     siteName: siteConfig.name,
-    title: 'WhereToFIRE - Compare Early Retirement Across Countries',
+    title: 'Where To FIRE - Compare Early Retirement Across Countries',
     description: siteConfig.description,
     images: [
       {
         url: siteConfig.ogImage,
         width: 1200,
         height: 630,
-        alt: 'WhereToFIRE - Early Retirement Calculator',
+        alt: 'Where To FIRE - Early Retirement Calculator',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'WhereToFIRE - Compare Early Retirement Across Countries',
+    title: 'Where To FIRE - Compare Early Retirement Across Countries',
     description: siteConfig.description,
     images: [siteConfig.ogImage],
     creator: siteConfig.twitter,
@@ -124,7 +124,7 @@ export function generateStructuredData(params?: {
   const baseStructuredData = {
     '@context': 'https://schema.org',
     '@type': 'WebApplication',
-    name: 'WhereToFIRE Calculator',
+    name: 'Where To FIRE Calculator',
     description: siteConfig.description,
     url: siteConfig.url,
     applicationCategory: 'FinanceApplication',
@@ -196,7 +196,7 @@ export function generateStructuredData(params?: {
         description: `Compare early retirement options between ${from.name} and ${to.name}. Includes tax comparison, cost of living, and visa requirements.`,
         author: {
           '@type': 'Organization',
-          name: 'WhereToFIRE',
+          name: 'Where To FIRE',
         },
       },
     ];
