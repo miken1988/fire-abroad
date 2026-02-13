@@ -1,4 +1,3 @@
-import Script from 'next/script';
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
@@ -51,22 +50,24 @@ export default function RootLayout({
             __html: JSON.stringify(structuredData),
           }}
         />
+        {/* Google Analytics 4 + Google Ads - must be in head as raw scripts for reliable firing */}
+        <script
+          async
+          src="https://www.googletagmanager.com/gtag/js?id=G-584EMEC7MD"
+        />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', 'G-584EMEC7MD');
+              gtag('config', 'AW-17937453268');
+            `,
+          }}
+        />
       </head>
       <body className={`${inter.variable} font-sans antialiased min-h-screen flex flex-col`}>
-        {/* Google Analytics 4 + Google Ads */}
-        <Script
-          src="https://www.googletagmanager.com/gtag/js?id=G-584EMEC7MD"
-          strategy="afterInteractive"
-        />
-        <Script id="ga4-init" strategy="afterInteractive">
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'G-584EMEC7MD');
-            gtag('config', 'AW-17937453268');
-          `}
-        </Script>
         <ThemeProvider>
           <main className="flex-1">
             {children}
