@@ -13,7 +13,6 @@ import { TaxBreakdownCard } from './TaxBreakdownCard';
 import { CoastFIRECard } from './CoastFIRECard';
 import { UserInputs } from '@/lib/calculations';
 import HealthcareAffiliate from './HealthcareAffiliate';
-import BankingAffiliate from './BankingAffiliate';
 import { JourneyTimeline } from './JourneyTimeline';
 import { AnimatedNumber } from './AnimatedNumber';
 
@@ -293,30 +292,13 @@ export function ResultsPanel({
         />
       )}
 
-      {/* Banking/Money Transfer Affiliate */}
-      {!simplifiedMode && !isSameCountry && country1?.currency !== country2?.currency && (
-        <BankingAffiliate
-          fromCurrency={country1?.currency || 'USD'}
-          toCurrency={country2?.currency || 'EUR'}
-          retireCountryName={country2?.name || 'abroad'}
-        />
-      )}
+      {/* Warnings - shown near financial analysis for context */}
+      <Warnings result1={result1} result2={result2} country1={country1} country2={country2} isSameCountry={isSameCountry} />
 
-      {/* Tax Notes - Hidden in simplified, merged into Advanced in full mode */}
+      {/* Tax Notes */}
       {!simplifiedMode && <CollapsibleTaxNotes result1={result1} result2={result2} country1={country1} country2={country2} isSameCountry={isSameCountry} showTaxNotes={showTaxNotes} setShowTaxNotes={setShowTaxNotes} />}
 
-      {/* Plan Your Move - Visa, checklist & tools combined */}
-      {!simplifiedMode && !isSameCountry && (
-        <MoveToCountryPanel
-          countryCode={country2Code}
-          userAge={userAge}
-          fromCurrency={country1?.currency || 'USD'}
-          toCurrency={country2?.currency || 'EUR'}
-          showDifferentCurrencies={country1?.currency !== country2?.currency}
-        />
-      )}
-
-      {/* Advanced Details - Collapsed by default, hidden in simplified */}
+      {/* Advanced Analysis - Monte Carlo + Tax Breakdown */}
       {!simplifiedMode && inputs && (
         <div className="border border-gray-200 dark:border-slate-700 rounded-xl overflow-hidden">
           <button
@@ -380,8 +362,16 @@ export function ResultsPanel({
         </div>
       )}
 
-      {/* Warnings - always show, these are important */}
-      <Warnings result1={result1} result2={result2} country1={country1} country2={country2} isSameCountry={isSameCountry} />
+      {/* Plan Your Move - Visa, checklist & tools (action planning last) */}
+      {!simplifiedMode && !isSameCountry && (
+        <MoveToCountryPanel
+          countryCode={country2Code}
+          userAge={userAge}
+          fromCurrency={country1?.currency || 'USD'}
+          toCurrency={country2?.currency || 'EUR'}
+          showDifferentCurrencies={country1?.currency !== country2?.currency}
+        />
+      )}
 
     </div>
   );
