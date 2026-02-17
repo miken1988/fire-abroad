@@ -12,6 +12,10 @@ function gtag(...args: any[]) {
   }
 }
 
+// Track whether key conversions have fired this session (avoid overcounting)
+let hasTrackedCalculationConversion = false;
+let hasTrackedPDFConversion = false;
+
 // ============================================
 // CALCULATOR INTERACTIONS
 // ============================================
@@ -43,7 +47,7 @@ export function trackModeSwitch(mode: 'simplified' | 'advanced') {
   });
 }
 
-/** FIRE calculation completed — the core event */
+/** FIRE calculation completed — the core event + Google Ads conversion */
 export function trackCalculation(data: {
   fromCountry: string;
   toCountry: string;
@@ -57,6 +61,7 @@ export function trackCalculation(data: {
   canRetire2: boolean;
   winner?: string;
 }) {
+  // GA4 event
   gtag('event', 'fire_calculation', {
     event_category: 'calculator',
     from_country: data.fromCountry,
@@ -70,6 +75,17 @@ export function trackCalculation(data: {
     winner: data.winner || 'none',
     comparison: `${data.fromCountry}_to_${data.toCountry}`,
   });
+
+  // Google Ads conversion — lets the campaign optimize toward engaged users
+  // Only fire once per session to avoid overcounting
+  if (!hasTrackedCalculationConversion) {
+    hasTrackedCalculationConversion = true;
+    gtag('event', 'conversion', {
+      send_to: 'AW-17937453268/fire_calculation',
+      value: 1.0,
+      currency: 'USD',
+    });
+  }
 }
 
 // ============================================
@@ -181,11 +197,18 @@ export function trackRetiredTodayView(annualIncome: number, fireType: string) {
 // CONVERSIONS & CTAs
 // ============================================
 
-/** User clicks Share button */
+/** User clicks Share button — conversion */
 export function trackShare(method: string) {
   gtag('event', 'share', {
     event_category: 'conversion',
     method,
+  });
+
+  // Track as Google Ads conversion
+  gtag('event', 'conversion', {
+    send_to: 'AW-17937453268/share',
+    value: 3.0,
+    currency: 'USD',
   });
 }
 
@@ -205,13 +228,23 @@ export function trackTryDifferentDestination() {
   });
 }
 
-/** User exports PDF */
+/** User exports PDF — high-value conversion */
 export function trackPDFExport(fromCountry: string, toCountry: string) {
   gtag('event', 'pdf_export', {
     event_category: 'conversion',
     from_country: fromCountry,
     to_country: toCountry,
   });
+
+  // Higher-value conversion for Google Ads
+  if (!hasTrackedPDFConversion) {
+    hasTrackedPDFConversion = true;
+    gtag('event', 'conversion', {
+      send_to: 'AW-17937453268/pdf_export',
+      value: 5.0,
+      currency: 'USD',
+    });
+  }
 }
 
 /** User clicks the "Customize account types" CTA */
