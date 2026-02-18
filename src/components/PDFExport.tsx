@@ -209,6 +209,7 @@ export function PDFExportButton({ result1, result2, comparison, country1Code, co
       mc2 = runMonteCarloSimulation(inputs, result2);
     } catch (e) {
       console.error('Monte Carlo error:', e);
+      import('@/lib/analytics').then(a => a.trackError('pdf_monte_carlo_error', String(e)));
     }
     
     const content = generatePDFContent(result1, result2, comparison, country1Code, country2Code, inputs, mc1, mc2);

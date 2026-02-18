@@ -434,7 +434,7 @@ export function Calculator() {
   useEffect(() => {
     fetchLiveRates()
       .then((rates) => { setRates(rates); setFxLoaded(true); })
-      .catch(() => { setFxError(true); setFxLoaded(true); });
+      .catch(() => { setFxError(true); setFxLoaded(true); analytics.trackError('fx_rate_fetch_failed'); });
   }, []);
 
   // Show mobile comparison bar when scrolled to results
@@ -465,7 +465,7 @@ export function Calculator() {
 
   const results = useMemo(() => {
     try { return compareFIRE(inputs, inputs.currentCountry, inputs.targetCountry); }
-    catch (error) { console.error('Calculation error:', error); return null; }
+    catch (error) { console.error('Calculation error:', error); analytics.trackError('calculation_error', String(error)); return null; }
   }, [inputs, fxLoaded]);
 
   // Track calculation

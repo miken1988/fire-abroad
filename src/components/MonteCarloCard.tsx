@@ -39,6 +39,7 @@ export function MonteCarloCard({ inputs, fireResult, countryCode }: MonteCarloCa
       setResult(simResult);
     } catch (e) {
       console.error('Monte Carlo error:', e);
+      import('@/lib/analytics').then(a => a.trackError('monte_carlo_error', String(e)));
       setResult(null);
     }
   }, [inputs, fireResult]);

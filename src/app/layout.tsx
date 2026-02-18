@@ -63,6 +63,22 @@ export default function RootLayout({
               gtag('js', new Date());
               gtag('config', 'GT-WR9FDFN8');
               gtag('config', 'AW-17937453268');
+
+              // Global error monitoring — sends unhandled errors to GA4
+              window.onerror = function(msg, src, line, col, error) {
+                gtag('event', 'app_error', {
+                  event_category: 'errors',
+                  error_type: 'unhandled_js_error',
+                  error_details: (msg + ' at ' + src + ':' + line).substring(0, 100)
+                });
+              };
+              window.addEventListener('unhandledrejection', function(e) {
+                gtag('event', 'app_error', {
+                  event_category: 'errors',
+                  error_type: 'unhandled_promise',
+                  error_details: String(e.reason).substring(0, 100)
+                });
+              });
             `,
           }}
         />
