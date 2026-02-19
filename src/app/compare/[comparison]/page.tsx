@@ -258,10 +258,8 @@ export default function ComparePage({ params }: { params: { comparison: string }
                 <span className="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">Cost of Living</span>
               </div>
               <ComparisonRow label="Overall Index" value1={`${from.costOfLiving.index}`} value2={`${to.costOfLiving.index}`} highlight="lower" />
-              <ComparisonRow label="Rent Index" value1={`${from.costOfLiving.rent}`} value2={`${to.costOfLiving.rent}`} highlight="lower" />
-              <ComparisonRow label="Groceries" value1={`${from.costOfLiving.groceries}`} value2={`${to.costOfLiving.groceries}`} highlight="lower" />
-              <ComparisonRow label="Restaurants" value1={`${from.costOfLiving.restaurants}`} value2={`${to.costOfLiving.restaurants}`} highlight="lower" />
-              <ComparisonRow label="Transportation" value1={`${from.costOfLiving.transportation}`} value2={`${to.costOfLiving.transportation}`} highlight="lower" />
+              <ComparisonRow label="Rent (City)" value1={`$${from.costOfLiving.monthlyRentCity.toLocaleString()}/mo`} value2={`$${to.costOfLiving.monthlyRentCity.toLocaleString()}/mo`} highlight="lower" />
+              <ComparisonRow label="Rent (Suburb)" value1={`$${from.costOfLiving.monthlyRentSuburb.toLocaleString()}/mo`} value2={`$${to.costOfLiving.monthlyRentSuburb.toLocaleString()}/mo`} highlight="lower" />
 
               <div className="py-2 mt-4">
                 <span className="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">Taxes</span>
