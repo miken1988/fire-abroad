@@ -1,5 +1,15 @@
 import { MetadataRoute } from 'next';
 
+const slugToCode: Record<string, string> = {
+  'portugal': 'PT', 'spain': 'ES', 'mexico': 'MX', 'thailand': 'TH',
+  'costa-rica': 'CR', 'italy': 'IT', 'greece': 'GR', 'france': 'FR',
+  'germany': 'DE', 'netherlands': 'NL', 'ireland': 'IE', 'uk': 'UK',
+  'canada': 'CA', 'australia': 'AU', 'japan': 'JP', 'new-zealand': 'NZ',
+  'colombia': 'CO', 'panama': 'PA', 'malaysia': 'MY', 'vietnam': 'VN',
+  'switzerland': 'CH', 'uae': 'AE', 'singapore': 'SG', 'united-states': 'US',
+  'south-korea': 'KR', 'indonesia': 'ID',
+};
+
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = 'https://wheretofire.com';
   
@@ -18,20 +28,25 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.9,
   }));
 
-  // Comparison URLs for popular routes
-  const popularFromCountries = ['US', 'UK', 'CA', 'AU', 'DE', 'IE'];
-  const popularToCountries = ['PT', 'ES', 'MX', 'TH', 'CR', 'PA', 'IT', 'GR', 'FR', 'VN', 'MY', 'CO'];
-  
+  // Comparison pages
+  const fromCountries = ['us', 'uk', 'canada', 'australia', 'ireland', 'germany'];
+  const toCountries = [
+    'portugal', 'spain', 'mexico', 'thailand', 'costa-rica', 'italy', 'greece',
+    'france', 'netherlands', 'japan', 'new-zealand', 'colombia', 'panama',
+    'malaysia', 'vietnam', 'switzerland', 'uae', 'singapore', 'south-korea', 'indonesia',
+  ];
+
   const comparisonUrls: MetadataRoute.Sitemap = [];
-  
-  for (const from of popularFromCountries) {
-    for (const to of popularToCountries) {
-      if (from !== to) {
+  for (const from of fromCountries) {
+    for (const to of toCountries) {
+      const fromCode = slugToCode[from];
+      const toCode = slugToCode[to];
+      if (fromCode && toCode && fromCode !== toCode) {
         comparisonUrls.push({
-          url: `${baseUrl}/?from=${from}&to=${to}`,
+          url: `${baseUrl}/compare/${from}-vs-${to}`,
           lastModified: new Date(),
           changeFrequency: 'weekly' as const,
-          priority: 0.7,
+          priority: 0.8,
         });
       }
     }
@@ -51,5 +66,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.8,
     },
     ...countryUrls,
+    ...comparisonUrls,
   ];
 }
