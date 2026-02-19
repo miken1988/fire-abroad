@@ -54,31 +54,13 @@ export const AFFILIATE_PARTNERS: AffiliatePartner[] = [
     relevantSections: ['healthcare', 'nextsteps'],
   },
   {
-    id: 'cigna',
-    name: 'Cigna Global',
-    description: 'Comprehensive international health insurance for expats. Access to 1.65M+ healthcare providers worldwide. Customizable Silver, Gold, and Platinum plans.',
-    shortDescription: 'Comprehensive expat health insurance worldwide',
-    commission: 'Per-quote commission via FlexOffers',
-    category: 'insurance',
-    url: 'https://www.cignaglobal.com/', // Replace with FlexOffers link once approved
-    ctaText: 'Compare Plans',
-    icon: '🏥',
-    features: [
-      '1.65M+ healthcare providers',
-      'Customizable coverage levels',
-      'Direct billing at hospitals',
-      'Telehealth included',
-    ],
-    relevantSections: ['healthcare', 'nextsteps'],
-  },
-  {
     id: 'nordvpn',
     name: 'NordVPN',
     description: 'Keep access to your home country banking, streaming, and services from anywhere. Essential for expats who need to access geo-restricted content.',
     shortDescription: 'Access home services from anywhere abroad',
     commission: '$3-6 per sale',
     category: 'vpn',
-    url: 'https://nordvpn.com/', // Replace with NordVPN affiliate link once approved
+    url: 'https://go.nordvpn.net/aff_c?offer_id=15&aff_id=140864', // NordVPN affiliate link
     ctaText: 'Get Protected',
     icon: '🔒',
     features: [
