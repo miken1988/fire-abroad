@@ -12,7 +12,7 @@ const slugToCode: Record<string, string> = {
   'japan': 'JP', 'new-zealand': 'NZ', 'colombia': 'CO', 'panama': 'PA',
   'malaysia': 'MY', 'vietnam': 'VN', 'switzerland': 'CH',
   'uae': 'AE', 'dubai': 'AE', 'singapore': 'SG', 'united-states': 'US',
-  'usa': 'US', 'south-korea': 'KR', 'indonesia': 'ID',
+  'usa': 'US', 'us': 'US', 'south-korea': 'KR', 'indonesia': 'ID',
 };
 
 const codeToSlug: Record<string, string> = {};
@@ -24,7 +24,7 @@ for (const [slug, code] of Object.entries(slugToCode)) {
 }
 
 // Popular "from" countries to generate comparison pages for
-const fromCountries = ['us', 'uk', 'canada', 'australia', 'ireland', 'germany'];
+const fromCountries = ['united-states', 'uk', 'canada', 'australia', 'ireland', 'germany'];
 // Popular "to" countries
 const toCountries = [
   'portugal', 'spain', 'mexico', 'thailand', 'costa-rica', 'italy', 'greece',

@@ -29,7 +29,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   }));
 
   // Comparison pages
-  const fromCountries = ['us', 'uk', 'canada', 'australia', 'ireland', 'germany'];
+  const fromCountries = ['united-states', 'uk', 'canada', 'australia', 'ireland', 'germany'];
   const toCountries = [
     'portugal', 'spain', 'mexico', 'thailand', 'costa-rica', 'italy', 'greece',
     'france', 'netherlands', 'japan', 'new-zealand', 'colombia', 'panama',
