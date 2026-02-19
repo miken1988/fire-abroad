@@ -128,18 +128,18 @@ export default function BlogPost() {
                 </div>
 
                 {/* Quick stats */}
-                <div className="grid grid-cols-3 gap-3 mb-4">
-                  <div className="bg-white dark:bg-slate-800 rounded-lg p-3 border border-gray-200 dark:border-slate-700 text-center">
-                    <div className="text-xs text-gray-500 dark:text-gray-400">Cost of Living</div>
-                    <div className="text-lg font-bold text-gray-900 dark:text-white">{country.col}/100</div>
+                <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-4">
+                  <div className="bg-white dark:bg-slate-800 rounded-lg p-2 sm:p-3 border border-gray-200 dark:border-slate-700 text-center">
+                    <div className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">Cost of Living</div>
+                    <div className="text-base sm:text-lg font-bold text-gray-900 dark:text-white">{country.col}/100</div>
                   </div>
-                  <div className="bg-white dark:bg-slate-800 rounded-lg p-3 border border-gray-200 dark:border-slate-700 text-center">
-                    <div className="text-xs text-gray-500 dark:text-gray-400">Capital Gains</div>
-                    <div className="text-lg font-bold text-gray-900 dark:text-white">{country.cgTax}</div>
+                  <div className="bg-white dark:bg-slate-800 rounded-lg p-2 sm:p-3 border border-gray-200 dark:border-slate-700 text-center">
+                    <div className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">Capital Gains</div>
+                    <div className="text-base sm:text-lg font-bold text-gray-900 dark:text-white">{country.cgTax}</div>
                   </div>
-                  <div className="bg-white dark:bg-slate-800 rounded-lg p-3 border border-gray-200 dark:border-slate-700 text-center">
-                    <div className="text-xs text-gray-500 dark:text-gray-400">Top Income Tax</div>
-                    <div className="text-lg font-bold text-gray-900 dark:text-white">{country.topIncome}</div>
+                  <div className="bg-white dark:bg-slate-800 rounded-lg p-2 sm:p-3 border border-gray-200 dark:border-slate-700 text-center">
+                    <div className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400">Top Income Tax</div>
+                    <div className="text-base sm:text-lg font-bold text-gray-900 dark:text-white">{country.topIncome}</div>
                   </div>
                 </div>
 

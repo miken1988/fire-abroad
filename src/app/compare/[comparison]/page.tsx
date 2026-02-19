@@ -120,12 +120,12 @@ function ComparisonRow({ label, value1, value2, highlight }: { label: string; va
   const v2Better = highlight === 'lower' ? v2Num < v1Num : v2Num > v1Num;
 
   return (
-    <div className="grid grid-cols-3 gap-4 py-3 border-b border-gray-100 dark:border-slate-700/50 last:border-0">
-      <div className="text-sm text-gray-500 dark:text-gray-400 font-medium">{label}</div>
-      <div className={`text-sm text-center font-semibold ${highlight !== 'none' && v1Better ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-900 dark:text-white'}`}>
+    <div className="grid grid-cols-3 gap-2 sm:gap-4 py-3 border-b border-gray-100 dark:border-slate-700/50 last:border-0">
+      <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 font-medium">{label}</div>
+      <div className={`text-xs sm:text-sm text-center font-semibold ${highlight !== 'none' && v1Better ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-900 dark:text-white'}`}>
         {value1} {highlight !== 'none' && v1Better && '✓'}
       </div>
-      <div className={`text-sm text-center font-semibold ${highlight !== 'none' && v2Better ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-900 dark:text-white'}`}>
+      <div className={`text-xs sm:text-sm text-center font-semibold ${highlight !== 'none' && v2Better ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-900 dark:text-white'}`}>
         {value2} {highlight !== 'none' && v2Better && '✓'}
       </div>
     </div>
@@ -204,7 +204,7 @@ export default function ComparePage({ params }: { params: { comparison: string }
           <Link href="/" className="text-blue-600 dark:text-blue-400 text-sm hover:underline mb-4 block">
             ← Back to WhereToFIRE Calculator
           </Link>
-          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-3">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-3">
             {from.flag} {from.name} vs {to.flag} {to.name}
           </h1>
           <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl">
@@ -240,7 +240,7 @@ export default function ComparePage({ params }: { params: { comparison: string }
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Side-by-Side Comparison</h2>
           <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden">
             {/* Header */}
-            <div className="grid grid-cols-3 gap-4 px-6 py-4 bg-gray-50 dark:bg-slate-700/50 border-b border-gray-200 dark:border-slate-700">
+            <div className="grid grid-cols-3 gap-2 sm:gap-4 px-3 sm:px-6 py-4 bg-gray-50 dark:bg-slate-700/50 border-b border-gray-200 dark:border-slate-700">
               <div className="text-sm font-medium text-gray-500 dark:text-gray-400"></div>
               <div className="text-center">
                 <span className="text-2xl">{from.flag}</span>
@@ -253,7 +253,7 @@ export default function ComparePage({ params }: { params: { comparison: string }
             </div>
 
             {/* Rows */}
-            <div className="px-6">
+            <div className="px-3 sm:px-6">
               <div className="py-2 mt-2">
                 <span className="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">Cost of Living</span>
               </div>
@@ -295,7 +295,7 @@ export default function ComparePage({ params }: { params: { comparison: string }
         <section>
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Tax Comparison for Retirees</h2>
           <div className="grid sm:grid-cols-2 gap-4">
-            <div className="bg-white dark:bg-slate-800 rounded-lg p-5 border border-gray-200 dark:border-slate-700">
+            <div className="bg-white dark:bg-slate-800 rounded-lg p-4 sm:p-5 border border-gray-200 dark:border-slate-700">
               <h3 className="font-bold text-gray-900 dark:text-white mb-2">{from.flag} {from.name} Taxes</h3>
               <div className="space-y-1 text-sm text-gray-600 dark:text-gray-400">
                 {from.incomeTax.brackets.map((b, i) => (
@@ -306,7 +306,7 @@ export default function ComparePage({ params }: { params: { comparison: string }
                 ))}
               </div>
             </div>
-            <div className="bg-white dark:bg-slate-800 rounded-lg p-5 border border-gray-200 dark:border-slate-700">
+            <div className="bg-white dark:bg-slate-800 rounded-lg p-4 sm:p-5 border border-gray-200 dark:border-slate-700">
               <h3 className="font-bold text-gray-900 dark:text-white mb-2">{to.flag} {to.name} Taxes</h3>
               <div className="space-y-1 text-sm text-gray-600 dark:text-gray-400">
                 {to.incomeTax.brackets.map((b, i) => (
@@ -339,7 +339,7 @@ export default function ComparePage({ params }: { params: { comparison: string }
                 </div>
               ))}
               {from.expatRules?.specialRegimes?.map((regime, i) => (
-                <div key={`from-${i}`} className="bg-white dark:bg-slate-800 rounded-lg p-5 border border-gray-200 dark:border-slate-700">
+                <div key={`from-${i}`} className="bg-white dark:bg-slate-800 rounded-lg p-4 sm:p-5 border border-gray-200 dark:border-slate-700">
                   <div className="flex items-center gap-2 mb-1">
                     <span>{from.flag}</span>
                     <h3 className="font-bold text-gray-900 dark:text-white">{regime.name}</h3>
@@ -364,7 +364,7 @@ export default function ComparePage({ params }: { params: { comparison: string }
           </p>
           <Link
             href={`/?from=${parsed.from}&to=${parsed.to}`}
-            className="inline-flex items-center px-8 py-3 bg-white text-blue-700 font-semibold rounded-lg hover:bg-blue-50 transition-colors"
+            className="inline-flex items-center px-6 sm:px-8 py-3 bg-white text-blue-700 font-semibold rounded-lg hover:bg-blue-50 transition-colors"
           >
             🔥 Open Calculator — {from.name} vs {to.name}
           </Link>
@@ -376,7 +376,7 @@ export default function ComparePage({ params }: { params: { comparison: string }
             FAQ: {from.name} vs {to.name} for Retirement
           </h2>
           <div className="space-y-4">
-            <div className="bg-white dark:bg-slate-800 rounded-lg p-5 border border-gray-200 dark:border-slate-700">
+            <div className="bg-white dark:bg-slate-800 rounded-lg p-4 sm:p-5 border border-gray-200 dark:border-slate-700">
               <h3 className="font-semibold text-gray-900 dark:text-white">
                 Is it cheaper to retire in {to.name} or {from.name}?
               </h3>
@@ -386,7 +386,7 @@ export default function ComparePage({ params }: { params: { comparison: string }
                 {colDiff < -10 && ` Your money goes approximately ${Math.abs(colDiff)}% further in ${to.name}.`}
               </p>
             </div>
-            <div className="bg-white dark:bg-slate-800 rounded-lg p-5 border border-gray-200 dark:border-slate-700">
+            <div className="bg-white dark:bg-slate-800 rounded-lg p-4 sm:p-5 border border-gray-200 dark:border-slate-700">
               <h3 className="font-semibold text-gray-900 dark:text-white">
                 How do taxes compare between {from.name} and {to.name}?
               </h3>
@@ -396,7 +396,7 @@ export default function ComparePage({ params }: { params: { comparison: string }
                 For FIRE retirees, the effective tax rate depends on your withdrawal strategy — use our calculator for a personalized estimate.
               </p>
             </div>
-            <div className="bg-white dark:bg-slate-800 rounded-lg p-5 border border-gray-200 dark:border-slate-700">
+            <div className="bg-white dark:bg-slate-800 rounded-lg p-4 sm:p-5 border border-gray-200 dark:border-slate-700">
               <h3 className="font-semibold text-gray-900 dark:text-white">
                 What about healthcare in {to.name} vs {from.name}?
               </h3>
@@ -462,11 +462,11 @@ export default function ComparePage({ params }: { params: { comparison: string }
         </section>
 
         {/* Country pages links */}
-        <section className="flex gap-3 justify-center">
+        <section className="flex flex-col sm:flex-row gap-2 sm:gap-3 items-center justify-center">
           <Link href={`/retire-in/${codeToSlug[parsed.from]}`} className="text-sm text-blue-600 dark:text-blue-400 hover:underline">
             More about retiring in {from.name} →
           </Link>
-          <span className="text-gray-300 dark:text-gray-600">|</span>
+          <span className="hidden sm:inline text-gray-300 dark:text-gray-600">|</span>
           <Link href={`/retire-in/${codeToSlug[parsed.to]}`} className="text-sm text-blue-600 dark:text-blue-400 hover:underline">
             More about retiring in {to.name} →
           </Link>
