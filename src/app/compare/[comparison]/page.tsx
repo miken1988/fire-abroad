@@ -99,7 +99,7 @@ export async function generateMetadata({ params }: { params: { comparison: strin
     openGraph: {
       title,
       description,
-      url: `https://wheretofire.com/compare/${params.comparison}`,
+      url: `https://www.wheretofire.com/compare/${params.comparison}`,
       type: 'article',
     },
     twitter: {
@@ -108,7 +108,7 @@ export async function generateMetadata({ params }: { params: { comparison: strin
       description,
     },
     alternates: {
-      canonical: `https://wheretofire.com/compare/${params.comparison}`,
+      canonical: `https://www.wheretofire.com/compare/${params.comparison}`,
     },
   };
 }
@@ -160,7 +160,7 @@ export default function ComparePage({ params }: { params: { comparison: string }
     description: `Detailed comparison of retiring in ${from.name} vs ${to.name} including taxes, cost of living, healthcare, and visa requirements.`,
     author: { '@type': 'Organization', name: 'Where To FIRE' },
     publisher: { '@type': 'Organization', name: 'Where To FIRE' },
-    mainEntityOfPage: `https://wheretofire.com/compare/${params.comparison}`,
+    mainEntityOfPage: `https://www.wheretofire.com/compare/${params.comparison}`,
   };
 
   const faqData = {

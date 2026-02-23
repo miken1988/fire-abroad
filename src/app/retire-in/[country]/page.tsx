@@ -66,7 +66,7 @@ export async function generateMetadata({ params }: { params: { country: string }
     openGraph: {
       title,
       description,
-      url: `https://wheretofire.com/retire-in/${params.country}`,
+      url: `https://www.wheretofire.com/retire-in/${params.country}`,
       type: 'article',
     },
     twitter: {
@@ -75,7 +75,7 @@ export async function generateMetadata({ params }: { params: { country: string }
       description,
     },
     alternates: {
-      canonical: `https://wheretofire.com/retire-in/${params.country}`,
+      canonical: `https://www.wheretofire.com/retire-in/${params.country}`,
     },
   };
 }

@@ -11,7 +11,7 @@ const slugToCode: Record<string, string> = {
 };
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://wheretofire.com';
+  const baseUrl = 'https://www.wheretofire.com';
   
   // Country landing pages
   const countryPages = [

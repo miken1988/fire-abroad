@@ -4,7 +4,7 @@ import { countries } from '@/data/countries';
 const siteConfig = {
   name: 'Where To FIRE',
   description: 'Compare early retirement across countries. Calculate your FIRE number, compare taxes, cost of living, and visa requirements for retiring abroad.',
-  url: 'https://wheretofire.com',
+  url: 'https://www.wheretofire.com',
   ogImage: '/og-image.png',
   twitter: '@wheretofire',
 };

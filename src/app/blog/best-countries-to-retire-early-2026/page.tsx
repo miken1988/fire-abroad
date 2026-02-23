@@ -12,11 +12,11 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Best Countries to Retire Early in 2026',
     description: 'Compare the top countries for early retirement. Taxes, cost of living, healthcare, and visa requirements analyzed.',
-    url: 'https://wheretofire.com/blog/best-countries-to-retire-early-2026',
+    url: 'https://www.wheretofire.com/blog/best-countries-to-retire-early-2026',
     type: 'article',
   },
   alternates: {
-    canonical: 'https://wheretofire.com/blog/best-countries-to-retire-early-2026',
+    canonical: 'https://www.wheretofire.com/blog/best-countries-to-retire-early-2026',
   },
 };
 
