@@ -13,6 +13,7 @@ import { ThemeToggle } from './ThemeProvider';
 import * as analytics from '@/lib/analytics';
 import { formatCurrency, smartCurrency } from '@/lib/formatters';
 import { ResultsSkeleton } from './ResultsSkeleton';
+import { StarRating } from './StarRating';
 
 const defaultInputs: UserInputs = {
   currentAge: 35,
@@ -682,6 +683,7 @@ export function Calculator() {
                   inflationRate={inputs.inflationRate}
                   simplifiedMode={!advancedMode}
                 />
+                <StarRating />
               </div>
             ) : (
               <ResultsSkeleton />
@@ -737,6 +739,7 @@ export function Calculator() {
                 inflationRate={inputs.inflationRate}
                 simplifiedMode={!advancedMode}
               />
+              <StarRating />
             </div>
           )}
         </div>
