@@ -6,8 +6,8 @@ const STORAGE_KEY = 'wtf_star_rating';
 const CALC_COUNT_KEY = 'wtf_calc_count';
 
 function gtag(...args: unknown[]) {
-  if (typeof window !== 'undefined' && (window as Record<string, unknown>).gtag) {
-    (window as Record<string, (...args: unknown[]) => void>).gtag(...args);
+  if (typeof window !== 'undefined' && (window as unknown as Record<string, unknown>).gtag) {
+    (window as unknown as Record<string, (...args: unknown[]) => void>).gtag(...args);
   }
 }
 
