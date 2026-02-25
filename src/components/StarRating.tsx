@@ -29,7 +29,7 @@ export function StarRating() {
     localStorage.setItem(CALC_COUNT_KEY, String(count));
 
     // Show after 2nd calculation
-    if (count >= 2) {
+    if (count >= 1) {
       const timer = setTimeout(() => {
         setVisible(true);
         // Trigger entrance animation after mount
