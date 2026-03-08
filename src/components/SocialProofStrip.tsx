@@ -13,7 +13,7 @@ export function SocialProofStrip() {
   return (
     <div
       className={`
-        flex flex-wrap items-center justify-center gap-3 sm:gap-5
+        flex flex-wrap items-center gap-3 sm:gap-5
         transition-all duration-700 ease-out
         ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'}
       `}
