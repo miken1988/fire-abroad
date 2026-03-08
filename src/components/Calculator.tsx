@@ -14,6 +14,7 @@ import * as analytics from '@/lib/analytics';
 import { formatCurrency, smartCurrency } from '@/lib/formatters';
 import { ResultsSkeleton } from './ResultsSkeleton';
 import { StarRating } from './StarRating';
+import { SocialProofStrip } from './SocialProofStrip';
 
 const defaultInputs: UserInputs = {
   currentAge: 35,
@@ -557,6 +558,7 @@ export function Calculator() {
                 <a href="/" className="hover:opacity-80 transition-opacity">Where to <span className="fire-gradient">FIRE</span></a>
               </h1>
               <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 hidden sm:block">Compare early retirement across 24 countries · Real tax data · Free</p>
+              <SocialProofStrip />
             </div>
             <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
               {showFxRate && fxLoaded && (
