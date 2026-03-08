@@ -650,7 +650,7 @@ export function InputPanel({ inputs, onChange }: InputPanelProps) {
     return treatment?.warning || null;
   };
 
-  const totalAllocated = inputs.traditionalRetirementAccounts + inputs.rothAccounts + inputs.taxableAccounts + 
+  const totalAllocated = currentAccountTypes.reduce((sum, acct) => sum + getAccountValue(acct.id), 0) + 
     (inputs.accounts?.crypto || 0) + (inputs.accounts?.cash || 0) + (inputs.accounts?.property || 0) + (inputs.accounts?.other || 0);
   
   const unallocated = Math.max(0, inputs.portfolioValue - totalAllocated + (inputs.accounts?.other || 0));
