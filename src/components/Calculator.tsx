@@ -64,6 +64,7 @@ function WhatIsFIRE({ isOpen, onToggle }: { isOpen: boolean; onToggle: () => voi
       
       {isOpen && (
         <div className="px-4 pb-4 space-y-4 text-sm text-gray-700 dark:text-gray-300">
+          <p className="text-sm text-gray-600 dark:text-gray-300 pb-2"><strong>FIRE</strong> stands for <strong>Financial Independence, Retire Early</strong> — saving and investing aggressively so your portfolio can cover your living expenses without needing to work.</p>
           <div className="grid sm:grid-cols-3 gap-4 pt-2">
             <div className="bg-white dark:bg-slate-800 rounded-lg p-3 shadow-sm">
               <div className="font-semibold text-gray-900 dark:text-white mb-1">💰 FIRE Number</div>
