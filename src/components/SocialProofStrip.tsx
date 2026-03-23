@@ -38,14 +38,14 @@ export function SocialProofStrip() {
             </svg>
           ))}
         </div>
-        <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">4.5/5</span>
+        <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">4.1/5</span>
         <span className="text-xs text-gray-400 dark:text-gray-500">rating</span>
       </div>
 
       {/* Calculations pill */}
       <div className="inline-flex items-center gap-1.5 bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm border border-gray-200/50 dark:border-slate-700/50 rounded-full px-3.5 py-1.5 shadow-sm">
         <span className="text-sm">🔥</span>
-        <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">37,000+</span>
+        <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">59,000+</span>
         <span className="text-xs text-gray-400 dark:text-gray-500">calculations run</span>
       </div>
 
