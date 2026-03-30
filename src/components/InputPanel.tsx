@@ -7,6 +7,8 @@ import { usStates, USState } from '@/data/usStateTaxes';
 import { formatCurrency } from '@/lib/formatters';
 import { useState, useCallback, useRef, useEffect } from 'react';
 import * as analytics from '@/lib/analytics';
+import { CountrySearchSelect } from './CountrySearchSelect';
+import { CountryMultiSelect } from './CountryMultiSelect';
 
 /**
  * Format number with commas (e.g., 5000000 -> "5,000,000")
@@ -605,11 +607,6 @@ export function InputPanel({ inputs, onChange }: InputPanelProps) {
     cash: inputs.inflationRate * 0.5,
   };
 
-  const countryOptions = Object.values(countries).map(c => ({
-    value: c.code,
-    label: `${c.flag} ${c.name}`,
-  }));
-
   const currentAccountTypes = countryAccountTypes[inputs.currentCountry] || [];
 
   // Numeric input hooks for all text-style number inputs
@@ -697,30 +694,27 @@ export function InputPanel({ inputs, onChange }: InputPanelProps) {
         <div className="grid grid-cols-2 gap-3 sm:gap-4">
           <div>
             <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Current Country</label>
-            <select
+            <CountrySearchSelect
               value={inputs.currentCountry}
-              onChange={(e) => handleChange('currentCountry', e.target.value)}
-              className="w-full px-2 sm:px-3 py-2 text-base sm:text-sm border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-800 text-gray-900 dark:text-white"
-            >
-              {countryOptions.map(opt => (
-                <option key={opt.value} value={opt.value}>{opt.label}</option>
-              ))}
-            </select>
+              onChange={(code) => handleChange('currentCountry', code)}
+            />
           </div>
           <div>
             <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Retirement Country
-              <Tooltip text="Where you plan to live during retirement" />
+              Retirement Countries
+              <Tooltip text="Compare up to 5 countries for retirement" />
             </label>
-            <select
-              value={inputs.targetCountry}
-              onChange={(e) => handleChange('targetCountry', e.target.value)}
-              className="w-full px-2 sm:px-3 py-2 text-base sm:text-sm border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-slate-800 text-gray-900 dark:text-white"
-            >
-              {countryOptions.map(opt => (
-                <option key={opt.value} value={opt.value}>{opt.label}</option>
-              ))}
-            </select>
+            <CountryMultiSelect
+              values={inputs.targetCountries || [inputs.targetCountry]}
+              onChange={(codes) => {
+                const newInputs = { ...inputs, targetCountries: codes, targetCountry: codes[0] || inputs.targetCountry };
+                if (codes.length > 0) {
+                  analytics.trackCountrySelect('to', codes[codes.length - 1], countries[codes[codes.length - 1]]?.name || '');
+                }
+                onChange(newInputs);
+              }}
+              excludeCountry={inputs.currentCountry}
+            />
           </div>
         </div>
         
@@ -763,6 +757,38 @@ export function InputPanel({ inputs, onChange }: InputPanelProps) {
               ⚠️ Over-allocated by {formatCurrency(totalAllocated - inputs.portfolioValue, inputs.portfolioCurrency)}
             </p>
           )}
+        </div>
+
+        {/* Portfolio Presets */}
+        <div className="flex flex-wrap gap-2">
+          <span className="text-xs text-gray-500 dark:text-gray-400 self-center mr-1">Presets:</span>
+          {[
+            { label: 'Conservative 60/40', stocks: 0.6, bonds: 0.4 },
+            { label: 'Moderate 80/20', stocks: 0.8, bonds: 0.2 },
+            { label: 'Aggressive 90/10', stocks: 0.9, bonds: 0.1 },
+          ].map((preset) => (
+            <button
+              key={preset.label}
+              type="button"
+              onClick={() => {
+                const pv = inputs.portfolioValue;
+                const stocksVal = Math.round(pv * preset.stocks);
+                const bondsVal = pv - stocksVal;
+                onChange({
+                  ...inputs,
+                  traditionalRetirementAccounts: Math.round(stocksVal * 0.4),
+                  rothAccounts: Math.round(stocksVal * 0.3),
+                  taxableAccounts: Math.round(stocksVal * 0.3) + bondsVal,
+                  accounts: { ...inputs.accounts, crypto: 0, cash: 0, property: 0 },
+                  propertyEquity: 0,
+                  portfolioAllocation: { stocks: preset.stocks * 100, bonds: preset.bonds * 100, cash: 0, crypto: 0, property: 0 },
+                });
+              }}
+              className="px-2.5 py-1 text-xs font-medium rounded-full border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/30 hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors"
+            >
+              {preset.label}
+            </button>
+          ))}
         </div>
 
         {/* Account Types with improved sliders */}
@@ -1097,9 +1123,175 @@ export function InputPanel({ inputs, onChange }: InputPanelProps) {
         )}
       </section>
 
+      {/* Passive Income */}
+      <PassiveIncomeSection inputs={inputs} onChange={onChange} />
+
       {/* Advanced Settings */}
       <AdvancedSettings inputs={inputs} onChange={handleChange} />
     </div>
+  );
+}
+
+function PassiveIncomeSection({ inputs, onChange }: { inputs: UserInputs; onChange: (inputs: UserInputs) => void }) {
+  const pi = inputs.passiveIncome || { rental: 0, rentalYears: 0, freelance: 0, freelanceYears: 0, other: 0, otherYears: 0 };
+  const hasAnyPassiveIncome = pi.rental > 0 || pi.freelance > 0 || pi.other > 0;
+  const [isOpen, setIsOpen] = useState(hasAnyPassiveIncome);
+  const currentCountry = countries[inputs.currentCountry];
+
+  const handlePIChange = (field: string, value: number) => {
+    onChange({
+      ...inputs,
+      passiveIncome: { ...pi, [field]: value },
+    });
+  };
+
+  const rentalInput = useNumericInput(pi.rental, (v) => handlePIChange('rental', v));
+  const rentalYearsInput = useNumericInput(pi.rentalYears, (v) => handlePIChange('rentalYears', v), { integer: true, format: false });
+  const freelanceInput = useNumericInput(pi.freelance, (v) => handlePIChange('freelance', v));
+  const freelanceYearsInput = useNumericInput(pi.freelanceYears, (v) => handlePIChange('freelanceYears', v), { integer: true, format: false });
+  const otherInput = useNumericInput(pi.other, (v) => handlePIChange('other', v));
+  const otherYearsInput = useNumericInput(pi.otherYears, (v) => handlePIChange('otherYears', v), { integer: true, format: false });
+
+  return (
+    <section className="space-y-3">
+      <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Passive Income</h3>
+
+      <div className="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-xl p-3 sm:p-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-lg">💼</span>
+            <div>
+              <p className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">Post-retirement income</p>
+              <p className="text-[10px] text-gray-500 dark:text-gray-400">Rental, freelance, dividends that reduce withdrawals</p>
+            </div>
+          </div>
+          <label className="relative inline-flex items-center cursor-pointer">
+            <input
+              type="checkbox"
+              checked={isOpen}
+              onChange={(e) => {
+                setIsOpen(e.target.checked);
+                if (!e.target.checked) {
+                  onChange({ ...inputs, passiveIncome: { rental: 0, rentalYears: 0, freelance: 0, freelanceYears: 0, other: 0, otherYears: 0 } });
+                }
+              }}
+              className="sr-only peer"
+            />
+            <div className="w-9 h-5 bg-gray-300 dark:bg-slate-600 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-purple-600"></div>
+          </label>
+        </div>
+
+        {isOpen && (
+          <div className="space-y-4 mt-3 pt-3 border-t border-purple-100 dark:border-purple-800">
+            {/* Rental Income */}
+            <div>
+              <p className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">🏠 Rental Income</p>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">Annual Amount</label>
+                  <div className="flex">
+                    <span className="inline-flex items-center px-2 text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-slate-700 border border-r-0 border-gray-300 dark:border-slate-600 rounded-l-lg">
+                      {currentCountry?.currencySymbol}
+                    </span>
+                    <input
+                      type="text" inputMode="numeric"
+                      value={rentalInput.value}
+                      onChange={rentalInput.onChange}
+                      onFocus={rentalInput.onFocus}
+                      onBlur={rentalInput.onBlur}
+                      className="flex-1 min-w-0 px-2 py-1.5 text-base sm:text-sm border border-gray-300 dark:border-slate-600 rounded-r-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-white dark:bg-slate-800 text-gray-900 dark:text-white"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">Years (0 = forever)</label>
+                  <input
+                    type="text" inputMode="numeric"
+                    value={rentalYearsInput.value}
+                    onChange={rentalYearsInput.onChange}
+                    onFocus={rentalYearsInput.onFocus}
+                    onBlur={rentalYearsInput.onBlur}
+                    className="w-full px-2 py-1.5 text-base sm:text-sm border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-white dark:bg-slate-800 text-gray-900 dark:text-white"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Freelance/Consulting */}
+            <div>
+              <p className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">💻 Freelance / Consulting</p>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">Annual Amount</label>
+                  <div className="flex">
+                    <span className="inline-flex items-center px-2 text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-slate-700 border border-r-0 border-gray-300 dark:border-slate-600 rounded-l-lg">
+                      {currentCountry?.currencySymbol}
+                    </span>
+                    <input
+                      type="text" inputMode="numeric"
+                      value={freelanceInput.value}
+                      onChange={freelanceInput.onChange}
+                      onFocus={freelanceInput.onFocus}
+                      onBlur={freelanceInput.onBlur}
+                      className="flex-1 min-w-0 px-2 py-1.5 text-base sm:text-sm border border-gray-300 dark:border-slate-600 rounded-r-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-white dark:bg-slate-800 text-gray-900 dark:text-white"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">Years (0 = forever)</label>
+                  <input
+                    type="text" inputMode="numeric"
+                    value={freelanceYearsInput.value}
+                    onChange={freelanceYearsInput.onChange}
+                    onFocus={freelanceYearsInput.onFocus}
+                    onBlur={freelanceYearsInput.onBlur}
+                    className="w-full px-2 py-1.5 text-base sm:text-sm border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-white dark:bg-slate-800 text-gray-900 dark:text-white"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Other Passive Income */}
+            <div>
+              <p className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">📈 Other (dividends, royalties, etc.)</p>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">Annual Amount</label>
+                  <div className="flex">
+                    <span className="inline-flex items-center px-2 text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-slate-700 border border-r-0 border-gray-300 dark:border-slate-600 rounded-l-lg">
+                      {currentCountry?.currencySymbol}
+                    </span>
+                    <input
+                      type="text" inputMode="numeric"
+                      value={otherInput.value}
+                      onChange={otherInput.onChange}
+                      onFocus={otherInput.onFocus}
+                      onBlur={otherInput.onBlur}
+                      className="flex-1 min-w-0 px-2 py-1.5 text-base sm:text-sm border border-gray-300 dark:border-slate-600 rounded-r-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-white dark:bg-slate-800 text-gray-900 dark:text-white"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">Years (0 = forever)</label>
+                  <input
+                    type="text" inputMode="numeric"
+                    value={otherYearsInput.value}
+                    onChange={otherYearsInput.onChange}
+                    onFocus={otherYearsInput.onFocus}
+                    onBlur={otherYearsInput.onBlur}
+                    className="w-full px-2 py-1.5 text-base sm:text-sm border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-white dark:bg-slate-800 text-gray-900 dark:text-white"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <p className="text-[10px] text-purple-600 dark:text-purple-400">
+              Passive income reduces how much you need to withdraw from your portfolio each year, extending its longevity.
+            </p>
+          </div>
+        )}
+      </div>
+    </section>
   );
 }
 

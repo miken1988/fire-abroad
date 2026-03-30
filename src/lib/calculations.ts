@@ -61,6 +61,19 @@ export interface UserInputs {
   expectedReturn: number;
   inflationRate: number;
   safeWithdrawalRate: number;
+
+  // Passive income streams (reduce required portfolio withdrawals)
+  passiveIncome?: {
+    rental: number;        // Annual rental income
+    rentalYears: number;   // Years active post-retirement (0 = forever)
+    freelance: number;     // Annual freelance/consulting income
+    freelanceYears: number;
+    other: number;         // Dividends, royalties, etc.
+    otherYears: number;
+  };
+
+  // Multi-country comparison (up to 5 target countries)
+  targetCountries?: string[];
 }
 
 export interface YearlyProjection {
@@ -357,10 +370,27 @@ export function calculateFIRE(inputs: UserInputs, targetCountryCode: string): FI
     if (isRetired) {
       // Inflate withdrawal needs each year to maintain purchasing power
       const inflatedWithdrawalNeeded = grossWithdrawalNeeded * Math.pow(1 + inflationRate, yearsSinceRetirement);
-      // Reduce withdrawal by pension income
-      const netWithdrawalNeeded = Math.max(0, inflatedWithdrawalNeeded - pensionIncome);
+
+      // Calculate passive income for this year
+      const pi = inputs.passiveIncome;
+      let totalPassiveIncome = 0;
+      if (pi) {
+        const inflationMult = Math.pow(1 + inflationRate, yearsSinceRetirement);
+        if (pi.rental > 0 && (pi.rentalYears === 0 || yearsSinceRetirement < pi.rentalYears)) {
+          totalPassiveIncome += convertCurrency(pi.rental, inputs.portfolioCurrency, country.currency) * inflationMult;
+        }
+        if (pi.freelance > 0 && (pi.freelanceYears === 0 || yearsSinceRetirement < pi.freelanceYears)) {
+          totalPassiveIncome += convertCurrency(pi.freelance, inputs.portfolioCurrency, country.currency) * inflationMult;
+        }
+        if (pi.other > 0 && (pi.otherYears === 0 || yearsSinceRetirement < pi.otherYears)) {
+          totalPassiveIncome += convertCurrency(pi.other, inputs.portfolioCurrency, country.currency) * inflationMult;
+        }
+      }
+
+      // Reduce withdrawal by pension income and passive income
+      const netWithdrawalNeeded = Math.max(0, inflatedWithdrawalNeeded - pensionIncome - totalPassiveIncome);
       withdrawal = netWithdrawalNeeded;
-      taxPaid = calculateTax(withdrawal + pensionIncome, country.incomeTax.brackets, country);
+      taxPaid = calculateTax(withdrawal + pensionIncome + totalPassiveIncome, country.incomeTax.brackets, country);
       yearsSinceRetirement++;
     }
     
@@ -733,6 +763,57 @@ export function calculateTaxBreakdown(
     effectiveRate,
     netIncome: grossIncome - totalTax,
     brackets
+  };
+}
+
+// Multi-country comparison
+export interface MultiCountryResult {
+  current: FIREResult;
+  targets: Array<{ countryCode: string; result: FIREResult }>;
+  rankings: {
+    byFireNumber: string[];
+    byFireAge: string[];
+    byTaxRate: string[];
+    overall: string;
+  };
+}
+
+export function compareMultipleFIRE(
+  inputs: UserInputs,
+  currentCountryCode: string,
+  targetCountryCodes: string[]
+): MultiCountryResult {
+  const current = calculateFIRE(inputs, currentCountryCode);
+  const targets = targetCountryCodes.map(code => ({
+    countryCode: code,
+    result: calculateFIRE(inputs, code),
+  }));
+
+  const allTargets = [...targets];
+
+  const byFireNumber = [...allTargets]
+    .sort((a, b) => a.result.fireNumberUSD - b.result.fireNumberUSD)
+    .map(t => t.countryCode);
+
+  const byFireAge = [...allTargets]
+    .sort((a, b) => a.result.fireAge - b.result.fireAge)
+    .map(t => t.countryCode);
+
+  const byTaxRate = [...allTargets]
+    .sort((a, b) => a.result.effectiveTaxRate - b.result.effectiveTaxRate)
+    .map(t => t.countryCode);
+
+  // Overall winner: earliest FIRE age, tiebreak by lowest FIRE number
+  const overall = [...allTargets]
+    .sort((a, b) => {
+      if (a.result.fireAge !== b.result.fireAge) return a.result.fireAge - b.result.fireAge;
+      return a.result.fireNumberUSD - b.result.fireNumberUSD;
+    })[0]?.countryCode || targetCountryCodes[0];
+
+  return {
+    current,
+    targets,
+    rankings: { byFireNumber, byFireAge, byTaxRate, overall },
   };
 }
 

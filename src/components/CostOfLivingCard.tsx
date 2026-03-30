@@ -108,6 +108,47 @@ export function CostOfLivingCard({
         </div>
       </div>
       
+      {/* Visual Bar Chart */}
+      <div className="mt-4 space-y-3">
+        <p className="text-xs text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wide">Visual Comparison</p>
+        {categories.map(({ key, label, icon }) => {
+          const fromVal = fromCOL[key];
+          const toVal = toCOL[key];
+          const maxVal = Math.max(fromVal, toVal, 1);
+          const isFree = toVal === 0;
+
+          return (
+            <div key={`bar-${key}`} className="space-y-1">
+              <div className="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400">
+                <span>{icon} {label}</span>
+              </div>
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] text-gray-500 dark:text-gray-400 w-8 text-right flex-shrink-0">{from.flag}</span>
+                  <div className="flex-1 bg-gray-100 dark:bg-slate-700 rounded-full h-3 overflow-hidden">
+                    <div
+                      className="h-full bg-blue-400 dark:bg-blue-500 rounded-full transition-all duration-500"
+                      style={{ width: `${(fromVal / maxVal) * 100}%` }}
+                    />
+                  </div>
+                  <span className="text-[10px] text-gray-500 dark:text-gray-400 w-8 flex-shrink-0">{fromVal}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] text-gray-500 dark:text-gray-400 w-8 text-right flex-shrink-0">{to.flag}</span>
+                  <div className="flex-1 bg-gray-100 dark:bg-slate-700 rounded-full h-3 overflow-hidden">
+                    <div
+                      className={`h-full rounded-full transition-all duration-500 ${isFree ? 'bg-green-400 dark:bg-green-500' : 'bg-emerald-400 dark:bg-emerald-500'}`}
+                      style={{ width: isFree ? '0%' : `${(toVal / maxVal) * 100}%` }}
+                    />
+                  </div>
+                  <span className="text-[10px] text-gray-500 dark:text-gray-400 w-8 flex-shrink-0">{isFree ? 'Free' : toVal}</span>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
       <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-3">
         Based on cost of living indices. Your actual costs may vary based on lifestyle.
       </p>
