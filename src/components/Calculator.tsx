@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
-import { UserInputs, compareFIRE } from '@/lib/calculations';
+import { UserInputs, compareFIRE, compareMultipleFIRE, MultiCountryResult } from '@/lib/calculations';
 import { countries } from '@/data/countries';
 import { InputPanel } from './InputPanel';
 import { ResultsPanel } from './ResultsPanel';
@@ -15,6 +15,9 @@ import { formatCurrency, smartCurrency } from '@/lib/formatters';
 import { ResultsSkeleton } from './ResultsSkeleton';
 import { StarRating } from './StarRating';
 import { SocialProofStrip } from './SocialProofStrip';
+import { CountrySearchSelect } from './CountrySearchSelect';
+import { FAQ } from './FAQ';
+import { MultiResultsPanel } from './MultiResultsPanel';
 
 const defaultInputs: UserInputs = {
   currentAge: 35,
@@ -38,6 +41,8 @@ const defaultInputs: UserInputs = {
   expectedReturn: 0.07,
   inflationRate: 0.03,
   safeWithdrawalRate: 0.04,
+  passiveIncome: { rental: 0, rentalYears: 0, freelance: 0, freelanceYears: 0, other: 0, otherYears: 0 },
+  targetCountries: ['PT'],
 };
 
 // What is FIRE explainer component
@@ -112,6 +117,7 @@ function QuickStartInputs({
     }
     if (field === 'targetCountry') {
       analytics.trackCountrySelect('to', value, countries[value]?.name || value);
+      newInputs.targetCountries = [value];
     }
     onChange(newInputs);
   };
@@ -133,27 +139,26 @@ function QuickStartInputs({
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">I currently live in</label>
-          <select
+          <CountrySearchSelect
             value={inputs.currentCountry}
-            onChange={(e) => handleChange('currentCountry', e.target.value)}
-            className="w-full px-3 py-2.5 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white text-base sm:text-sm"
-          >
-            {countryOptions.map(opt => (
-              <option key={opt.value} value={opt.value}>{opt.label}</option>
-            ))}
-          </select>
+            onChange={(code) => handleChange('currentCountry', code)}
+          />
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">I want to retire in</label>
-          <select
+          <CountrySearchSelect
             value={inputs.targetCountry}
-            onChange={(e) => handleChange('targetCountry', e.target.value)}
-            className="w-full px-3 py-2.5 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-slate-700 text-gray-900 dark:text-white text-base sm:text-sm"
+            onChange={(code) => handleChange('targetCountry', code)}
+          />
+        </div>
+        <div className="col-span-2 text-right">
+          <button
+            type="button"
+            onClick={onShowAdvanced}
+            className="text-xs text-blue-600 dark:text-blue-400 hover:underline"
           >
-            {countryOptions.map(opt => (
-              <option key={opt.value} value={opt.value}>{opt.label}</option>
-            ))}
-          </select>
+            + Compare more countries
+          </button>
         </div>
       </div>
 
@@ -466,10 +471,20 @@ export function Calculator() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [showShareMenu]);
 
+  const targets = (inputs.targetCountries && inputs.targetCountries.length > 0)
+    ? inputs.targetCountries : [inputs.targetCountry];
+  const isMultiCountry = targets.length > 1;
+
   const results = useMemo(() => {
     try { return compareFIRE(inputs, inputs.currentCountry, inputs.targetCountry); }
     catch (error) { console.error('Calculation error:', error); analytics.trackError('calculation_error', String(error)); return null; }
   }, [inputs, fxLoaded]);
+
+  const multiResults = useMemo(() => {
+    if (!isMultiCountry) return null;
+    try { return compareMultipleFIRE(inputs, inputs.currentCountry, targets); }
+    catch (error) { console.error('Multi-country calculation error:', error); return null; }
+  }, [inputs, fxLoaded, isMultiCountry]);
 
   // Track calculation
   useEffect(() => {
@@ -670,17 +685,26 @@ export function Calculator() {
             </div>
           </div>
           <div>
-            {results ? (
+            {isMultiCountry && multiResults ? (
               <div className="space-y-6">
-                <ResultsPanel 
-                  result1={results.country1} 
-                  result2={results.country2} 
-                  comparison={results.comparison} 
-                  country1Code={inputs.currentCountry} 
-                  country2Code={inputs.targetCountry} 
-                  annualSpending={inputs.annualSpending} 
-                  spendingCurrency={inputs.spendingCurrency} 
-                  userAge={inputs.currentAge} 
+                <MultiResultsPanel
+                  multiResult={multiResults}
+                  currentCountryCode={inputs.currentCountry}
+                  inputs={inputs}
+                />
+                <StarRating />
+              </div>
+            ) : results ? (
+              <div className="space-y-6">
+                <ResultsPanel
+                  result1={results.country1}
+                  result2={results.country2}
+                  comparison={results.comparison}
+                  country1Code={inputs.currentCountry}
+                  country2Code={inputs.targetCountry}
+                  annualSpending={inputs.annualSpending}
+                  spendingCurrency={inputs.spendingCurrency}
+                  userAge={inputs.currentAge}
                   inputs={inputs}
                   expectedReturn={inputs.expectedReturn}
                   inflationRate={inputs.inflationRate}
@@ -726,25 +750,38 @@ export function Calculator() {
               </button>
             </div>
           )}
-          {activeTab === 'results' && results && (
+          {activeTab === 'results' && (results || multiResults) && (
             <div className="space-y-6 animate-slide-in-right">
-              <ResultsPanel 
-                result1={results.country1} 
-                result2={results.country2} 
-                comparison={results.comparison} 
-                country1Code={inputs.currentCountry} 
-                country2Code={inputs.targetCountry} 
-                annualSpending={inputs.annualSpending} 
-                spendingCurrency={inputs.spendingCurrency} 
-                userAge={inputs.currentAge} 
-                inputs={inputs}
-                expectedReturn={inputs.expectedReturn}
-                inflationRate={inputs.inflationRate}
-                simplifiedMode={!advancedMode}
-              />
+              {isMultiCountry && multiResults ? (
+                <MultiResultsPanel
+                  multiResult={multiResults}
+                  currentCountryCode={inputs.currentCountry}
+                  inputs={inputs}
+                />
+              ) : results ? (
+                <ResultsPanel
+                  result1={results.country1}
+                  result2={results.country2}
+                  comparison={results.comparison}
+                  country1Code={inputs.currentCountry}
+                  country2Code={inputs.targetCountry}
+                  annualSpending={inputs.annualSpending}
+                  spendingCurrency={inputs.spendingCurrency}
+                  userAge={inputs.currentAge}
+                  inputs={inputs}
+                  expectedReturn={inputs.expectedReturn}
+                  inflationRate={inputs.inflationRate}
+                  simplifiedMode={!advancedMode}
+                />
+              ) : null}
               <StarRating />
             </div>
           )}
+        </div>
+
+        {/* FAQ Section */}
+        <div className="mt-8 max-w-4xl mx-auto">
+          <FAQ />
         </div>
       </main>
 

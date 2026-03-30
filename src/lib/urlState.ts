@@ -32,7 +32,12 @@ export function encodeStateToURL(inputs: UserInputs): string {
   params.set('age', inputs.currentAge.toString());
   params.set('ret', inputs.targetRetirementAge.toString());
   params.set('from', inputs.currentCountry);
-  params.set('to', inputs.targetCountry);
+  // Support multi-country: comma-separated target codes
+  if (inputs.targetCountries && inputs.targetCountries.length > 1) {
+    params.set('to', inputs.targetCountries.join(','));
+  } else {
+    params.set('to', inputs.targetCountry);
+  }
   if (inputs.usState) params.set('state', inputs.usState);
   params.set('pv', inputs.portfolioValue.toString());
   params.set('pc', inputs.portfolioCurrency);
@@ -58,7 +63,15 @@ export function encodeStateToURL(inputs: UserInputs): string {
     params.set('destPensionAmt', (inputs.destinationPensionAmount || 0).toString());
     params.set('destPensionAge', (inputs.destinationPensionAge || 66).toString());
   }
-  
+
+  // Passive income params (only encode non-zero values)
+  const pi = inputs.passiveIncome;
+  if (pi) {
+    if (pi.rental > 0) { params.set('piR', pi.rental.toString()); params.set('piRY', pi.rentalYears.toString()); }
+    if (pi.freelance > 0) { params.set('piF', pi.freelance.toString()); params.set('piFY', pi.freelanceYears.toString()); }
+    if (pi.other > 0) { params.set('piO', pi.other.toString()); params.set('piOY', pi.otherYears.toString()); }
+  }
+
   return params.toString();
 }
 
@@ -69,7 +82,20 @@ export function decodeStateFromURL(params: URLSearchParams, defaults: UserInputs
   inputs.currentAge = safeParseInt(params.get('age'), defaults.currentAge, 1, 120);
   inputs.targetRetirementAge = safeParseInt(params.get('ret'), defaults.targetRetirementAge, 1, 120);
   inputs.currentCountry = safeParseCountry(params.get('from'), defaults.currentCountry);
-  inputs.targetCountry = safeParseCountry(params.get('to'), defaults.targetCountry);
+  // Support multi-country: comma-separated target codes
+  const toParam = params.get('to') || '';
+  if (toParam.includes(',')) {
+    const codes = toParam.split(',').map(c => c.trim()).filter(c => countries[c]);
+    if (codes.length > 0) {
+      inputs.targetCountry = codes[0];
+      inputs.targetCountries = codes.slice(0, 5);
+    } else {
+      inputs.targetCountry = safeParseCountry(null, defaults.targetCountry);
+    }
+  } else {
+    inputs.targetCountry = safeParseCountry(toParam || null, defaults.targetCountry);
+    inputs.targetCountries = [inputs.targetCountry];
+  }
   if (params.get('state')) inputs.usState = params.get('state')!;
   
   inputs.portfolioValue = safeParseFloat(params.get('pv'), defaults.portfolioValue, 0);
@@ -106,7 +132,22 @@ export function decodeStateFromURL(params: URLSearchParams, defaults: UserInputs
     inputs.destinationPensionAmount = safeParseFloat(params.get('destPensionAmt'), 0, 0);
     inputs.destinationPensionAge = safeParseInt(params.get('destPensionAge'), 66, 50, 100);
   }
-  
+
+  // Passive income params
+  const piR = safeParseFloat(params.get('piR'), 0, 0);
+  const piF = safeParseFloat(params.get('piF'), 0, 0);
+  const piO = safeParseFloat(params.get('piO'), 0, 0);
+  if (piR > 0 || piF > 0 || piO > 0) {
+    inputs.passiveIncome = {
+      rental: piR,
+      rentalYears: safeParseInt(params.get('piRY'), 0, 0, 100),
+      freelance: piF,
+      freelanceYears: safeParseInt(params.get('piFY'), 0, 0, 100),
+      other: piO,
+      otherYears: safeParseInt(params.get('piOY'), 0, 0, 100),
+    };
+  }
+
   return inputs;
 }
 
